@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MAX 학생 페이지</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* CSS 초기화 및 레이아웃 설정 */
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #1e1e2e;
+            --light: #f8f9fa;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --border-radius: 16px;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            
+            /* ⭐️ 메인 레이아웃: 상단(컨텐츠) / 하단(메뉴) */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ⭐️ 컨텐츠가 표시될 아이프레임 영역 */
+        #contentFrame {
+            flex: 1; /* 남은 공간을 모두 차지 */
+            border: none;
+            width: 100%;
+            overflow-y: auto; /* 내용이 길면 아이프레임 안에서만 스크롤 */
+        }
+
+        /* ⭐️ 하단 내비게이션 바 */
+        .bottom-nav {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            height: 70px;
+            background-color: #ffffff;
+            border-top: 1px solid var(--gray-light);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+            padding-bottom: env(safe-area-inset-bottom);
+            position: relative;
+            z-index: 100;
+        }
+        
+        /* 메뉴 버튼 스타일 */
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-decoration: none;
+            color: var(--gray);
+            font-size: 11px;
+            padding: 8px 0;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .nav-button i {
+            font-size: 22px;
+            margin-bottom: 4px;
+            transition: var(--transition);
+        }
+        
+        /* ⭐️ 활성화된 메뉴 버튼 스타일 */
+        .nav-button.active {
+            color: var(--primary);
+        }
+        
+        .nav-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 24px;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+        
+        /* 로딩 인디케이터 */
+        .loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            z-index: 1000;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loadingIndicator"></div>
+
+    <iframe id="contentFrame" src="welcome.html" name="contentFrame"></iframe>
+
+    <nav class="bottom-nav">
+        <a href="welcome.html" class="nav-button active" target="contentFrame" onclick="setActive(this)">
+            <i class="fa-solid fa-house"></i>
+            <span>홈</span>
+        </a>
+        <a href="search.html" class="nav-button" target="contentFrame" onclick="setActive(this)">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>대학찾기</span>
+        </a>
+        <a href="saved_list.html" class="nav-button" target="contentFrame" onclick="setActive(this)">
+            <i class="fa-solid fa-star"></i>
+            <span>저장대학</span>
+        </a>
+        <a href="practical.html" class="nav-button" target="contentFrame" onclick="setActive(this)">
+            <i class="fa-solid fa-person-running"></i>
+            <span>실기관리</span>
+        </a>
+        <a href="mypage.html" class="nav-button" target="contentFrame" onclick="setActive(this)">
+            <i class="fa-solid fa-user"></i>
+            <span>마이페이지</span>
+        </a>
+    </nav>
+
+    <script>
+        // 현재 활성화된 버튼을 관리하는 함수
+        function setActive(element) {
+            // 로딩 인디케이터 표시
+            document.getElementById('loadingIndicator').style.display = 'block';
+            
+            // 1. 모든 버튼에서 'active' 클래스 제거
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            // 2. 방금 클릭한 버튼에 'active' 클래스 추가
+            element.classList.add('active');
+            
+            // 3. 아이프레임 로딩 완료 시 로딩 인디케이터 숨기기
+            document.getElementById('contentFrame').addEventListener('load', function() {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            });
+        }
+        
+        // 초기 로딩 시 로딩 인디케이터 숨기기
+        window.addEventListener('load', function() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

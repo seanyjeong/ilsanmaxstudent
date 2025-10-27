@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>학생 가입 승인 관리</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --primary:#2563eb; --danger:#ef4444; --success:#10b981;
+  --bg:#f8fafc; --card:#fff; --text:#1e293b; --border:#e2e8f0;
+}
+body { font-family:'Pretendard',sans-serif; background:var(--bg); margin:0; padding:20px; }
+h1 { color:var(--primary); margin-bottom:20px; text-align:center; }
+.container { max-width:1000px; /* ⭐️ 살짝 넓힘 */ margin:auto; background:var(--card); border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.05); padding:20px; overflow-x:auto; }
+.status { margin-bottom:16px; font-size:.9rem; color:#475569; text-align:right; }
+table { width:100%; border-collapse:collapse; font-size:.9rem; }
+th,td { border-bottom:1px solid var(--border); padding:10px 8px; text-align:center; white-space:nowrap; } /* ⭐️ 줄바꿈 방지 */
+th { background:#f1f5f9; color:#475569; }
+td { color:var(--text); }
+
+button { padding:6px 10px; border:0; border-radius:6px; font-size:.8rem; cursor:pointer; }
+.btn-approve { background:var(--success); color:#fff; margin-right:4px; }
+.btn-reject { background:var(--danger); color:#fff; }
+
+.badge { display:inline-block; padding:3px 8px; border-radius:12px; font-size:.75rem; font-weight:600; }
+.badge.wait { background:#facc15; color:#000; }
+.badge.ok { background:var(--success); color:#fff; }
+.badge.block { background:var(--danger); color:#fff; }
+
+.empty { text-align:center; padding:40px; color:#94a3b8; }
+
+.action-cell { display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+.action-disabled { font-size:.8rem; font-weight:600; color:var(--success); }
+</style>
+</head>
+<body>
+
+<h1><i class="fas fa-user-check"></i> 학생 가입 승인 관리</h1>
+<div class="container">
+  <div class="status" id="statusText">로딩 중...</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>아이디</th>
+        <th>이름</th>
+        <th>고교명</th> <th>학년</th>   <th>지점</th>
+        <th>전화번호</th>
+        <th>상태</th>
+        <th>액션</th>
+      </tr>
+    </thead>
+    <tbody id="studentTableBody">
+      <tr><td colspan="9" class="empty">불러오는 중...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const SVR = 'https://supermax.kr';
+const token = localStorage.getItem('jwt_token');
+const tbody = document.getElementById('studentTableBody');
+const statusText = document.getElementById('statusText');
+
+if (!token) {
+  alert('관리자/원장 토큰이 없습니다. 먼저 로그인하세요.');
+  location.href = 'student_login.html'; // ⭐️ 로그인 페이지로 튕기기
+}
+
+/** 상태 뱃지 렌더링 */
+function renderBadge(state) {
+  if (state === '승인') return '<span class="badge ok">승인</span>';
+  if (state === '대기') return '<span class="badge wait">대기</span>';
+  if (state === '차단') return '<span class="badge block">차단</span>';
+  return '-';
+}
+
+/** 학생 목록 불러오기 */
+async function loadList() {
+  statusText.textContent = '불러오는 중...';
+  try {
+    const res = await fetch(`${SVR}/26susi_student/pending-list`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      // ⭐️ 2. colspan 수정 (7 -> 9)
+      tbody.innerHTML = `<tr><td colspan="9" class="empty">${data.message || '권한 없음'}</td></tr>`;
+      statusText.textContent = '권한 없음';
+      return;
+    }
+
+    const students = data.students;
+    statusText.textContent = `총 ${students.length}명`;
+
+    if (students.length === 0) {
+      // ⭐️ 3. colspan 수정 (7 -> 9)
+      tbody.innerHTML = `<tr><td colspan="9" class="empty">가입 대기 중인 학생이 없습니다.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = '';
+    students.forEach(st => {
+      const tr = document.createElement('tr');
+
+      let actionHtml = '';
+      if (st.승인여부 === '대기') {
+        actionHtml = `
+          <button class="btn-approve" data-id="${st.학생ID}">승인</button>
+          <button class="btn-reject" data-id="${st.학생ID}">삭제</button>
+        `;
+      } else {
+        actionHtml = `
+          <span class="action-disabled">승인됨</span>
+          <button class="btn-reject" data-id="${st.학생ID}">삭제</button>
+        `;
+      }
+
+      // ⭐️ 4. tr innerHTML에 고교명, 학년 추가
+      tr.innerHTML = `
+        <td>${st.학생ID}</td>
+        <td>${st.아이디}</td>
+        <td>${st.이름}</td>
+        <td>${st.고교명 || '-'}</td>
+        <td>${st.학년 || '-'}</td>
+        <td>${st.지점명}</td>
+        <td>${st.전화번호}</td>
+        <td>${renderBadge(st.승인여부)}</td>
+        <td class="action-cell">
+          ${actionHtml}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    hookButtons();
+  } catch (e) {
+    console.error(e);
+    // ⭐️ 5. colspan 수정 (7 -> 9)
+    tbody.innerHTML = `<tr><td colspan="9" class="empty">불러오기 실패</td></tr>`;
+    statusText.textContent = '불러오기 실패';
+  }
+}
+
+/** 버튼 핸들러 연결 */
+function hookButtons() {
+  // 승인 버튼
+  document.querySelectorAll('.btn-approve').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const sid = btn.dataset.id;
+      if (!confirm('이 학생을 승인하시겠습니까?')) return;
+      const res = await fetch(`${SVR}/26susi_student/approve`, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+token
+        },
+        body: JSON.stringify({ student_id: sid })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || '승인 완료'); // ⭐️ 자동 매칭 결과 메시지 표시
+        loadList();
+      } else {
+        alert('승인 실패: '+(data.message || '오류'));
+      }
+    });
+  });
+
+  // 삭제 버튼
+  document.querySelectorAll('.btn-reject').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const sid = btn.dataset.id;
+      if (!confirm('이 학생을 삭제(가입 거절)하시겠습니까?')) return;
+      const res = await fetch(`${SVR}/26susi_student/delete`, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+token
+        },
+        body: JSON.stringify({ student_id: sid })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('삭제 완료');
+        loadList();
+      } else {
+        alert('삭제 실패: '+(data.message || '오류'));
+      }
+    });
+  });
+}
+
+// 첫 로드
+loadList();
+</script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>환영합니다</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #28a745; /* 완료 색상 변경 */
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #1e1e2e;
+            --light: #f8f9fa;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --border-radius: 16px;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+
+        /* ⭐️ 1. 헤더 (로고 + 웰컴 메시지) */
+        .welcome-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--border-radius);
+            padding: 20px;
+            color: white;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* ⭐️ 2. 지점 로고 */
+        #branchLogo {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .welcome-text {
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+
+        .welcome-text h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            color: white;
+        }
+
+        .welcome-text p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+        }
+
+        /* 카드 공통 타이틀 */
+        .card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+        }
+
+        .card h3 i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        /* --- ⭐️ 오늘의 필수 운동 리스트 --- */
+        .assignment-list {
+            list-style: none; padding-left: 0; margin: 0;
+        }
+        .assignment-item {
+            display: flex; align-items: center;
+            padding: 12px 5px; border-bottom: 1px solid var(--gray-light);
+            transition: background-color 0.2s;
+        }
+        .assignment-item:last-child { border-bottom: none; }
+        .assignment-item input[type="checkbox"] {
+            width: 20px; height: 20px; margin-right: 15px; flex-shrink: 0;
+            cursor: pointer; accent-color: var(--success);
+        }
+        .assignment-details { flex-grow: 1; font-size: 15px; }
+        .assignment-details .exercise-name { font-weight: 600; display: block; margin-bottom: 3px; }
+        .assignment-details .target-info { font-size: 0.9em; color: var(--text-secondary); }
+        /* 완료된 항목 스타일 */
+        .assignment-item.completed { background-color: #f0fff4; /* 옅은 초록 배경 */ }
+        .assignment-item.completed .assignment-details { text-decoration: line-through; color: var(--gray); }
+        .assignment-item.completed .exercise-name { color: var(--success); } /* 완료 시 운동명 색상 변경 */
+
+        .loading, .no-data { text-align: center; padding: 15px; color: var(--text-secondary); font-size: 14px;}
+        /* --- ⭐️ 오늘의 필수 운동 끝 --- */
+
+
+        /* 학원 공지 (링크) */
+        .notice-list a {
+            display: block; /* 한 줄 전체 차지 */
+            padding: 10px 5px;
+            text-decoration: none;
+            color: var(--dark);
+            font-size: 15px;
+            border-bottom: 1px solid var(--gray-light);
+            transition: var(--transition);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* 제목 길면 ... 처리 */
+        }
+        .notice-list a:last-child { border-bottom: none; }
+        .notice-list a:hover { background-color: rgba(67, 97, 238, 0.05); border-radius: 8px; padding-left: 10px; }
+
+
+        /* 빠른 액션 버튼 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .action-btn {
+            background: white; border: none; border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); transition: var(--transition);
+            cursor: pointer; text-decoration: none; color: var(--dark);
+        }
+        .action-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); }
+        .action-btn i { font-size: 24px; margin-bottom: 8px; color: var(--primary); }
+        .action-btn span { font-size: 13px; font-weight: 600; }
+
+        /* --- ⭐️ Toast Popup --- */
+        .toast-popup {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.85); color: white; padding: 12px 20px; border-radius: 25px;
+            font-size: 14px; z-index: 1001; opacity: 0;
+            transition: opacity 0.4s ease, bottom 0.4s ease; white-space: nowrap;
+        }
+        .toast-popup.show { opacity: 1; bottom: 50px; }
+        .toast-popup.success { background-color: rgba(40, 167, 69, 0.9); }
+        .toast-popup.error { background-color: rgba(220, 38, 38, 0.9); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-header">
+            <div id="branchLogo">MAX</div>
+            <div class="welcome-text">
+                <h2><span id="studentName">학생</span>님, 환영합니다!</h2>
+                <p>오늘도 목표를 향해 달려보세요.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fa-solid fa-calendar-check" style="color:var(--warning)"></i> 오늘의 필수 운동</h3>
+            <ul class="assignment-list" id="assignmentList">
+                <p class="loading" id="assignmentLoading"><i class="fas fa-spinner fa-spin"></i> 오늘 운동 목록 불러오는 중...</p>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3><i class="fa-solid fa-bullhorn" style="color:var(--info)"></i> 학원 공지사항</h3>
+            <div class="notice-list" id="noticeList">
+                <p class="loading" id="noticeLoading"><i class="fas fa-spinner fa-spin"></i> 공지사항 불러오는 중...</p>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="practical.html" class="action-btn" target="_self">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>훈련일지</span>
+            </a>
+            <a href="search.html" class="action-btn" target="_self">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>대학검색</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // --- 0. 설정 ---
+        const JUNGSI_SVR = 'https://supermax.kr';
+        const token = localStorage.getItem('jwt_token');
+
+        // --- 1. DOM 요소 ---
+        const studentNameEl = document.getElementById('studentName');
+        const branchLogoEl = document.getElementById('branchLogo');
+        const assignmentListEl = document.getElementById('assignmentList');
+        const assignmentLoadingEl = document.getElementById('assignmentLoading');
+        const noticeListEl = document.getElementById('noticeList');
+        const noticeLoadingEl = document.getElementById('noticeLoading');
+
+        // --- 2. 헬퍼 함수 ---
+        function showToast(message, isSuccess = true) {
+            const t = document.createElement('div'); t.textContent = message;
+            t.className = `toast-popup ${isSuccess ? 'success' : 'error'}`;
+            document.body.appendChild(t); setTimeout(() => { t.classList.add('show'); }, 10);
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => { if (document.body.contains(t)) document.body.removeChild(t); }, 500); }, 2500);
+        }
+
+        // --- 3. 데이터 로딩 및 렌더링 함수 ---
+
+        // 오늘 할당된 운동 목록 API 호출 및 화면 렌더링 (변경 없음)
+        async function loadAssignments() {
+            if (!token) return;
+            try {
+                assignmentLoadingEl.style.display = 'block';
+                assignmentListEl.innerHTML = '';
+                assignmentListEl.appendChild(assignmentLoadingEl);
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/today-assignment`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(`[${res.status}] ${data.message || '운동 목록 로드 실패'}`);
+                if (!data.success) throw new Error(data.message || '운동 목록 로드 실패 (Success: false)');
+                assignmentLoadingEl.style.display = 'none';
+                const assignments = data.assignments || [];
+                if (assignments.length === 0) {
+                    assignmentListEl.innerHTML = '<p class="no-data">오늘 할당된 운동이 없습니다.</p>';
+                    return;
+                }
+                assignments.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'assignment-item';
+                    if (item.is_completed) { li.classList.add('completed'); }
+                    li.dataset.assignmentId = item.assignment_id;
+                    let targetInfo = '';
+                    if (item.category === 'Weight') { targetInfo = `${item.target_weight || '-'}kg ${item.target_sets || '-'}x${item.target_reps || '-'}`; }
+                    else if (item.target_notes) { targetInfo = item.target_notes; }
+                    else if (item.target_sets || item.target_reps) { targetInfo = `${item.target_sets || ''}세트 ${item.target_reps || ''}회`; }
+                    li.innerHTML = `
+                        <input type="checkbox" ${item.is_completed ? 'checked' : ''} onchange="updateAssignmentStatus(this, ${item.assignment_id})">
+                        <div class="assignment-details">
+                            <span class="exercise-name">${item.exercise_name || '운동명 없음'}</span>
+                            <span class="target-info">${targetInfo || '세부 정보 없음'}</span>
+                        </div>
+                    `;
+                    assignmentListEl.appendChild(li);
+                });
+            } catch (err) {
+                console.error("오늘 운동 목록 로딩 실패:", err);
+                assignmentLoadingEl.style.display = 'none';
+                assignmentListEl.innerHTML = `<p class="no-data status-error">운동 목록 로드 중 오류 발생</p>`;
+            }
+        }
+
+        // ⭐️ 공지사항 목록 API 호출 수정 (URL 변경)
+        async function loadNotices() {
+            if (!token) return;
+            try {
+                noticeLoadingEl.style.display = 'block';
+                noticeListEl.innerHTML = '';
+                noticeListEl.appendChild(noticeLoadingEl);
+
+                // --- ⭐️⭐️⭐️ API 호출 주소 수정! (학생용 API) ⭐️⭐️⭐️ ---
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/announcements`, { // ✅ /student 추가됨!
+                     headers: { 'Authorization': 'Bearer ' + token }
+                });
+                // --- ⭐️⭐️⭐️ 수정 끝 ⭐️⭐️⭐️ ---
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(`[${res.status}] ${data.message || '공지 로드 실패'}`);
+                if (!data.success) throw new Error(data.message || '공지 로드 실패 (Success: false)');
+                noticeLoadingEl.style.display = 'none';
+                const notices = data.announcements || [];
+                if (notices.length === 0) {
+                    noticeListEl.innerHTML = '<p class="no-data">등록된 공지사항이 없습니다.</p>';
+                    return;
+                }
+                notices.slice(0, 3).forEach(notice => {
+                    const a = document.createElement('a');
+                    a.href = `#notice-${notice.notice_id}`;
+                    a.textContent = notice.title || '제목 없음';
+                    noticeListEl.appendChild(a);
+                });
+            } catch (err) {
+                 console.error("공지사항 로딩 실패:", err);
+                 noticeLoadingEl.style.display = 'none';
+                 noticeListEl.innerHTML = `<p class="no-data status-error">공지 로드 중 오류 발생</p>`;
+            }
+        }
+
+        // 운동 완료 상태 업데이트 API 호출 (변경 없음)
+        async function updateAssignmentStatus(checkboxElement, assignmentId) {
+            if (!token) return;
+            const isCompleted = checkboxElement.checked;
+            const listItem = checkboxElement.closest('.assignment-item');
+            listItem.classList.toggle('completed', isCompleted);
+            checkboxElement.disabled = true;
+            try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/assignment/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ assignment_id: assignmentId, is_completed: isCompleted })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(`[${res.status}] ${data.message || '상태 업데이트 실패'}`);
+                if (!data.success) throw new Error(data.message || '상태 업데이트 실패 (Success: false)');
+            } catch (err) {
+                console.error("운동 완료 상태 업데이트 실패:", err);
+                showToast(`❌ 상태 업데이트 오류: ${err.message}`, false);
+                checkboxElement.checked = !isCompleted;
+                listItem.classList.toggle('completed', !isCompleted);
+            } finally {
+                checkboxElement.disabled = false;
+            }
+        }
+        window.updateAssignmentStatus = updateAssignmentStatus; // 전역 노출
+
+        // --- 4. 페이지 로드 시 실행 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // 토큰 로드 및 헤더 설정 (변경 없음)
+            if (token) {
+                try {
+                    const base64Url = token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join(''));
+                    const payload = JSON.parse(jsonPayload);
+                    studentNameEl.textContent = payload.name || '학생';
+                    branchLogoEl.textContent = payload.branch || 'MAX';
+                } catch (error) {
+                    console.error("토큰 디코딩 오류:", error);
+                    studentNameEl.textContent = '학생';
+                    branchLogoEl.textContent = 'MAX';
+                }
+            } else {
+                console.warn("로그인 토큰을 찾을 수 없습니다.");
+                // 로그인 안 된 상태 처리
+            }
+
+            // 오늘 필수 운동 & 공지사항 비동기 로드 시작 (변경 없음)
+            loadAssignments();
+            loadNotices();
+        });
+
+    </script>
+</body>
+</html>

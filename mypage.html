@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>마이페이지</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --dark: #1e1e2e;
+            --light: #f8f9fa;
+            --gray: #adb5bd;
+            --gray-light: #e9ecef;
+            --border-radius: 16px;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            margin: 0; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .card { 
+            background-color: #ffffff; 
+            border-radius: var(--border-radius); 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card h3 { 
+            font-size: 18px; 
+            font-weight: 700; 
+            margin-top: 0; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px; 
+            border-bottom: 1px solid var(--gray-light); 
+            display: flex;
+            align-items: center;
+        }
+        
+        .card h3 i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        
+        /* 1. 내 정보 스타일 */
+        .info-list-item { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 15px; 
+            padding: 12px 5px; 
+            border-bottom: 1px solid var(--gray-light); 
+        }
+        
+        .info-list-item:last-child { 
+            border-bottom: none; 
+        }
+        
+        .info-list-item .label { 
+            color: var(--gray); 
+            font-weight: 500; 
+        }
+        
+        .info-list-item .value { 
+            color: var(--dark); 
+            font-weight: 600; 
+        }
+
+        /* 2. 성적 입력 폼 스타일 */
+        .score-form-container { 
+            display: none; /* 평소엔 숨김 */ 
+        }
+        
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+        }
+        
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        .form-group label { 
+            font-size: 13px; 
+            color: var(--dark); 
+            margin-bottom: 6px; 
+            font-weight: 600;
+        }
+        
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid var(--gray-light);
+            border-radius: 10px;
+            box-sizing: border-box;
+            background-color: var(--light);
+            transition: var(--transition);
+        }
+        
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        .form-group.full-width { 
+            grid-column: 1 / -1; 
+        }
+
+        /* 3. 버튼 스타일 */
+        .action-button { 
+            display: block; 
+            text-align: center; 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 14px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            border: 0; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            transition: var(--transition);
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: #fff; 
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            margin-top: 20px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-secondary { 
+            background-color: var(--gray); 
+            color: #fff; 
+            margin-top: 10px; 
+        }
+        
+        .btn-danger { 
+            background-color: #fff; 
+            color: var(--danger); 
+            border: 1px solid var(--danger); 
+            margin-top: 20px; 
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-disabled { 
+            background-color: #ccc; 
+            color: #777; 
+            pointer-events: none; 
+        }
+
+        /* 4. 탭 스타일 (가채점/실채점) */
+        .tab-buttons { 
+            display: flex; 
+            margin-bottom: 15px; 
+            background-color: var(--gray-light);
+            border-radius: 10px;
+            padding: 4px;
+        }
+        
+        .tab-button {
+            flex: 1; 
+            padding: 12px; 
+            text-align: center; 
+            font-size: 14px; 
+            font-weight: 600;
+            border-radius: 8px;
+            color: var(--dark); 
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .tab-button.active {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 상태 메시지 */
+        #saveStatus {
+            text-align: center; 
+            color: var(--success); 
+            font-size: 14px; 
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
+        /* 헤더 프로필 */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--border-radius);
+            padding: 20px;
+            color: white;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .profile-info {
+            flex-grow: 1;
+            padding-left: 15px;
+        }
+        
+        .profile-info h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            color: white;
+        }
+        
+        .profile-info p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+        }
+        
+        /* 숨김 필드 스타일 */
+        .official-field {
+            display: none;
+        }
+        
+        /* 과목별 카드 스타일 */
+        .subject-card {
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .subject-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .subject-card h4 i {
+            margin-right: 8px;
+        }
+        
+        /* 과목별 색상 구분 */
+        .korean-card { border-left-color: #e63946; }
+        .korean-card h4 { color: #e63946; }
+        
+        .math-card { border-left-color: #2a9d8f; }
+        .math-card h4 { color: #2a9d8f; }
+        
+        .english-card { border-left-color: #e9c46a; }
+        .english-card h4 { color: #e9c46a; }
+        
+        .korean-history-card { border-left-color: #f4a261; }
+        .korean-history-card h4 { color: #f4a261; }
+        
+        .inquiry1-card { border-left-color: #9d4edd; }
+        .inquiry1-card h4 { color: #9d4edd; }
+        
+        .inquiry2-card { border-left-color: #4361ee; }
+        .inquiry2-card h4 { color: #4361ee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <script>
+            const JUNGSI_SVR = 'https://supermax.kr';
+            const token = localStorage.getItem('jwt_token');
+            let MY_학년도 = '2026';
+        </script>
+
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">MAX</div>
+            <div class="profile-info">
+                <h2 id="profileName">로딩중...</h2>
+                <p id="profileSchool">...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fa-solid fa-user"></i> 내 정보</h3>
+            <div class="info-list">
+                <div class="info-list-item"><span class="label">이름</span><span class="value" id="info-name">로딩중...</span></div>
+                <div class="info-list-item"><span class="label">학교</span><span class="value" id="info-school">...</span></div>
+                <div class="info-list-item"><span class="label">학년</span><span class="value" id="info-grade">...</span></div>
+                <div class="info-list-item"><span class="label">성별</span><span class="value" id="info-gender">...</span></div>
+                <div class="info-list-item"><span class="label">지점</span><span class="value" id="info-branch">...</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fa-solid fa-chart-simple"></i> 수능 성적 입력/수정</h3>
+
+            <div class="tab-buttons">
+                <div class="tab-button active" onclick="switchTab('raw')">가채점</div>
+                <div class="tab-button" onclick="switchTab('official')">실채점(성적표)</div>
+            </div>
+
+            <input type="hidden" id="입력유형" value="raw"> 
+            
+            <!-- 국어 카드 -->
+            <div class="card subject-card korean-card">
+                <h4><i class="fa-solid fa-book"></i> 국어</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>선택과목</label>
+                        <select id="국어_선택과목">
+                            <option value="화법과작문">화법과작문</option>
+                            <option value="언어와매체">언어와매체</option>
+                        </select>
+                    </div>
+                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="국어_원점수" placeholder="예: 88" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>표준점수</label><input type="number" id="국어_표준점수" min="0" max="150"></div>
+                    <div class="form-group official-field"><label>백분위</label><input type="number" id="국어_백분위" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>등급</label><input type="number" id="국어_등급" min="1" max="9"></div>
+                </div>
+            </div>
+
+            <!-- 수학 카드 -->
+            <div class="card subject-card math-card">
+                <h4><i class="fa-solid fa-calculator"></i> 수학</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>선택과목</label>
+                        <select id="수학_선택과목">
+                            <option value="확률과통계">확률과통계</option>
+                            <option value="미적분">미적분</option>
+                            <option value="기하">기하</option>
+                        </select>
+                    </div>
+                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="수학_원점수" placeholder="예: 92" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>표준점수</label><input type="number" id="수학_표준점수" min="0" max="150"></div>
+                    <div class="form-group official-field"><label>백분위</label><input type="number" id="수학_백분위" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>등급</label><input type="number" id="수학_등급" min="1" max="9"></div>
+                </div>
+            </div>
+
+            <!-- 영어 카드 -->
+            <div class="card subject-card english-card">
+                <h4><i class="fa-solid fa-language"></i> 영어</h4>
+                <div class="form-grid">
+                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="영어_원점수" placeholder="예: 90" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>등급</label><input type="number" id="영어_등급" min="1" max="9"></div>
+                </div>
+            </div>
+
+            <!-- 한국사 카드 -->
+            <div class="card subject-card korean-history-card">
+                <h4><i class="fa-solid fa-landmark"></i> 한국사</h4>
+                <div class="form-grid">
+                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="한국사_원점수" placeholder="예: 50" min="0" max="50"></div>
+                    <div class="form-group official-field"><label>등급</label><input type="number" id="한국사_등급" min="1" max="9"></div>
+                </div>
+            </div>
+
+            <!-- 탐구1 카드 -->
+            <div class="card subject-card inquiry1-card">
+                <h4><i class="fa-solid fa-magnifying-glass"></i> 탐구1</h4>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>선택과목</label>
+                        <select id="탐구1_선택과목"></select>
+                    </div>
+                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="탐구1_원점수" placeholder="예: 48" min="0" max="50"></div>
+                    <div class="form-group official-field"><label>표준점수</label><input type="number" id="탐구1_표준점수" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>백분위</label><input type="number" id="탐구1_백분위" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>등급</label><input type="number" id="탐구1_등급" min="1" max="9"></div>
+                </div>
+            </div>
+
+            <!-- 탐구2 카드 -->
+            <div class="card subject-card inquiry2-card">
+                <h4><i class="fa-solid fa-magnifying-glass"></i> 탐구2</h4>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>선택과목</label>
+                        <select id="탐구2_선택과목"></select>
+                    </div>
+                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="탐구2_원점수" placeholder="예: 45" min="0" max="50"></div>
+                    <div class="form-group official-field"><label>표준점수</label><input type="number" id="탐구2_표준점수" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>백분위</label><input type="number" id="탐구2_백분위" min="0" max="100"></div>
+                    <div class="form-group official-field"><label>등급</label><input type="number" id="탐구2_등급" min="1" max="9"></div>
+                </div>
+            </div>
+
+            <button class="action-button btn-primary" id="saveScoreBtn" onclick="saveMyScore()">성적 저장하기</button>
+            <p id="saveStatus"></p>
+        </div>
+
+        <button class="action-button btn-danger" onclick="logout()">로그아웃</button>
+    </div>
+
+<script>
+    // --- 공통 변수 ---
+
+    const 탐구과목 = [
+        "생활과윤리", "윤리와사상", "한국지리", "세계지리", "동아시아사", "세계사", "정치와법", "경제", "사회문화",
+        "물리1", "화학1", "생명과학1", "지구과학1", "물리2", "화학2", "생명과학2", "지구과학2"
+    ];
+
+    // --- 1. 페이지 로드 시 실행 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            window.parent.location.href = 'student_login.html';
+            return;
+        }
+        
+        // 탐구과목 <select> 채우기
+        const t1 = document.getElementById('탐구1_선택과목');
+        const t2 = document.getElementById('탐구2_선택과목');
+        t1.innerHTML = ''; t2.innerHTML = ''; // 초기화
+        t1.options.add(new Option('선택하세요', ''));
+        t2.options.add(new Option('선택하세요', ''));
+        탐구과목.forEach(sub => {
+            t1.options.add(new Option(sub, sub));
+            t2.options.add(new Option(sub, sub));
+        });
+        
+        // ▼▼▼▼▼ 날짜 확인 로직 (KST 기준) ▼▼▼▼▼
+        // ⭐️ 성적 발표일 (KST 오전 9시). 브라우저가 KST로 해석함.
+        const officialScoreReleaseDate = new Date('2025-12-05T09:00:00'); 
+        // ⭐️ 현재 시간 (브라우저의 로컬 시간대, 즉 KST)
+        const today = new Date(); 
+        const canEnterOfficialScores = today >= officialScoreReleaseDate; 
+        // ▲▲▲▲▲ 날짜 확인 끝 ▲▲▲▲▲
+
+        const officialTabButton = document.querySelector('.tab-button[onclick="switchTab(\'official\')"]');
+        
+        if (!canEnterOfficialScores) {
+            // 성적 발표일 전: 실채점 탭 비활성화
+            if (officialTabButton) {
+                officialTabButton.style.pointerEvents = 'none';
+                officialTabButton.style.opacity = '0.5';
+                officialTabButton.style.cursor = 'not-allowed';
+                officialTabButton.title = '성적 발표일 이후 활성화됩니다.'; 
+            }
+            switchTab('raw'); // 가채점 탭 기본 활성화
+            // ⭐️ 중요: 발표일 전에는 loadMyProfile 호출 전에 enable 필수!
+            enableMockScoreInputs(); // 가채점 입력 가능하게 함
+            loadMyProfile(); // 내 정보 + 성적(가채점만) 불러오기
+        } else {
+            // 성적 발표일 이후: 실채점 탭 활성화
+             if (officialTabButton) {
+                officialTabButton.style.pointerEvents = 'auto';
+                officialTabButton.style.opacity = '1';
+                officialTabButton.style.cursor = 'pointer';
+                officialTabButton.title = ''; 
+            }
+            // ⭐️ API 호출 먼저: DB에 저장된 입력 유형에 따라 탭/필드 상태 결정
+            loadMyProfile(); 
+        }
+
+    }); // DOMContentLoaded 끝
+
+    // --- 2. 탭 전환 함수 ---
+    function switchTab(mode) { 
+        document.getElementById('입력유형').value = mode;
+        document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.tab-button[onclick="switchTab('${mode}')"]`).classList.add('active');
+        
+        const rawFields = document.querySelectorAll('.raw-field');
+        const officialFields = document.querySelectorAll('.official-field');
+
+        if (mode === 'raw') {
+            rawFields.forEach(el => el.style.display = 'flex');
+            officialFields.forEach(el => el.style.display = 'none');
+        } else {
+            rawFields.forEach(el => el.style.display = 'none');
+            officialFields.forEach(el => el.style.display = 'flex');
+        }
+    }
+    
+    // --- Helper: 가채점 입력 필드 비활성화 ---
+    function disableMockScoreInputs() {
+        const rawTabButton = document.querySelector('.tab-button[onclick="switchTab(\'raw\')"]');
+        if (rawTabButton) {
+            rawTabButton.style.pointerEvents = 'none'; 
+            rawTabButton.style.opacity = '0.6';      
+            rawTabButton.style.cursor = 'not-allowed';
+        }
+        document.querySelectorAll('.raw-field input, .raw-field select').forEach(el => {
+            el.disabled = true;
+            el.style.backgroundColor = '#f1f1f1'; 
+            el.style.color = '#777';
+        });
+        // (선택과목 비활성화는 주석 처리)
+    }
+
+    // --- Helper: 가채점 입력 필드 활성화 ---
+    function enableMockScoreInputs() {
+        const rawTabButton = document.querySelector('.tab-button[onclick="switchTab(\'raw\')"]');
+        if (rawTabButton) {
+            rawTabButton.style.pointerEvents = 'auto';
+            rawTabButton.style.opacity = '1';
+            rawTabButton.style.cursor = 'pointer';
+        }
+        document.querySelectorAll('.raw-field input, .raw-field select').forEach(el => {
+            el.disabled = false;
+            el.style.backgroundColor = ''; 
+             el.style.color = ''; 
+        });
+        // (선택과목 활성화는 주석 처리)
+    }
+
+    // --- 3. API 호출: 내 정보 불러오기 함수 ---
+    async function loadMyProfile() {
+        try {
+            const res = await fetch(`${JUNGSI_SVR}/jungsi/student/my-profile`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || '프로필 로드 실패');
+
+            const p = data.profile;
+            MY_학년도 = p.학년도; 
+
+            // 내 정보 카드 채우기
+            document.getElementById('info-name').textContent = p.student_name;
+            document.getElementById('info-school').textContent = p.school_name || '미입력';
+            document.getElementById('info-grade').textContent = p.grade || '미입력';
+            document.getElementById('info-gender').textContent = p.gender || '미입력';
+            document.getElementById('info-branch').textContent = p.branch_name || '미입력';
+            document.getElementById('profileName').textContent = p.student_name;
+            document.getElementById('profileSchool').textContent = p.school_name || '학교 정보 없음';
+            document.getElementById('profileAvatar').textContent = p.student_name ? p.student_name.charAt(0) : 'MAX';
+
+            // 성적 입력 폼 채우기 및 상태 결정
+            if (p.scores) {
+                const s = p.scores;
+                const currentInputType = s.입력유형 || 'raw';
+                
+                // ⭐️ 날짜가 지났어도, DB 상태 기준으로 탭/필드 상태 최종 결정
+                switchTab(currentInputType); 
+
+                // 필드 값 채우기 (국어 ~ 탐구2 모두)
+                document.getElementById('국어_선택과목').value = s.국어_선택과목 || '';
+                document.getElementById('수학_선택과목').value = s.수학_선택과목 || '';
+                document.getElementById('탐구1_선택과목').value = s.탐구1_선택과목 || '';
+                document.getElementById('탐구2_선택과목').value = s.탐구2_선택과목 || '';
+                document.getElementById('국어_원점수').value = s.국어_원점수 ?? '';
+                document.getElementById('수학_원점수').value = s.수학_원점수 ?? '';
+                document.getElementById('영어_원점수').value = s.영어_원점수 ?? '';
+                document.getElementById('한국사_원점수').value = s.한국사_원점수 ?? ''; 
+                document.getElementById('탐구1_원점수').value = s.탐구1_원점수 ?? '';
+                document.getElementById('탐구2_원점수').value = s.탐구2_원점수 ?? '';
+                document.getElementById('국어_표준점수').value = s.국어_표준점수 ?? '';
+                document.getElementById('국어_백분위').value = s.국어_백분위 ?? '';
+                document.getElementById('국어_등급').value = s.국어_등급 ?? '';
+                document.getElementById('수학_표준점수').value = s.수학_표준점수 ?? '';
+                document.getElementById('수학_백분위').value = s.수학_백분위 ?? '';
+                document.getElementById('수학_등급').value = s.수학_등급 ?? '';
+                document.getElementById('영어_등급').value = s.영어_등급 ?? '';
+                document.getElementById('한국사_등급').value = s.한국사_등급 ?? ''; 
+                document.getElementById('탐구1_표준점수').value = s.탐구1_표준점수 ?? '';
+                document.getElementById('탐구1_백분위').value = s.탐구1_백분위 ?? '';
+                document.getElementById('탐구1_등급').value = s.탐구1_등급 ?? '';
+                document.getElementById('탐구2_표준점수').value = s.탐구2_표준점수 ?? '';
+                document.getElementById('탐구2_백분위').value = s.탐구2_백분위 ?? '';
+                document.getElementById('탐구2_등급').value = s.탐구2_등급 ?? '';
+                
+                // 만약 실채점 데이터가 있다면, 가채점 입력을 막음
+                if (currentInputType === 'official') {
+                    disableMockScoreInputs();
+                } else {
+                    enableMockScoreInputs(); 
+                }
+            } else {
+                // 성적 데이터 없으면 -> 가채점 탭 활성화 (날짜 조건은 이미 위에서 처리됨)
+                switchTab('raw'); 
+                enableMockScoreInputs();
+            }
+            
+        } catch (err) {
+            console.error(err);
+            alert(`오류: ${err.message}`);
+            document.getElementById('info-name').textContent = '오류'; 
+            enableMockScoreInputs(); 
+        }
+    }
+    
+    // --- 4. API 호출: 내 성적 저장하기 함수 ---
+    async function saveMyScore() {
+        const btn = document.getElementById('saveScoreBtn');
+        const statusEl = document.getElementById('saveStatus');
+        btn.disabled = true; btn.textContent = '저장 중...'; statusEl.textContent = '';
+
+        try {
+            const scores = { /* ... (폼에서 값 읽어오는 로직 - 수정 없음) ... */ 
+                국어_선택과목: document.getElementById('국어_선택과목').value,
+                국어_원점수: document.getElementById('국어_원점수').value || null,
+                국어_표준점수: document.getElementById('국어_표준점수').value || null,
+                국어_백분위: document.getElementById('국어_백분위').value || null,
+                국어_등급: document.getElementById('국어_등급').value || null,
+                수학_선택과목: document.getElementById('수학_선택과목').value,
+                수학_원점수: document.getElementById('수학_원점수').value || null,
+                수학_표준점수: document.getElementById('수학_표준점수').value || null,
+                수학_백분위: document.getElementById('수학_백분위').value || null,
+                수학_등급: document.getElementById('수학_등급').value || null,
+                영어_원점수: document.getElementById('영어_원점수').value || null,
+                영어_등급: document.getElementById('영어_등급').value || null,
+                한국사_원점수: document.getElementById('한국사_원점수').value || null,
+                한국사_등급: document.getElementById('한국사_등급').value || null,
+                탐구1_선택과목: document.getElementById('탐구1_선택과목').value,
+                탐구1_원점수: document.getElementById('탐구1_원점수').value || null,
+                탐구1_표준점수: document.getElementById('탐구1_표준점수').value || null,
+                탐구1_백분위: document.getElementById('탐구1_백분위').value || null,
+                탐구1_등급: document.getElementById('탐구1_등급').value || null,
+                탐구2_선택과목: document.getElementById('탐구2_선택과목').value,
+                탐구2_원점수: document.getElementById('탐구2_원점수').value || null,
+                탐구2_표준점수: document.getElementById('탐구2_표준점수').value || null,
+                탐구2_백분위: document.getElementById('탐구2_백분위').value || null,
+                탐구2_등급: document.getElementById('탐구2_등급').value || null,
+            };
+            const body = { 학년도: MY_학년도, 입력유형: document.getElementById('입력유형').value, scores: scores };
+            
+            console.log('전송할 데이터:', body);
+            
+            const res = await fetch(`${JUNGSI_SVR}/jungsi/student/my-score`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || '저장 실패');
+
+            statusEl.textContent = '✅ 성공적으로 저장되었습니다!';
+            
+            // 저장 후 폼 다시 채우기 (가채점->변환값 표시)
+            if (data.savedData) {
+               const s = data.savedData;
+               // ... (실채점 필드 업데이트 로직 - 수정 없음) ...
+                document.getElementById('국어_표준점수').value = s.국어_표준점수 || '';
+                document.getElementById('국어_백분위').value = s.국어_백분위 || '';
+                document.getElementById('국어_등급').value = s.국어_등급 || '';
+                document.getElementById('수학_표준점수').value = s.수학_표준점수 || '';
+                document.getElementById('수학_백분위').value = s.수학_백분위 || '';
+                document.getElementById('수학_등급').value = s.수학_등급 || '';
+                document.getElementById('영어_등급').value = s.영어_등급 || '';
+                document.getElementById('한국사_등급').value = s.한국사_등급 || '';
+                document.getElementById('탐구1_표준점수').value = s.탐구1_표준점수 || '';
+                document.getElementById('탐구1_백분위').value = s.탐구1_백분위 || '';
+                document.getElementById('탐구1_등급').value = s.탐구1_등급 || '';
+                document.getElementById('탐구2_표준점수').value = s.탐구2_표준점수 || '';
+                document.getElementById('탐구2_백분위').value = s.탐구2_백분위 || '';
+                document.getElementById('탐구2_등급').value = s.탐구2_등급 || '';
+                
+                // ⭐️ 저장 후, 만약 입력 유형이 'official'이면 가채점 입력 막기
+                if (s.입력유형 === 'official') {
+                    disableMockScoreInputs();
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            statusEl.style.color = 'var(--danger)';
+            statusEl.textContent = `❌ 오류: ${err.message}`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '성적 저장하기';
+        }
+    }
+
+    // --- 5. 로그아웃 함수 ---
+    function logout() {
+        if (confirm('로그아웃 하시겠습니까?')) {
+            localStorage.removeItem('jwt_token');
+            window.parent.location.href = 'student_login.html';
+        }
+    }
+</script>
+
+</body>
+</html>

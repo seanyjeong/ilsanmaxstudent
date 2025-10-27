@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>내 운동 종목 설정</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee; --gray: #adb5bd; --gray-light: #e9ecef;
+            --dark: #1e1e2e; --light: #f8f9fa; --border-radius: 12px;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+            --success: #28a745; --danger: #dc3545; /* 추가 */
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6; margin: 0; padding: 20px; color: var(--dark);
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card {
+            background-color: #fff; border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow); padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            font-size: 18px; font-weight: 700; margin-top: 0; margin-bottom: 15px;
+            padding-bottom: 10px; border-bottom: 1px solid var(--gray-light);
+            display: flex; align-items: center;
+        }
+        .card h3 i { margin-right: 8px; color: var(--primary); }
+
+        /* 종목 목록 스타일 */
+        .event-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 반응형 그리드 */
+            gap: 10px;
+            max-height: 50vh; /* 너무 길어지면 스크롤 */
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            background-color: var(--light);
+        }
+        .event-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 6px;
+            border: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+        .event-item input[type="checkbox"] {
+            width: 18px; height: 18px; margin-right: 10px;
+            cursor: pointer; accent-color: var(--primary);
+        }
+        .event-item label {
+            font-size: 14px; cursor: pointer; flex-grow: 1;
+        }
+        .event-item:has(input:checked) { /* 체크된 항목 스타일 */
+            background-color: #e9f0ff;
+            border-color: var(--primary);
+        }
+
+        /* 버튼 스타일 */
+        .btn-primary {
+            width: 100%; padding: 12px; font-size: 16px; font-weight: 600;
+            border: none; border-radius: 8px; cursor: pointer;
+            background-color: var(--primary); color: #fff;
+            transition: var(--transition); margin-top: 20px;
+        }
+        .btn-primary:hover { background-color: #3a54d8; }
+        .btn-primary:disabled { background-color: var(--gray); }
+
+        /* 상태 메시지 */
+        #statusMessage {
+            text-align: center; font-size: 14px; margin-top: 10px;
+            font-weight: 600; min-height: 1.5em; /* 높이 고정 */
+        }
+        .status-success { color: var(--success); }
+        .status-error { color: var(--danger); } /* 수정 */
+
+        .loading, .no-data { text-align: center; padding: 30px; color: var(--text-secondary); } /* 수정: var(--text-secondary) */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h3><i class="fa-solid fa-list-check"></i> 훈련 기록할 종목 선택</h3>
+        <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;">
+            여기서 선택한 종목만 '실기 훈련 일지' 페이지에 표시됩니다.
+        </p>
+        <div class="event-list" id="eventListContainer">
+            <p class="loading"><i class="fas fa-spinner fa-spin"></i> 종목 목록 로딩 중...</p>
+        </div>
+        <button class="btn-primary" id="saveButton" onclick="saveSettings()" disabled>
+            <i class="fa-solid fa-save"></i> 설정 저장하기
+        </button>
+        <p id="statusMessage"></p>
+    </div>
+
+    <a href="practical.html" style="display: block; text-align: center; margin-top: 15px; color: var(--primary); text-decoration: none; font-weight: 500;">
+        <i class="fa-solid fa-arrow-left"></i> 훈련 일지로 돌아가기
+    </a>
+</div>
+
+<script>
+    // --- 0. 설정 ---
+    const JUNGSI_SVR = 'https://supermax.kr';
+    const token = localStorage.getItem('jwt_token');
+
+    // --- ⭐️ SYSTEM_EVENTS 배열 제거됨 ---
+
+    // --- 1. DOM 요소 ---
+    const eventListContainer = document.getElementById('eventListContainer');
+    const saveButton = document.getElementById('saveButton');
+    const statusMessage = document.getElementById('statusMessage');
+
+    let currentTrackedEvents = []; // 현재 저장된 추적 종목
+    let availableEvents = [];      // API로 불러온 전체 종목 목록
+
+    // --- 2. 초기화 함수 ---
+    async function initializePage() {
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            // window.parent.location.href = 'student_login.html';
+            eventListContainer.innerHTML = '<p class="no-data status-error">로그인이 필요합니다.</p>';
+            return;
+        }
+
+        try {
+            statusMessage.textContent = '데이터 로딩 중...';
+            eventListContainer.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> 종목 목록 로딩 중...</p>'; // 초기 로딩 표시
+
+            // ⭐️ 1. API 호출: 전체 실기 종목 목록 불러오기
+            const eventsRes = await fetch(`${JUNGSI_SVR}/jungsi/public/practical-events`); // 인증 불필요
+            const eventsData = await eventsRes.json();
+            if (!eventsRes.ok) throw new Error(`[${eventsRes.status}] ${eventsData.message || '전체 종목 로드 실패'}`);
+            if (!eventsData.success || !Array.isArray(eventsData.events)) throw new Error('전체 종목 로드 실패 (데이터 형식 오류)');
+            availableEvents = eventsData.events; // 전역 변수에 저장
+            console.log('사용 가능한 전체 종목:', availableEvents);
+
+            if (availableEvents.length === 0) {
+                 eventListContainer.innerHTML = '<p class="no-data">선택 가능한 실기 종목이 없습니다.</p>';
+                 statusMessage.textContent = '';
+                 return; // 종목 없으면 중단
+            }
+
+            // ⭐️ 2. API 호출: 현재 설정된 추적 종목 불러오기
+            const settingsRes = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/dashboard`, { // 대시보드 API 재활용
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const settingsData = await settingsRes.json();
+            if (!settingsRes.ok) throw new Error(`[${settingsRes.status}] ${settingsData.message || '설정 로드 실패'}`);
+            if (!settingsData.success) throw new Error(settingsData.message || '설정 로드 실패 (Success: false)');
+
+            currentTrackedEvents = settingsData.dashboard?.settings?.trackedEvents || [];
+            console.log('현재 추적 종목:', currentTrackedEvents);
+
+            // ⭐️ 3. 종목 목록 (체크박스) 렌더링 (API 결과 기반)
+            renderEventList();
+            saveButton.disabled = false; // 로드 성공 시 저장 버튼 활성화
+            statusMessage.textContent = ''; // 로딩 메시지 제거
+
+        } catch (err) {
+            console.error('초기화 오류:', err);
+            // 에러 시에도 종목 목록은 보여주도록 시도 (선택 사항)
+            if(availableEvents.length > 0) renderEventList();
+            else eventListContainer.innerHTML = `<p class="no-data status-error">오류: ${err.message}</p>`;
+
+            statusMessage.textContent = `❌ 오류: ${err.message}`; // 상태 메시지에 오류 표시
+            statusMessage.className = 'status-error';
+        }
+    }
+
+    // --- 3. UI 렌더링 함수 ---
+    function renderEventList() {
+        eventListContainer.innerHTML = ''; // 기존 목록 비우기
+
+        // ⭐️ API로 받아온 availableEvents 배열 사용
+        availableEvents.forEach(event => {
+            const isChecked = currentTrackedEvents.includes(event);
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'event-item';
+            if (isChecked) itemDiv.classList.add('checked'); // 초기 체크 스타일
+
+            const checkboxId = `event-check-${event.replace(/[\s\(\)]/g, '-')}`; // ID 고유하게 생성
+            itemDiv.innerHTML = `
+                <input type="checkbox" id="${checkboxId}" value="${event}" ${isChecked ? 'checked' : ''}>
+                <label for="${checkboxId}">${event}</label>
+            `;
+
+            // 체크박스 변경 시 스타일 업데이트 (선택 사항)
+            itemDiv.querySelector('input').addEventListener('change', (e) => {
+                 itemDiv.classList.toggle('checked', e.target.checked);
+            });
+
+            eventListContainer.appendChild(itemDiv);
+        });
+    }
+
+    // --- 4. 저장 함수 (API 호출 부분 동일) ---
+    async function saveSettings() {
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 저장 중...';
+        statusMessage.textContent = '';
+        statusMessage.className = '';
+
+        // 현재 체크된 종목 목록 가져오기
+        const selectedEvents = Array.from(
+            eventListContainer.querySelectorAll('input[type="checkbox"]:checked')
+        ).map(checkbox => checkbox.value);
+
+        console.log('저장할 종목:', selectedEvents);
+
+        try {
+            const res = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/settings`, { // 저장 API
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ tracked_events: selectedEvents })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(`[${res.status}] ${data.message || '저장 실패'}`);
+            if (!data.success) throw new Error(data.message || '저장 실패 (Success: false)');
+
+            // 성공 시 현재 상태 업데이트 및 메시지 표시
+            currentTrackedEvents = selectedEvents;
+            statusMessage.textContent = '✅ 설정이 성공적으로 저장되었습니다!';
+            statusMessage.className = 'status-success';
+
+        } catch (err) {
+            console.error('설정 저장 오류:', err);
+            statusMessage.textContent = `❌ 저장 오류: ${err.message}`;
+            statusMessage.className = 'status-error';
+        } finally {
+            saveButton.disabled = false;
+            saveButton.innerHTML = '<i class="fa-solid fa-save"></i> 설정 저장하기';
+        }
+    }
+
+    // --- 5. 페이지 로드 시 실행 ---
+    document.addEventListener('DOMContentLoaded', initializePage);
+
+</script>
+
+</body>
+</html>

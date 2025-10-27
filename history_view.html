@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>성적 기록 보기</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee; --gray: #adb5bd; --gray-light: #e9ecef;
+            --dark: #1e1e2e; --light: #f8f9fa; --border-radius: 12px;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --info: #17a2b8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6; margin: 0; padding: 20px; color: var(--dark);
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .header {
+            background-color: #fff; padding: 15px 20px;
+            border-bottom: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h2 { 
+            margin: 0; font-size: 18px; font-weight: 700; 
+            text-align: center; flex-grow: 1;
+        }
+        .back-btn {
+            font-size: 16px;
+            color: var(--dark);
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background-color: var(--gray-light);
+            font-weight: 500;
+        }
+        .back-btn:hover { background-color: #dde1e5; }
+        
+        .history-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* 기록 카드 스타일 */
+        .history-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--gray-light);
+            overflow: hidden; /* 내부 테이블 radius 적용 */
+        }
+        .history-date {
+            padding: 10px 15px;
+            background-color: var(--light);
+            border-bottom: 1px solid var(--gray-light);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .history-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .total-score-big {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        .total-score-big strong {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--danger);
+            margin-left: 8px;
+        }
+        
+        /* 점수 표 스타일 */
+        .score-breakdown, .silgi-details-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .score-breakdown th, .score-breakdown td,
+        .silgi-details-table th, .silgi-details-table td {
+            padding: 8px 10px;
+            border: 1px solid var(--gray-light);
+            text-align: center;
+        }
+        .score-breakdown th, .silgi-details-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: 33.33%;
+        }
+        .silgi-details-table th {
+             width: 25%; /* 실기 상세는 4칸 */
+        }
+        .score-breakdown td {
+            font-weight: 700;
+        }
+        .score-breakdown td.suneung { color: var(--primary); }
+        .score-breakdown td.naeshin { color: var(--warning); }
+        .score-breakdown td.silgi { color: var(--success); }
+        .silgi-details-table td:nth-child(4) { /* '감' 수 */
+            color: var(--danger);
+            font-weight: 700;
+        }
+        .silgi-details-table td:nth-child(4).success {
+            color: var(--success);
+        }
+        
+        .empty-msg, .loading-msg {
+            text-align: center; color: var(--gray); font-size: 14px;
+            padding: 20px; background-color: #fff; border-radius: var(--border-radius);
+            border: 1px dashed var(--gray-light);
+        }
+        
+    </style>
+</head>
+<body>
+    <script>
+        // --- 1. 전역 변수 및 헬퍼 함수 정의 ---
+        const JUNGSI_SVR = 'https://supermax.kr';
+        const token = localStorage.getItem('jwt_token');
+
+        // 날짜 포맷팅 함수 (예: '2025년 10월 27일 오전 1:05')
+        function formatDateTime(isoString) {
+            if (!isoString) return '날짜 없음';
+            try {
+                const date = new Date(isoString);
+                // KST로 강제 변환 (DB가 UTC 기준일 경우 +9시간)
+                // const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+                
+                // DB가 이미 KST(한국 표준시)로 저장했다고 가정
+                return date.toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            } catch (e) {
+                console.error('Date formatting error:', e);
+                return isoString; // 실패 시 원본 반환
+            }
+        }
+    </script>
+
+    <div class="container">
+        <div class="header">
+            <a href="saved_list.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 뒤로</a>
+            <h2 id="university-title">기록 보기</h2>
+        </div>
+
+        <div class="history-list-container" id="history-list">
+            <p class="loading-msg" id="loading-msg">
+                <i class="fas fa-spinner fa-spin"></i> 기록을 불러오는 중...
+            </p>
+        </div>
+    </div>
+
+    <template id="history-card-template">
+        <div class="history-card">
+            <div class="history-date">
+                <i class="fa-solid fa-calendar-check"></i> 
+                <span class="record-date">2025-10-27 12:00:00</span>
+            </div>
+            <div class="history-body">
+                <div class="total-score-big">
+                    총점 <strong>0점</strong>
+                </div>
+                
+                <table class="score-breakdown">
+                    <thead>
+                        <tr><th>수능 환산</th><th>내신 환산</th><th>실기 환산</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="suneung">0점</td>
+                            <td class="naeshin">0점</td>
+                            <td class="silgi">0점</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                </div>
+        </div>
+    </template>
+    
+    <template id="silgi-table-template">
+         <table class="silgi-details-table">
+            <thead>
+                <tr><th>종목</th><th>기록</th><th>배점</th><th>감수</th></tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </template>
+
+
+    <script>
+        // --- 2. DOM 요소 변수 ---
+        const universityTitle = document.getElementById('university-title');
+        const historyListContainer = document.getElementById('history-list');
+        const loadingMsg = document.getElementById('loading-msg');
+
+        // --- 3. 메인 함수 정의 ---
+
+        /**
+         * API를 호출하여 성적 기록을 불러오는 함수
+         */
+        async function loadHistory(uid, year) {
+            try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/get-history/${uid}/${year}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    throw new Error('인증 오류. 다시 로그인해주세요.');
+                }
+                
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.message || '기록 조회에 실패했습니다.');
+                }
+                
+                // 로딩 메시지 제거
+                loadingMsg.style.display = 'none';
+
+                if (data.history.length === 0) {
+                    historyListContainer.innerHTML = '<p class="empty-msg">아직 저장된 점수 기록이 없습니다.</p>';
+                    return;
+                }
+                
+                // 기록이 있으면, 각 기록을 카드로 만들어 추가
+                data.history.forEach(record => {
+                    const card = createHistoryCard(record);
+                    historyListContainer.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error('성적 기록 로드 실패:', err);
+                loadingMsg.innerHTML = `<span style="color:var(--danger);">❌ ${err.message}</span>`;
+            }
+        }
+
+        /**
+         * 기록 데이터로 HTML 카드 요소를 생성하는 함수
+         */
+        function createHistoryCard(item) {
+            const card = document.getElementById('history-card-template').content.cloneNode(true).firstElementChild;
+            
+            // 1. 날짜 및 총점
+            card.querySelector('.record-date').textContent = formatDateTime(item.record_date);
+            card.querySelector('.total-score-big strong').textContent = `${item.total_score || 0}점`;
+            
+            // 2. 점수 요약 테이블
+            const breakdownTbody = card.querySelector('.score-breakdown tbody');
+            breakdownTbody.querySelector('.suneung').textContent = `${item.suneung_score || 0}점`;
+            breakdownTbody.querySelector('.naeshin').textContent = `${item.naeshin_score || 0}점`;
+            breakdownTbody.querySelector('.silgi').textContent = `${item.silgi_score || 0}점`;
+            
+            // 3. 실기 세부 테이블 (데이터가 있을 경우에만)
+            if (item.silgi_records_json && Array.isArray(item.silgi_records_json) && item.silgi_records_json.length > 0) {
+                const silgiTable = document.getElementById('silgi-table-template').content.cloneNode(true).firstElementChild;
+                const silgiTbody = silgiTable.querySelector('tbody');
+                
+                item.silgi_records_json.forEach(silgi => {
+                    const tr = document.createElement('tr');
+                    const gam = silgi.gam || 0;
+                    tr.innerHTML = `
+                        <td>${silgi.event || '-'}</td>
+                        <td>${silgi.record || '-'}</td>
+                        <td>${silgi.score ?? 'N/A'}</td>
+                        <td class="${gam === 0 ? 'success' : ''}">${gam}감</td>
+                    `;
+                    silgiTbody.appendChild(tr);
+                });
+                
+                card.querySelector('.history-body').appendChild(silgiTable); // 카드 본문에 실기 테이블 추가
+            }
+            
+            return card;
+        }
+
+        // --- 4. 페이지 로드 시 실행 ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!token) {
+                alert('로그인이 필요합니다.');
+                window.parent.location.href = 'student_login.html';
+                return;
+            }
+            
+            // 1. URL에서 파라미터 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('uid');
+            const year = urlParams.get('year');
+            const name = urlParams.get('name') || '기록 보기';
+            
+            if (!uid || !year) {
+                historyListContainer.innerHTML = '<p class="empty-msg">잘못된 접근입니다. (대학 ID 또는 학년도 없음)</p>';
+                return;
+            }
+            
+            // 2. 제목 설정
+            universityTitle.textContent = decodeURIComponent(name);
+            
+            // 3. 기록 불러오기 API 실행
+            await loadHistory(uid, year);
+        });
+
+    </script>
+</body>
+</html>

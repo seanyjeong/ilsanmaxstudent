@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>학생 로그인</title>
+<style>
+body { font-family:sans-serif; max-width:360px; margin:60px auto; text-align:center; }
+input { width:100%; padding:12px; font-size:1rem; margin:8px 0; box-sizing:border-box; }
+button { width:100%; padding:12px; font-size:1rem; font-weight:600; background:#2563eb; color:#fff; border:0; border-radius:6px; cursor:pointer; margin-top:12px; }
+.status { min-height:20px; font-size:.9rem; color:#ef4444; margin-top:12px; white-space:pre-line; }
+.ok { color:#10b981; }
+.note { font-size:.8rem; color:#64748b; line-height:1.4; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<h2>학생 로그인</h2>
+<p class="note">승인된 학생만 로그인할 수 있어요.</p>
+
+<input id="idInput" placeholder="아이디" />
+<input id="pwInput" type="password" placeholder="비밀번호" />
+<button id="loginBtn">로그인</button>
+
+<div id="loginStatus" class="status"></div>
+
+<script>
+const SVR = 'https://supermax.kr';
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const userid = document.getElementById('idInput').value.trim();
+  const password = document.getElementById('pwInput').value.trim();
+  const statusEl = document.getElementById('loginStatus');
+
+  if (!userid || !password) {
+    statusEl.textContent = '아이디/비번을 모두 입력해주세요.';
+    return;
+  }
+
+  // 1️⃣ 먼저 학생 로그인 시도
+  let res = await fetch(`${SVR}/26susi_student/login`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ userid, password })
+  });
+  let data = await res.json();
+
+  // 2️⃣ 학생 로그인 실패 시 → 원장 로그인 시도
+  if (!data.success || !data.token) {
+    res = await fetch(`${SVR}/26susi_owner/login`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ userid, password })
+    });
+    data = await res.json();
+  }
+
+  // 3️⃣ 성공 시 토큰 저장
+  if (data.success && data.token) {
+    // ⭐️ 학생/원장 토큰을 'jwt_token'이라는 이름으로 통일해서 저장
+    localStorage.setItem('jwt_token', data.token);
+    statusEl.textContent = '로그인 성공!';
+    statusEl.className = 'status ok';
+
+    // ⭐️ 역할에 따라 페이지 분기
+    const payload = JSON.parse(atob(data.token.split('.')[1]));
+    if (payload.role === 'owner' || payload.role === 'admin') {
+      // 원장/관리자면 승인 페이지로
+      location.href = 'admin_student_approve.html'; 
+    } else {
+      // 학생이면 대시보드로
+      location.href = 'student_dashboard.html'; // (이 페이지는 만들어야 함)
+    }
+
+  } else {
+    // 4️⃣ 둘 다 실패 시
+    statusEl.textContent = data.message || '로그인 실패';
+    statusEl.className = 'status';
+  }
+});
+
+</script>
+
+</body>
+</html>

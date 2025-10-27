@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>실기 훈련 일지</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee; --gray: #adb5bd; --gray-light: #e9ecef;
+            --dark: #1e1e2e; --light: #f8f9fa; --border-radius: 12px;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --info: #17a2b8;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6; margin: 0; padding: 20px; color: var(--dark);
+            /* ⭐️ 가로 스크롤 방지 (최후의 수단) */
+            overflow-x: hidden;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+
+        /* 페이지 헤더 */
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        .page-header h2 { margin: 0; font-size: 20px; font-weight: 700; }
+        .settings-btn {
+            padding: 8px 12px; font-size: 13px; font-weight: 600;
+            border: 1px solid var(--gray); border-radius: 8px;
+            background-color: #fff; color: var(--dark); cursor: pointer;
+            text-decoration: none; transition: var(--transition);
+            flex-shrink: 0; /* 버튼 작아지지 않게 */
+        }
+        .settings-btn:hover { background-color: var(--gray-light); }
+
+        /* 종목 카드 컨테이너 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 모바일 우선: 1열 */
+            gap: 20px;
+        }
+        @media (min-width: 600px) {
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* 개별 종목 카드 */
+        .event-card {
+            background-color: #fff; border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow); display: flex; flex-direction: column;
+            overflow: hidden; /* 내부 요소가 넘치면 숨김 (카드 자체) */
+        }
+        .event-card-header {
+            padding: 15px 20px; border-bottom: 1px solid var(--gray-light);
+        }
+        .event-card-header h3 {
+            margin: 0 0 10px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center;
+            /* ⭐️ 제목 길어지면 줄바꿈 대신 ... 처리 */
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .event-card-header h3 i { margin-right: 8px; color: var(--primary); flex-shrink: 0; }
+        .goal-setting-area {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .goal-setting-area label { font-size: 13px; font-weight: 500; color: #555; white-space: nowrap; }
+        .goal-setting-area input {
+            /* flex-grow: 1; */ /* 자동으로 늘어나지 않게 */
+            width: 60px; padding: 6px 8px; font-size: 13px; text-align: center;
+            border: 1px solid var(--gray-light); border-radius: 6px;
+            min-width: 50px; /* 최소 너비 */
+        }
+        .goal-setting-area button {
+            padding: 6px 10px; font-size: 12px; font-weight: 600;
+            border: none; border-radius: 6px; cursor: pointer;
+            background-color: var(--warning); color: #fff; white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .goal-setting-area button:disabled { background-color: var(--gray); }
+
+        .event-card-body { padding: 15px 20px; flex-grow: 1; min-width: 0; /* ⭐️ flex 아이템 줄어들 수 있게 */ }
+        .personal-best {
+            font-size: 13px; text-align: right; margin-bottom: 8px;
+            font-weight: 600; color: var(--danger);
+        }
+        /* 기본 차트 높이, 너비는 항상 100% */
+        .chart-container { position: relative; height: 150px; width: 100%; margin-bottom: 15px; }
+        .record-input-area {
+            display: flex; gap: 10px; align-items: center; border-top: 1px dashed var(--gray-light); padding-top: 15px;
+        }
+        .record-input-area input {
+            flex-grow: 1; padding: 10px; font-size: 14px;
+            border: 1px solid var(--gray-light); border-radius: 8px; text-align: center;
+            min-width: 60px; /* 최소 너비 */
+        }
+        .record-input-area button {
+            padding: 10px 15px; font-size: 14px; font-weight: 600;
+            border: none; border-radius: 8px; cursor: pointer;
+            background-color: var(--primary); color: #fff; white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .record-input-area button:disabled { background-color: var(--gray); }
+
+        /* --- ⭐️ 미디어 쿼리 수정: 작은 화면 가로폭 대응 강화 --- */
+        @media (max-width: 360px) {
+            body { padding: 10px; }
+            .page-header { margin-bottom: 15px; padding-bottom: 10px; }
+            .page-header h2 { font-size: 17px; }
+            .settings-btn { padding: 6px 10px; font-size: 12px; }
+
+            .dashboard-grid { gap: 15px; }
+
+            .event-card-header { padding: 10px 12px; }
+            .event-card-header h3 { font-size: 14px; margin-bottom: 8px; }
+            .goal-setting-area label { font-size: 12px; }
+            .goal-setting-area input { padding: 4px 5px; font-size: 12px; width: 50px; }
+            .goal-setting-area button { padding: 4px 6px; font-size: 10px; }
+
+            .event-card-body {
+                padding-left: 10px;
+                padding-right: 10px;
+                padding-top: 10px;
+                padding-bottom: 12px;
+            }
+            .personal-best { font-size: 12px; margin-bottom: 5px; }
+            .chart-container {
+                height: 120px; /* 높이는 약간 줄임 */
+                margin-bottom: 10px;
+                /* ⭐️⭐️⭐️ 핵심: 컨테이너가 내용물보다 작아질 수 있도록 허용 ⭐️⭐️⭐️ */
+                min-width: 0;
+                /* overflow: hidden; */ /* 또는 넘치는 부분을 잘라버림 (선택) */
+            }
+            .record-input-area { padding-top: 10px; gap: 8px; }
+            .record-input-area input { padding: 6px; font-size: 12px; }
+            .record-input-area button { padding: 6px 8px; font-size: 12px; }
+        }
+        /* --- ⭐️ 미디어 쿼리 끝 --- */
+
+        /* 기타 */
+        .loading, .no-data { text-align: center; padding: 30px; color: var(--text-secondary); }
+        .toast-popup {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); background-color: rgba(0,0,0,0.85);
+            color: white; padding: 12px 20px; border-radius: 25px;
+            font-size: 14px; z-index: 1001; opacity: 0;
+            transition: opacity 0.4s ease, bottom 0.4s ease; white-space: nowrap;
+        }
+        .toast-popup.show { opacity: 1; bottom: 50px; }
+        .toast-popup.success { background-color: rgba(40, 167, 69, 0.9); }
+        .toast-popup.error { background-color: rgba(220, 38, 38, 0.9); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-person-running"></i> 실기 훈련 일지</h2>
+        <a href="practical_settings.html" class="settings-btn">
+            <i class="fa-solid fa-gear"></i> 종목 설정
+        </a>
+    </div>
+
+    <div class="dashboard-grid" id="dashboardGrid">
+        <p class="loading" id="loadingIndicator"><i class="fas fa-spinner fa-spin"></i> 대시보드 로딩 중...</p>
+        </div>
+</div>
+
+<template id="eventCardTemplate">
+    <div class="event-card">
+        <div class="event-card-header">
+            <h3><i class="fa-solid fa-dumbbell"></i> <span class="event-name">종목명</span></h3>
+            <div class="goal-setting-area">
+                <label for="goal-input-{{eventName}}">목표:</label>
+                <input type="number" id="goal-input-{{eventName}}" placeholder="목표 기록">
+                <button onclick="saveGoal(this)">저장</button>
+            </div>
+        </div>
+        <div class="event-card-body">
+            <p class="personal-best">PB: 기록 없음</p>
+            <div class="chart-container">
+                <canvas></canvas>
+            </div>
+            <div class="record-input-area">
+                <input type="number" placeholder="오늘 기록 입력">
+                <button onclick="saveRecord(this)">저장</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<script>
+    // --- 0. 설정 ---
+    const JUNGSI_SVR = 'https://supermax.kr';
+    const token = localStorage.getItem('jwt_token');
+
+    // --- 1. DOM 요소 ---
+    const dashboardGrid = document.getElementById('dashboardGrid');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    // --- 2. 전역 변수 ---
+    let dashboardData = { settings: {}, goals: {}, records: {} };
+    let chartInstances = {};
+
+    // --- 3. 헬퍼 함수 ---
+    function getEventRules(eventName) {
+        eventName = eventName || '';
+        const LOW_IS_BETTER_KEYWORDS = [ 'm', 'run', '런', '왕복', '초', '벽','지그','z' ];
+        let method = 'higher_is_better';
+        if (LOW_IS_BETTER_KEYWORDS.some((k) => eventName.includes(k))) { method = 'lower_is_better'; }
+        if (eventName.includes('던지기') || eventName.includes('멀리뛰기')) { method = 'higher_is_better'; }
+        return { method };
+    }
+    function showToast(message, isSuccess = true) {
+        const t = document.createElement('div'); t.textContent = message;
+        t.className = `toast-popup ${isSuccess ? 'success' : 'error'}`;
+        document.body.appendChild(t); setTimeout(() => { t.classList.add('show'); }, 10);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => { if (document.body.contains(t)) document.body.removeChild(t); }, 500); }, 2500);
+    }
+    function getTodayString() {
+        const today = new Date(); const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`;
+    }
+    function eventNameToId(eventName) {
+        if (!eventName) return '';
+        return eventName.replace(/[\s\(\)]/g, '-');
+    }
+
+    // --- 4. 초기화 및 데이터 로드 ---
+    async function initializeDashboard() {
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            // window.parent.location.href = 'student_login.html';
+            loadingIndicator.textContent = '로그인이 필요합니다.';
+            loadingIndicator.style.color = 'var(--danger)';
+            return;
+        }
+        try {
+            loadingIndicator.style.display = 'block';
+            dashboardGrid.innerHTML = '';
+            const res = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/dashboard`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(`[${res.status}] ${data.message || '데이터 로드 실패'}`);
+            if (!data.success) throw new Error(data.message || '데이터 로드 실패 (Success: false)');
+            dashboardData = data.dashboard;
+            console.log('Dashboard Data Loaded:', dashboardData);
+            const trackedEvents = dashboardData.settings?.trackedEvents || [];
+            console.log('>>> DEBUG: Tracked Events Array:', JSON.stringify(trackedEvents), 'Length:', trackedEvents.length);
+            if (trackedEvents.length === 0) {
+                loadingIndicator.textContent = '추적 중인 종목이 없습니다. "종목 설정"에서 추가해주세요.';
+                loadingIndicator.style.color = 'var(--gray)';
+                return;
+            }
+            trackedEvents.forEach(eventName => {
+                createEventCard(eventName);
+            });
+            loadingIndicator.style.display = 'none';
+        } catch (err) {
+            console.error('대시보드 초기화 오류:', err);
+            loadingIndicator.textContent = `❌ 오류: ${err.message}`;
+            loadingIndicator.style.color = 'var(--danger)';
+        }
+    }
+
+    // --- 5. UI 렌더링 함수 ---
+    function createEventCard(eventName) {
+        const template = document.getElementById('eventCardTemplate');
+        const cardHtml = template.innerHTML.replace(/\{\{eventName\}\}/g, eventNameToId(eventName));
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cardHtml;
+        const card = tempDiv.firstElementChild;
+        card.classList.add('event-card');
+        card.dataset.eventName = eventName;
+        card.querySelector('.event-name').textContent = eventName;
+        const goalInput = card.querySelector('.goal-setting-area input');
+        const currentGoal = dashboardData.goals?.[eventName];
+        goalInput.value = currentGoal !== undefined && currentGoal !== null ? currentGoal : '';
+        dashboardGrid.appendChild(card);
+        updateCardPersonalBest(card, eventName);
+        renderCardChart(card, eventName);
+    }
+    function updateCardPersonalBest(cardElement, eventName) {
+        const records = dashboardData.records?.[eventName] || [];
+        const pbDisplayElement = cardElement.querySelector('.personal-best');
+        if (records.length === 0) {
+            pbDisplayElement.textContent = 'PB: 기록 없음';
+            return;
+        }
+        const values = records.map(r => r.value);
+        const { method } = getEventRules(eventName);
+        let pb = (method === 'lower_is_better') ? Math.min(...values) : Math.max(...values);
+        pbDisplayElement.textContent = `PB: ${pb}`;
+    }
+    function renderCardChart(cardElement, eventName) {
+        const canvas = cardElement.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        const records = dashboardData.records?.[eventName] || [];
+        const goal = dashboardData.goals?.[eventName];
+        const { method } = getEventRules(eventName);
+        if (chartInstances[eventName]) {
+            chartInstances[eventName].destroy();
+        }
+        const sortedRecords = [...records].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const labels = sortedRecords.map(r => r.date);
+        const values = sortedRecords.map(r => r.value);
+        let pb = null;
+        if (values.length > 0) {
+            pb = (method === 'lower_is_better') ? Math.min(...values) : Math.max(...values);
+        }
+        chartInstances[eventName] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '기록', data: values,
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        fill: true, tension: 0.1
+                    },
+                    goal ? {
+                        label: '목표', data: Array(labels.length).fill(goal),
+                        borderColor: 'rgba(40, 167, 69, 0.8)',
+                        borderWidth: 1.5, borderDash: [5, 5], fill: false, pointRadius: 0
+                    } : {},
+                    pb !== null ? {
+                        label: 'PB', data: Array(labels.length).fill(pb),
+                        borderColor: 'rgba(255, 193, 7, 0.8)',
+                        borderWidth: 1.5, borderDash: [5, 5], fill: false, pointRadius: 0
+                    } : {}
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { beginAtZero: false, ticks: { maxTicksLimit: 5 } }
+                }
+            }
+        });
+    }
+
+    // --- 6. 이벤트 핸들러 ---
+    async function saveGoal(buttonElement) {
+        const card = buttonElement.closest('.event-card');
+        const eventName = card.dataset.eventName;
+        const input = card.querySelector('.goal-setting-area input');
+        const goalValue = input.value.trim();
+        const valueToSend = (goalValue === '') ? null : parseFloat(goalValue);
+        if (goalValue !== '' && (isNaN(valueToSend) || valueToSend < 0)) {
+            showToast('유효한 목표 기록(0 이상의 숫자)을 입력하거나 비워두세요.', false);
+            return;
+        }
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        try {
+            const res = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/goal`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ event_name: eventName, goal_value: valueToSend })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(`[${res.status}] ${data.message || '목표 저장 실패'}`);
+            if (!data.success) throw new Error(data.message || '목표 저장 실패 (Success: false)');
+            dashboardData.goals[eventName] = (valueToSend === null) ? undefined : valueToSend;
+            renderCardChart(card, eventName);
+            showToast(`[${eventName}] 목표가 저장되었습니다.`, true);
+        } catch (err) {
+            console.error('목표 저장 오류:', err);
+            showToast(`❌ 목표 저장 오류: ${err.message}`, false);
+            input.value = dashboardData.goals?.[eventName] || '';
+        } finally {
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = '저장';
+        }
+    }
+    async function saveRecord(buttonElement) {
+        const card = buttonElement.closest('.event-card');
+        const eventName = card.dataset.eventName;
+        const input = card.querySelector('.record-input-area input');
+        const recordValue = input.value.trim();
+        const recordDate = getTodayString();
+        if (!recordValue) {
+            showToast('기록을 입력해주세요.', false);
+            return;
+        }
+        const recordValueNum = parseFloat(recordValue);
+        if (isNaN(recordValueNum) || recordValueNum < 0) {
+            showToast('유효한 기록(0 이상의 숫자)을 입력해주세요.', false);
+            return;
+        }
+        buttonElement.disabled = true;
+        buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        try {
+            const res = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/record`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ event_name: eventName, record_date: recordDate, record_value: recordValueNum })
+            });
+            const data = await res.json();
+            if (res.status === 429) {
+                throw new Error(data.message || '하루 최대 3개 기록 제한');
+            }
+            if (!res.ok) throw new Error(`[${res.status}] ${data.message || '저장 실패'}`);
+            if (!data.success) throw new Error(data.message || '저장 실패 (Success: false)');
+            if (!dashboardData.records[eventName]) dashboardData.records[eventName] = [];
+            dashboardData.records[eventName].push({ date: recordDate, value: recordValueNum });
+            updateCardPersonalBest(card, eventName);
+            renderCardChart(card, eventName);
+            input.value = '';
+            showToast('기록이 저장되었습니다!', true);
+        } catch (err) {
+            console.error('기록 저장 오류:', err);
+            showToast(`❌ 저장 오류: ${err.message}`, false);
+        } finally {
+            buttonElement.disabled = false;
+            buttonElement.innerHTML = '저장';
+        }
+    }
+
+    // --- 7. 페이지 로드 시 실행 ---
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+</script>
+
+</body>
+</html>

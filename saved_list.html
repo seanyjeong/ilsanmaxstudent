@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>저장한 대학 (점수 계산/기록)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee; --gray: #adb5bd; --gray-light: #e9ecef;
+            --dark: #1e1e2e; --light: #f8f9fa; --border-radius: 12px;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+            --success: #28a745; --danger: #dc3545; --warning: #ffc107;
+            --info: #17a2b8; /* 기록 보기 버튼 색상 */
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f4f7f6; margin: 0; padding: 20px; color: var(--dark);
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header {
+            background-color: #fff; padding: 15px 20px;
+            border-bottom: 1px solid var(--gray-light);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            box-shadow: var(--card-shadow);
+        }
+        .header h2 { margin: 0; font-size: 20px; font-weight: 700; text-align: center; }
+        
+        .gun-section { margin-bottom: 20px; }
+        .gun-header {
+            font-size: 18px; font-weight: 600; color: var(--primary);
+            padding: 10px 0; margin-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+        
+        /* 저장된 대학 카드 */
+        .saved-card {
+            background-color: #fff; border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--gray-light);
+            position: relative;
+            /* ⭐️ 클릭 영역과 버튼 영역 분리 */
+        }
+        .card-main-content { /* ⭐️ 클릭 시 모달 열리는 영역 */
+             padding: 15px;
+             cursor: pointer; 
+             transition: background-color 0.2s ease;
+        }
+        .saved-card:hover .card-main-content { background-color: #f8f9fa; }
+        .saved-card .uni-name { font-weight: 600; font-size: 17px; margin-bottom: 3px; padding-right: 30px; /* 삭제 버튼 공간 확보 */ }
+        .saved-card .dept-name { color: #555; font-size: 14px; margin-bottom: 10px; }
+        .saved-card .saved-score {
+            font-size: 14px; font-weight: 500; color: var(--dark);
+        }
+        .saved-card .saved-score .score-value {
+            font-weight: 700; font-size: 1.1em; color: var(--primary);
+        }
+        .delete-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: none; border: none; font-size: 16px;
+            color: var(--gray); cursor: pointer; padding: 5px; z-index: 5;
+        }
+        .delete-btn:hover { color: var(--danger); }
+        
+        /* ⭐️ 카드 하단 버튼 영역 (다시 추가) */
+        .card-actions {
+            border-top: 1px solid var(--gray-light);
+            padding: 10px 15px;
+            background-color: var(--light);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        .view-history-btn {
+            display: block; width: 100%; text-align: center;
+            padding: 8px 12px;
+            font-size: 14px; font-weight: 600;
+            border: none; border-radius: 8px;
+            background-color: var(--info);
+            color: white;
+            cursor: pointer;
+            text-decoration: none; /* ⭐️ a 태그 대비 */
+            transition: var(--transition);
+        }
+        .view-history-btn:hover { background-color: #138496; }
+        
+        .empty-list-msg {
+            text-align: center; color: var(--gray); font-size: 14px;
+            padding: 20px; background-color: #fff; border-radius: var(--border-radius);
+            border: 1px dashed var(--gray-light);
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); z-index: 100;
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content {
+            background-color: #fff; border-radius: var(--border-radius);
+            width: 90%; max-width: 500px; max-height: 80vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-header {
+            padding: 15px 20px; border-bottom: 1px solid var(--gray-light);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h3 { margin: 0; font-size: 16px; }
+        .modal-header .close-btn { background: none; border: none; font-size: 20px; color: var(--gray); cursor: pointer; }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        .modal-group { margin-bottom: 15px; }
+        .modal-group label {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--dark);
+        }
+        .modal-group .score-display {
+            font-size: 18px; font-weight: 700; color: var(--primary);
+        }
+        .modal-group input[type="text"], .modal-group input[type="number"] {
+            width: 100%; padding: 10px; font-size: 14px;
+            border: 1px solid var(--gray-light); border-radius: 8px;
+            box-sizing: border-box; background-color: var(--light);
+        }
+        .silgi-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .deduction-display {
+            font-size: 13px; font-weight: 700; color: var(--danger);
+            padding: 2px 6px; background-color: #fff5f5; border-radius: 6px;
+        }
+        .deduction-display.success { color: var(--success); background-color: #f0fff4; }
+        
+        .modal-footer {
+            padding: 15px 20px; border-top: 1px solid var(--gray-light);
+            background-color: var(--light);
+        }
+        .calculate-btn {
+            width: 100%; padding: 12px; font-size: 16px; font-weight: 600;
+            border: none; border-radius: 8px; cursor: pointer;
+            background-color: var(--primary); color: #fff;
+            transition: var(--transition);
+        }
+        .calculate-btn:hover { background-color: #3a54d8; }
+        .calculate-btn:disabled { background-color: var(--gray); }
+        .total-score-display {
+            margin-top: 15px; text-align: center;
+            font-size: 16px; font-weight: 500;
+        }
+        .total-score-display strong {
+            font-size: 20px; font-weight: 700; color: var(--danger);
+        }
+        
+        .spinner { text-align: center; padding: 30px; font-size: 20px; color: var(--primary); }
+        
+        .toast-popup {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); background-color: rgba(0,0,0,0.85);
+            color: white; padding: 12px 20px; border-radius: 25px;
+            font-size: 14px; z-index: 1001; opacity: 0;
+            transition: opacity 0.4s ease, bottom 0.4s ease; white-space: nowrap;
+        }
+        .toast-popup.show { opacity: 1; bottom: 50px; }
+        .toast-popup.error { background-color: rgba(220, 38, 38, 0.9); }
+        .toast-popup.success { background-color: rgba(40, 167, 69, 0.9); }
+    </style>
+</head>
+<body>
+    <script>
+        // --- ⭐️ 1. 전역 변수 및 헬퍼 함수 정의 (먼저 선언) ---
+        const JUNGSI_SVR = 'https://supermax.kr';
+        const token = localStorage.getItem('jwt_token');
+        let currentStudentProfile = null;
+        let currentModal_F_data = null;
+        
+        function getEventRules(eventName) {
+            eventName = eventName || '';
+            const LOW_IS_BETTER_KEYWORDS = [ 'm', 'run', '런', '왕복', '초', '벽','지그','z' ];
+            let method = 'higher_is_better';
+            if (LOW_IS_BETTER_KEYWORDS.some((k) => eventName.includes(k))) {
+                method = 'lower_is_better';
+            }
+            if (eventName.includes('던지기') || eventName.includes('멀리뛰기')) {
+                method = 'higher_is_better';
+            }
+            return { method };
+        }
+        
+        function lookupScore(studentRecord, method, scoreTable) {
+            if (!scoreTable || scoreTable.length === 0) return '0';
+            const studentValueStr = String(studentRecord).trim();
+            const studentValueNum = Number(studentValueStr);
+            const isNumericInput = !Number.isNaN(studentValueNum) && studentValueStr !== '';
+            let numericLevels = [];
+            let exactMatchLevels = new Map();
+            let rangeLevels = [];
+            for (const level of scoreTable) {
+                const recordStr = String(level.기록).trim();
+                const recordNum = Number(recordStr);
+                if (!Number.isNaN(recordNum) && recordStr !== '') {
+                    numericLevels.push({ record: recordNum, grade: level.배점 });
+                } else if ( recordStr.includes('이상') || recordStr.includes('이하') || recordStr.includes('초과') || recordStr.includes('미만') ) {
+                    rangeLevels.push({ rangeStr: recordStr, grade: level.배점 });
+                } else {
+                    exactMatchLevels.set(recordStr, level.배점);
+                }
+            }
+            if (exactMatchLevels.has(studentValueStr)) {
+                return exactMatchLevels.get(studentValueStr);
+            }
+            if (isNumericInput) {
+                for (const level of rangeLevels) {
+                    const parts = level.rangeStr.match(/([0-9.]+)\s*(이상|이하|초과|미만)/);
+                    if (parts && parts[1]) {
+                        const limit = Number(parts[1]);
+                        const type = parts[2];
+                        if (type === '이상' && studentValueNum >= limit) return level.grade;
+                        if (type === '이하' && studentValueNum <= limit) return level.grade;
+                        if (type === '초과' && studentValueNum > limit) return level.grade;
+                        if (type === '미만' && studentValueNum < limit) return level.grade;
+                    }
+                }
+                if (numericLevels.length > 0) {
+                    if (method === 'lower_is_better') {
+                        numericLevels.sort((a, b) => b.record - a.record);
+                        for (const level of numericLevels) {
+                            if (studentValueNum >= level.record) return level.grade;
+                        }
+                        if (studentValueNum < numericLevels[numericLevels.length - 1].record) {
+                            return numericLevels[numericLevels.length - 1].grade;
+                        }
+                    } else {
+                        numericLevels.sort((a, b) => b.record - a.record);
+                        for (const level of numericLevels) {
+                            if (studentValueNum >= level.record) return level.grade;
+                        }
+                        if (numericLevels.length > 0 && studentValueNum > numericLevels[0].record) {
+                             return numericLevels[0].grade;
+                        }
+                    }
+                }
+            }
+            return '0';
+        }
+        
+        function lookupDeductionLevel(studentScore, scoreTable) {
+            if (!scoreTable || scoreTable.length === 0) return 0;
+            const allScores = [...new Set(
+                scoreTable.map(l => Number(l.배점)).filter(n => !Number.isNaN(n))
+            )];
+            allScores.sort((a, b) => b - a);
+            const studentScoreNum = Number(studentScore);
+            if (Number.isNaN(studentScoreNum)) return 0;
+            const levelIndex = allScores.indexOf(studentScoreNum);
+            return (levelIndex === -1) ? 0 : levelIndex; 
+        }
+        
+        function addSilgiInputListeners() {
+            document.querySelectorAll('.silgi-record-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const record = e.target.value;
+                    const eventName = e.target.dataset.event;
+                    const gender = currentStudentProfile.gender;
+                    if (!currentModal_F_data || !gender) return;
+                    const scoreTable = currentModal_F_data.실기배점?.filter(
+                        item => item.종목명 === eventName && item.성별 === gender
+                    ) || [];
+                    if (scoreTable.length === 0) return;
+                    const { method } = getEventRules(eventName);
+                    const score = lookupScore(record, method, scoreTable);
+                    const deduction = lookupDeductionLevel(score, scoreTable);
+                    const eventId = eventName.replace(/[\s\(\)]/g, '-');
+                    const displaySpan = document.getElementById(`silgi-gam-${eventId}`);
+                    if (displaySpan) {
+                        if (!record.trim()) {
+                             displaySpan.textContent = "- (0감)";
+                             displaySpan.className = 'deduction-display';
+                        } else if (isNaN(Number(score))) {
+                            displaySpan.textContent = `${score}`;
+                            displaySpan.className = 'deduction-display';
+                        } else {
+                            displaySpan.textContent = `${score}점 (${deduction}감)`;
+                            displaySpan.className = `deduction-display ${deduction === 0 ? 'success' : ''}`;
+                        }
+                    }
+                });
+            });
+        }
+        
+        function showToast(message, isError = false) {
+            const t = document.createElement('div');
+            t.textContent = message;
+            t.className = `toast-popup ${isError ? 'error' : 'success'}`;
+            document.body.appendChild(t);
+            setTimeout(() => { t.classList.add('show'); }, 10);
+            setTimeout(() => {
+                t.classList.remove('show');
+                setTimeout(() => { if (document.body.contains(t)) document.body.removeChild(t); }, 500);
+            }, 2500);
+        }
+    </script>
+
+    <div class="container">
+        <div class="header">
+            <h2><i class="fa-solid fa-heart" style="color: var(--success);"></i> 저장한 대학 목록</h2>
+        </div>
+
+        <div class="gun-section">
+            <div class="gun-header">가군</div>
+            <div class="card-list" id="gun-ga-cards">
+                <p class="empty-list-msg" id="empty-ga">저장된 대학이 없습니다.</p>
+            </div>
+        </div>
+
+        <div class="gun-section">
+            <div class="gun-header">나군</div>
+            <div class="card-list" id="gun-na-cards">
+                <p class="empty-list-msg" id="empty-na">저장된 대학이 없습니다.</p>
+            </div>
+        </div>
+
+        <div class="gun-section">
+            <div class="gun-header">다군</div>
+            <div class="card-list" id="gun-da-cards">
+                <p class="empty-list-msg" id="empty-da">저장된 대학이 없습니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">대학 정보</h3>
+                <button class="close-btn" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body-content">
+                </div>
+            <div class="modal-footer" id="modal-footer-content" style="display: none;">
+                <button class="calculate-btn" id="calculate-total-btn" onclick="calculateAndSaveTotalScore()">총점 계산 및 기록하기</button>
+                <div class="total-score-display" id="total-score-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <template id="saved-card-template">
+        <div class="saved-card">
+            <button class="delete-btn"><i class="fa-solid fa-trash-can"></i></button>
+            <div class="card-main-content">
+                <div class="uni-name">대학명</div>
+                <div class="dept-name">학과명</div>
+                <div class="saved-score">
+                    저장된 수능점수: <span class="score-value">0점</span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="view-history-btn"><i class="fa-solid fa-chart-line"></i> 기록 보기</button>
+            </div>
+        </div>
+    </template>
+
+
+    <script>
+        // --- ⭐️ 2. DOM 요소 변수 (글로벌 헬퍼 함수 뒤에 선언) ---
+        const modalOverlay = document.getElementById('detail-modal');
+        const modalBody = document.getElementById('modal-body-content');
+        const modalFooter = document.getElementById('modal-footer-content');
+        const modalTitle = document.getElementById('modal-title');
+        const totalScoreResult = document.getElementById('total-score-result');
+
+        // --- ⭐️ 3. 메인 함수 정의 (DOM 요소 변수 뒤, 실행부 앞) ---
+
+        async function loadStudentProfile() {
+            try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/my-profile`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || '프로필 로드 실패');
+                currentStudentProfile = data.profile;
+                console.log('Student Profile Loaded (for gender/scores):', currentStudentProfile);
+            } catch (err) {
+                console.error('학생 프로필 로드 실패:', err);
+                alert(`학생 정보를 불러오지 못했습니다: ${err.message}`);
+            }
+        }
+
+        async function loadSavedList() {
+            const containers = {
+                '가': document.getElementById('gun-ga-cards'),
+                '나': document.getElementById('gun-na-cards'),
+                '다': document.getElementById('gun-da-cards')
+            };
+            const emptyMsgs = {
+                '가': document.getElementById('empty-ga'),
+                '나': document.getElementById('empty-na'),
+                '다': document.getElementById('empty-da')
+            };
+            
+            try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/saved-universities`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error('저장 목록 로드 실패');
+
+                data.list.forEach(item => {
+                    const gun = item.군 || '가'; 
+                    const container = containers[gun];
+                    if (container) {
+                        if (emptyMsgs[gun]) emptyMsgs[gun].style.display = 'none';
+                        
+                        const card = document.getElementById('saved-card-template').content.cloneNode(true).firstElementChild;
+                        card.querySelector('.uni-name').textContent = item.대학명;
+                        card.querySelector('.dept-name').textContent = item.학과명;
+                        card.querySelector('.saved-score .score-value').textContent = `${item.calculated_suneung_score || 'N/A'}점`;
+
+                        card.dataset.uid = item.U_ID;
+                        card.dataset.year = item.학년도;
+                        card.dataset.gun = item.군;
+                        card.dataset.savedScore = item.calculated_suneung_score || 0;
+                        card.dataset.savedId = item.saved_id;
+
+                        // ⭐️ 카드 클릭(모달 열기)은 .card-main-content 영역만
+                        card.querySelector('.card-main-content').addEventListener('click', (e) => {
+                            // ⭐️ 삭제 버튼 클릭 시 모달이 열리지 않도록 예외 처리
+                            if (e.target.closest('.delete-btn')) return; 
+                            openDetailModal(card);
+                        });
+                        
+                        // 삭제 버튼 이벤트
+                        card.querySelector('.delete-btn').addEventListener('click', async (e) => {
+                            e.stopPropagation(); // ⭐️ 카드 클릭(모달 열기) 방지
+                            await deleteSavedItem(card, item.saved_id, gun);
+                        });
+                        
+                        // ⭐️ "기록 보기" 버튼 이벤트 리스너 추가
+                        card.querySelector('.view-history-btn').addEventListener('click', (e) => {
+                             e.stopPropagation(); // ⭐️ 카드 클릭(모달 열기) 방지
+                             const uid = item.U_ID;
+                             const year = item.학년도;
+                             const name = encodeURIComponent(`${item.대학명} - ${item.학과명}`);
+                             // ⭐️ history_view.html 페이지로 이동
+                             window.location.href = `history_view.html?uid=${uid}&year=${year}&name=${name}`;
+                        });
+                        
+                        container.appendChild(card);
+                    }
+                });
+            } catch (err) {
+                console.error('저장된 대학 목록 로드 실패:', err);
+                alert(`저장 목록을 불러오지 못했습니다: ${err.message}`);
+            }
+        }
+        
+        async function deleteSavedItem(cardElement, savedId, gun) {
+            if (!confirm('이 대학을 저장 목록에서 삭제하시겠습니까?')) return;
+            try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/remove-university`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ savedId: savedId })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || '삭제 실패');
+                
+                showToast('삭제되었습니다.', false);
+                const container = cardElement.parentElement;
+                cardElement.remove();
+                
+                const emptyMsg = document.getElementById(`empty-${gun.toLowerCase()}`);
+                if (container && container.querySelectorAll('.saved-card').length === 0 && emptyMsg) {
+                    emptyMsg.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('저장 항목 삭제 오류:', err);
+                showToast(`삭제 중 오류 발생: ${err.message}`, true);
+            }
+        }
+
+      async function openDetailModal(card) {
+            if (!currentStudentProfile) {
+                alert('학생 정보가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            const uid = card.dataset.uid;
+            const year = card.dataset.year;
+            const savedScore = parseFloat(card.dataset.savedScore || 0);
+
+            modalTitle.textContent = '정보 로딩 중...';
+            modalBody.innerHTML = '<div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>';
+            modalFooter.style.display = 'none';
+            totalScoreResult.innerHTML = '';
+            currentModal_F_data = null;
+            modalOverlay.classList.add('show');
+
+            // --- ⭐️ 1. 오늘 최고 기록 불러오기 API 호출 ---
+            let todayBestRecords = {}; // 기본값 빈 객체
+            try {
+                console.log('Fetching today\'s best records...');
+                const bestRes = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/today-best`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const bestData = await bestRes.json();
+                if (bestRes.ok && bestData.success) {
+                    todayBestRecords = bestData.bestRecords || {};
+                    console.log('Today\'s best records loaded:', todayBestRecords);
+                } else {
+                    console.warn('Failed to load today\'s best records:', bestData.message);
+                }
+            } catch (err) {
+                console.error('Error fetching today\'s best records:', err);
+                // 에러 발생해도 모달 로딩은 계속 진행 (기록 자동 채우기만 안 됨)
+            }
+            // --- ⭐️ API 호출 끝 ---
+
+            try {
+                // --- 대학 상세 정보 로드 (기존과 동일) ---
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ U_ID: uid, year: year })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message || '대학 상세 정보 로드 실패');
+
+                currentModal_F_data = data.data;
+                const F = currentModal_F_data;
+
+                modalTitle.textContent = `${F.대학명} - ${F.학과명}`;
+                modalBody.innerHTML = ''; // 내용 초기화
+
+                // 수능 점수 표시 (기존과 동일)
+                modalBody.innerHTML += `
+                    <div class="modal-group">
+                        <label><i class="fa-solid fa-calculator"></i> 수능 환산 점수 (저장값)</label>
+                        <div class="score-display" id="modal-suneung-score">${savedScore.toFixed(2)} 점</div>
+                    </div>
+                `;
+
+                // 내신 입력칸 (기존과 동일)
+                if (F.내신 && Number(F.내신) > 0) {
+                    modalBody.innerHTML += `
+                        <div class="modal-group">
+                            <label for="naeshin-score-input"><i class="fa-solid fa-book-open"></i> 해당학교의 진학사내신점수입력 (최종 ${F.내신}%)</label>
+                            <input type="number" id="naeshin-score-input" placeholder="진학사 내신 점수 입력 (예: 95.5)">
+                            <small style="color:var(--gray); font-size:11px;">* 이 대학의 내신 반영비율(${F.내신}%)이 적용된 최종 점수를 입력하세요.</small>
+                        </div>
+                    `;
+                }
+
+                // --- ⭐️ 실기 입력칸 생성 수정 ---
+                if (F.실기 && Number(F.실기) > 0 && F.실기배점 && F.실기배점.length > 0) {
+                    let silgiInputsHtml = '<div class="silgi-input-grid">';
+                    const gender = currentStudentProfile.gender;
+                    const events = [...new Set(
+                        F.실기배점.filter(item => item.성별 === gender).map(item => item.종목명)
+                    )];
+
+                    if(events.length > 0) {
+                        events.forEach(eventName => {
+                            const eventId = eventName.replace(/[\s\(\)]/g, '-');
+                            // ⭐️ 오늘 최고 기록 가져오기
+                            const bestRecordValue = todayBestRecords[eventName];
+                            // ⭐️ input 태그에 value 속성 추가 (값이 있을 때만)
+                            const valueAttribute = (bestRecordValue !== undefined && bestRecordValue !== null) ? `value="${bestRecordValue}"` : '';
+
+                            silgiInputsHtml += `
+                                <div class="modal-group">
+                                    <label for="silgi-input-${eventId}">
+                                        <span>${eventName}</span>
+                                        <span class="deduction-display" id="silgi-gam-${eventId}">- (0감)</span>
+                                    </label>
+                                    <input type="text" class="silgi-record-input" id="silgi-input-${eventId}" data-event="${eventName}" placeholder="기록 입력 (예: 12.5)" ${valueAttribute}>
+                                </div>
+                            `;
+                        });
+                        silgiInputsHtml += '</div>';
+                        modalBody.innerHTML += `
+                            <div class="modal-group">
+                                <label><i class="fa-solid fa-person-running"></i> 실기 기록 입력 (${F.실기}%)</label>
+                                ${silgiInputsHtml}
+                            </div>
+                        `;
+                        addSilgiInputListeners(); // 리스너 추가 (기존과 동일)
+
+                        // --- ⭐️⭐️⭐️ 중요: 미리 채워진 값에 대해 감수 업데이트 트리거 ---
+                        // 모달이 완전히 표시된 후에 실행되도록 약간의 딜레이 추가
+                        setTimeout(() => {
+                            events.forEach(eventName => {
+                                const bestRecordValue = todayBestRecords[eventName];
+                                if (bestRecordValue !== undefined && bestRecordValue !== null) {
+                                    const eventId = eventName.replace(/[\s\(\)]/g, '-');
+                                    const inputElement = document.getElementById(`silgi-input-${eventId}`);
+                                    if (inputElement) {
+                                        // input 이벤트 강제 발생시켜서 addSilgiInputListeners 안의 로직 실행
+                                        inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+                                        console.log(`Triggered input event for ${eventName} with value ${bestRecordValue}`);
+                                    }
+                                }
+                            });
+                        }, 100); // 0.1초 딜레이 (필요시 조정)
+                        // --- ⭐️⭐️⭐️ 트리거 끝 ---
+
+                    } else {
+                         modalBody.innerHTML += `<p style="color:var(--danger); font-size:12px;">실기(${F.실기}%) 반영 대학이나, 학생 성별(${gender})에 맞는 실기 배점표 데이터가 없습니다.</p>`;
+                    }
+                }
+                // --- ⭐️ 실기 입력칸 생성 수정 끝 ---
+
+                modalFooter.style.display = 'block'; // 푸터 표시 (기존과 동일)
+
+            } catch (err) {
+                console.error('모달 데이터 로드 오류:', err);
+                modalBody.innerHTML = `<p style="color:var(--danger);">오류: ${err.message}</p>`;
+            }
+        }
+        
+        function closeDetailModal() {
+            modalOverlay.classList.remove('show');
+            currentModal_F_data = null;
+        }
+
+        async function calculateAndSaveTotalScore() {
+            if (!currentModal_F_data || !currentStudentProfile) return;
+            
+            const btn = document.getElementById('calculate-total-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 계산/저장 중...';
+            totalScoreResult.innerHTML = '';
+            
+            let suneungScore = 0;
+            let naeshinScore = 0;
+            let silgiScore = 0;
+            let totalScore = 0;
+            let silgiRecordsPayload = []; 
+            
+            try {
+                suneungScore = parseFloat(document.getElementById('modal-suneung-score').textContent || 0);
+                const naeshinInput = document.getElementById('naeshin-score-input');
+                naeshinScore = naeshinInput ? parseFloat(naeshinInput.value || 0) : 0;
+                
+                const silgiInputs = document.querySelectorAll('.silgi-record-input');
+                if (silgiInputs.length > 0) {
+                    const practicals = Array.from(silgiInputs).map(input => ({
+                        event: input.dataset.event,
+                        value: input.value
+                    }));
+                    
+                    const sDataForSilgi = {
+                        gender: currentStudentProfile.gender,
+                        practicals: practicals
+                    };
+                    
+                    const silgiRes = await fetch(`${JUNGSI_SVR}/silgi/calculate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ F_data: currentModal_F_data, S_data: sDataForSilgi })
+                    });
+                    
+                    const silgiData = await silgiRes.json();
+                    if (!silgiData.success) throw new Error(silgiData.message || '실기 점수 계산 실패');
+                    
+                    silgiScore = parseFloat(silgiData.result.totalScore || 0);
+                    
+                    if (silgiData.result.breakdown && silgiData.result.breakdown.events) {
+                        silgiRecordsPayload = silgiData.result.breakdown.events.map(evt => ({
+                            event: evt.event,
+                            record: evt.record,
+                            score: evt.score,
+                            gam: evt.deduction_level
+                        }));
+                    }
+                    console.log('Calculated Weighted Silgi Score:', silgiScore);
+                }
+
+                totalScore = suneungScore + naeshinScore + silgiScore;
+                
+                totalScoreResult.innerHTML = `
+                    수능: ${suneungScore.toFixed(2)}점 + 
+                    내신: ${naeshinScore.toFixed(2)}점 + 
+                    실기: ${silgiScore.toFixed(2)}점 = 
+                    <strong>${totalScore.toFixed(2)}점</strong>
+                `;
+
+                // ⭐️ [신규] 계산된 점수를 history DB에 저장
+                const historyBody = {
+                    U_ID: currentModal_F_data.U_ID,
+                    year: currentModal_F_data.학년도,
+                    suneungScore: suneungScore,
+                    naeshinScore: naeshinScore,
+                    silgiRecordsJson: silgiRecordsPayload,
+                    silgiScore: silgiScore,
+                    totalScore: totalScore
+                };
+
+                const historyRes = await fetch(`${JUNGSI_SVR}/jungsi/student/save-history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(historyBody)
+                });
+
+                const historyData = await historyRes.json();
+                if (!historyData.success) {
+                    throw new Error(historyData.message || '계산 결과 기록에 실패했습니다.');
+                }
+                
+                if (historyData.updated) {
+                    showToast('✅ 오늘 점수로 업데이트 되었습니다!');
+                } else {
+                    showToast('✅ 성적 기록이 새로 저장되었습니다!');
+                }
+
+            } catch (err) {
+                console.error('총점 계산/저장 오류:', err);
+                totalScoreResult.innerHTML = `<span style="color:var(--danger);">계산/저장 오류: ${err.message}</span>`;
+                showToast(`❌ 오류: ${err.message}`, true);
+            } finally {
+                 btn.disabled = false;
+                 btn.innerHTML = '총점 계산 및 기록하기';
+            }
+        }
+
+        // --- ⭐️ 4. 페이지 로드 시 실행 (함수 정의가 끝난 후) ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!token) {
+                alert('로그인이 필요합니다.');
+                window.parent.location.href = 'student_login.html';
+                return;
+            }
+            // ⭐️ 함수들이 먼저 정의된 후에 DOMContentLoaded가 실행됨
+            await Promise.all([
+                loadStudentProfile(),
+                loadSavedList()
+            ]);
+        });
+
+    </script>
+</body>
+</html>
