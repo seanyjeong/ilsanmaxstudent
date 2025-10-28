@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IMAX</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
+    
+    <link rel="manifest" href="manifest.json">
+
+    <meta name="theme-color" content="#4361ee">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="IMAX">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png"> <style>
         /* CSS 초기화 및 레이아웃 설정 */
         :root {
             --primary: #4361ee;
@@ -172,6 +180,19 @@
         window.addEventListener('load', function() {
             document.getElementById('loadingIndicator').style.display = 'none';
         });
+
+        // ⭐️⭐️⭐️ PWA 서비스 워커 등록 (다시 추가!) ⭐️⭐️⭐️
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js') // sw.js 파일 경로
+              .then(registration => {
+                console.log('서비스 워커 등록 성공:', registration);
+              })
+              .catch(registrationError => {
+                console.log('서비스 워커 등록 실패:', registrationError);
+              });
+          });
+        }
     </script>
 </body>
 </html>
