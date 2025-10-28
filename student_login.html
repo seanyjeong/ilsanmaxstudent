@@ -3,26 +3,58 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>학생 로그인</title>
+<title>로그인</title>
 <style>
-body { font-family:sans-serif; max-width:360px; margin:60px auto; text-align:center; }
+body { font-family:sans-serif; max-width:360px; margin:40px auto; text-align:center; padding: 0 20px; }
+/* ⭐️ 로고 스타일 추가 */
+.logo {
+    width: 200px; /* 로고 크기, 적절히 조절해 */
+    margin-bottom: 10px;
+}
+h2 { margin-bottom: 8px; }
 input { width:100%; padding:12px; font-size:1rem; margin:8px 0; box-sizing:border-box; }
 button { width:100%; padding:12px; font-size:1rem; font-weight:600; background:#2563eb; color:#fff; border:0; border-radius:6px; cursor:pointer; margin-top:12px; }
 .status { min-height:20px; font-size:.9rem; color:#ef4444; margin-top:12px; white-space:pre-line; }
 .ok { color:#10b981; }
-.note { font-size:.8rem; color:#64748b; line-height:1.4; margin-top:8px; }
+.note { font-size:.8rem; color:#64748b; line-height:1.4; margin-top:0; }
+/* ⭐️ 회원가입 링크 스타일 추가 */
+.link-container {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+.register-link {
+    font-size: 0.9rem;
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+.register-link:hover {
+    background-color: #f3f4f6;
+}
 </style>
 </head>
 <body>
 
-<h2>학생 로그인</h2>
-<p class="note">승인된 학생만 로그인할 수 있어요.</p>
+<img src="https://github.com/seanyjeong/ilsanmaxstudent/blob/main/%EC%9D%BC%EB%A7%A5%EB%A1%9C%EA%B3%A0.png?raw=true" alt="IMAX 로고" class="logo">
+
+
+<p class="note">ID/PW가 없으면 회원가입해주세요.</p>
 
 <input id="idInput" placeholder="아이디" />
 <input id="pwInput" type="password" placeholder="비밀번호" />
 <button id="loginBtn">로그인</button>
 
 <div id="loginStatus" class="status"></div>
+
+<div class="link-container">
+    <a href="student_register.html" class="register-link">
+        아직 계정이 없나요? 회원가입
+    </a>
+</div>
 
 <script>
 const SVR = 'https://supermax.kr';
@@ -83,4 +115,3 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
 
 </body>
 </html>
-
