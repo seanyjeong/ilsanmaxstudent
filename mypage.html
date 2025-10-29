@@ -309,6 +309,18 @@
         
         .inquiry2-card { border-left-color: #4361ee; }
         .inquiry2-card h4 { color: #4361ee; }
+
+        /* ▼▼▼▼▼ 여기부터 추가 ▼▼▼▼▼ */
+        .calculated-score {
+            font-size: 13px; /* 조그맣게 */
+            font-weight: 600;
+            color: var(--primary); /* 눈에띄게 (파란색) */
+            padding: 8px 4px 0 4px; /* input box 아래에 보이도록 */
+            text-align: right;
+            display: none; /* 기본 숨김 */
+            line-height: 1.4; /* 줄간격 */
+        }
+        /* ▲▲▲▲▲ 여기까지 추가 ▲▲▲▲▲ */
     </style>
 </head>
 <body>
@@ -348,7 +360,6 @@
 
             <input type="hidden" id="입력유형" value="raw"> 
             
-            <!-- 국어 카드 -->
             <div class="card subject-card korean-card">
                 <h4><i class="fa-solid fa-book"></i> 국어</h4>
                 <div class="form-grid">
@@ -359,14 +370,16 @@
                             <option value="언어와매체">언어와매체</option>
                         </select>
                     </div>
-                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="국어_원점수" placeholder="예: 88" min="0" max="100"></div>
+                    <div class="form-group raw-field">
+                        <label>원점수</label>
+                        <input type="number" id="국어_원점수" placeholder="예: 88" min="0" max="100">
+                        <span class="calculated-score" id="국어_계산결과"></span> </div>
                     <div class="form-group official-field"><label>표준점수</label><input type="number" id="국어_표준점수" min="0" max="150"></div>
                     <div class="form-group official-field"><label>백분위</label><input type="number" id="국어_백분위" min="0" max="100"></div>
                     <div class="form-group official-field"><label>등급</label><input type="number" id="국어_등급" min="1" max="9"></div>
                 </div>
             </div>
 
-            <!-- 수학 카드 -->
             <div class="card subject-card math-card">
                 <h4><i class="fa-solid fa-calculator"></i> 수학</h4>
                 <div class="form-grid">
@@ -378,32 +391,38 @@
                             <option value="기하">기하</option>
                         </select>
                     </div>
-                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="수학_원점수" placeholder="예: 92" min="0" max="100"></div>
+                    <div class="form-group raw-field">
+                        <label>원점수</label>
+                        <input type="number" id="수학_원점수" placeholder="예: 92" min="0" max="100">
+                        <span class="calculated-score" id="수학_계산결과"></span> </div>
                     <div class="form-group official-field"><label>표준점수</label><input type="number" id="수학_표준점수" min="0" max="150"></div>
                     <div class="form-group official-field"><label>백분위</label><input type="number" id="수학_백분위" min="0" max="100"></div>
                     <div class="form-group official-field"><label>등급</label><input type="number" id="수학_등급" min="1" max="9"></div>
                 </div>
             </div>
 
-            <!-- 영어 카드 -->
             <div class="card subject-card english-card">
                 <h4><i class="fa-solid fa-language"></i> 영어</h4>
                 <div class="form-grid">
-                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="영어_원점수" placeholder="예: 90" min="0" max="100"></div>
+                    <div class="form-group raw-field">
+                        <label>원점수</label>
+                        <input type="number" id="영어_원점수" placeholder="예: 90" min="0" max="100">
+                        <span class="calculated-score" id="영어_계산결과"></span> </div>
                     <div class="form-group official-field"><label>등급</label><input type="number" id="영어_등급" min="1" max="9"></div>
                 </div>
             </div>
 
-            <!-- 한국사 카드 -->
             <div class="card subject-card korean-history-card">
                 <h4><i class="fa-solid fa-landmark"></i> 한국사</h4>
                 <div class="form-grid">
-                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="한국사_원점수" placeholder="예: 50" min="0" max="50"></div>
+                    <div class="form-group raw-field">
+                        <label>원점수</label>
+                        <input type="number" id="한국사_원점수" placeholder="예: 50" min="0" max="50">
+                        <span class="calculated-score" id="한국사_계산결과"></span> </div>
                     <div class="form-group official-field"><label>등급</label><input type="number" id="한국사_등급" min="1" max="9"></div>
                 </div>
             </div>
 
-            <!-- 탐구1 카드 -->
             <div class="card subject-card inquiry1-card">
                 <h4><i class="fa-solid fa-magnifying-glass"></i> 탐구1</h4>
                 <div class="form-grid">
@@ -411,14 +430,16 @@
                         <label>선택과목</label>
                         <select id="탐구1_선택과목"></select>
                     </div>
-                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="탐구1_원점수" placeholder="예: 48" min="0" max="50"></div>
+                    <div class="form-group raw-field">
+                        <label>원점수</label>
+                        <input type="number" id="탐구1_원점수" placeholder="예: 48" min="0" max="50">
+                        <span class="calculated-score" id="탐구1_계산결과"></span> </div>
                     <div class="form-group official-field"><label>표준점수</label><input type="number" id="탐구1_표준점수" min="0" max="100"></div>
                     <div class="form-group official-field"><label>백분위</label><input type="number" id="탐구1_백분위" min="0" max="100"></div>
                     <div class="form-group official-field"><label>등급</label><input type="number" id="탐구1_등급" min="1" max="9"></div>
                 </div>
             </div>
 
-            <!-- 탐구2 카드 -->
             <div class="card subject-card inquiry2-card">
                 <h4><i class="fa-solid fa-magnifying-glass"></i> 탐구2</h4>
                 <div class="form-grid">
@@ -426,7 +447,10 @@
                         <label>선택과목</label>
                         <select id="탐구2_선택과목"></select>
                     </div>
-                    <div class="form-group raw-field"><label>원점수</label><input type="number" id="탐구2_원점수" placeholder="예: 45" min="0" max="50"></div>
+                    <div class="form-group raw-field">
+                        <label>원점수</label>
+                        <input type="number" id="탐구2_원점수" placeholder="예: 45" min="0" max="50">
+                        <span class="calculated-score" id="탐구2_계산결과"></span> </div>
                     <div class="form-group official-field"><label>표준점수</label><input type="number" id="탐구2_표준점수" min="0" max="100"></div>
                     <div class="form-group official-field"><label>백분위</label><input type="number" id="탐구2_백분위" min="0" max="100"></div>
                     <div class="form-group official-field"><label>등급</label><input type="number" id="탐구2_등급" min="1" max="9"></div>
@@ -609,16 +633,21 @@
                 document.getElementById('탐구2_백분위').value = s.탐구2_백분위 ?? '';
                 document.getElementById('탐구2_등급').value = s.탐구2_등급 ?? '';
                 
-                // 만약 실채점 데이터가 있다면, 가채점 입력을 막음
+                // ▼▼▼▼▼ [수정] 가채점/실채점 상태에 따라 결과 표시 ▼▼▼▼▼
                 if (currentInputType === 'official') {
                     disableMockScoreInputs();
+                    displayCalculatedScores(null); // 실채점 모드면 가채점 결과 숨김
                 } else {
                     enableMockScoreInputs(); 
+                    displayCalculatedScores(s); // 가채점 모드면 가채점 결과 표시
                 }
+                // ▲▲▲▲▲ [수정] 끝 ▲▲▲▲▲
+
             } else {
                 // 성적 데이터 없으면 -> 가채점 탭 활성화 (날짜 조건은 이미 위에서 처리됨)
                 switchTab('raw'); 
                 enableMockScoreInputs();
+                displayCalculatedScores(null); // (추가) 성적 없으면 숨김
             }
             
         } catch (err) {
@@ -674,12 +703,11 @@
             const data = await res.json();
             if (!data.success) throw new Error(data.message || '저장 실패');
 
-            statusEl.textContent = '✅ 성공적으로 저장되었습니다!';
-            
-            // 저장 후 폼 다시 채우기 (가채점->변환값 표시)
+            // ⭐️ 저장 후 폼 다시 채우기 (가채점->변환값 표시)
             if (data.savedData) {
-               const s = data.savedData;
-               // ... (실채점 필드 업데이트 로직 - 수정 없음) ...
+               const s = data.savedData; // ⭐️ s 변수 정의를 위로 이동
+               
+               // (기존) 실채점 필드(숨겨진) 업데이트
                 document.getElementById('국어_표준점수').value = s.국어_표준점수 || '';
                 document.getElementById('국어_백분위').value = s.국어_백분위 || '';
                 document.getElementById('국어_등급').value = s.국어_등급 || '';
@@ -695,10 +723,23 @@
                 document.getElementById('탐구2_백분위').value = s.탐구2_백분위 || '';
                 document.getElementById('탐구2_등급').value = s.탐구2_등급 || '';
                 
+                // ▼▼▼▼▼ [수정] 상태 메시지 변경 및 가채점 결과 표시 ▼▼▼▼▼
+                if (body.입력유형 === 'raw') { 
+                    statusEl.textContent = '✅ 저장 완료! 가채점 기준 변환 점수가 아래에 표시되었습니다.';
+                    statusEl.style.color = 'var(--success)';
+                    displayCalculatedScores(s); // 가채점 저장 시 결과 표시
+                } else {
+                     statusEl.textContent = '✅ 성공적으로 저장되었습니다!';
+                     statusEl.style.color = 'var(--success)';
+                     displayCalculatedScores(null); // 실채점 저장 시 가채점 결과 숨김
+                }
+                
                 // ⭐️ 저장 후, 만약 입력 유형이 'official'이면 가채점 입력 막기
                 if (s.입력유형 === 'official') {
                     disableMockScoreInputs();
+                    displayCalculatedScores(null); // (중복이지만 확실하게)
                 }
+                // ▲▲▲▲▲ [수정] 끝 ▲▲▲▲▲
             }
         } catch (err) {
             console.error(err);
@@ -709,6 +750,45 @@
             btn.textContent = '성적 저장하기';
         }
     }
+
+    // ▼▼▼▼▼ [신규] 계산된 점수 <span>에 표시/숨김 헬퍼 함수 ▼▼▼▼▼
+    function displayCalculatedScores(scoresObject) {
+        if (!scoresObject) {
+            // scoresObject가 없으면 모든 <span> 숨기기
+            document.querySelectorAll('.calculated-score').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            return;
+        }
+        
+        const s = scoresObject;
+        const korResult = `표점: ${s.국어_표준점수 || '-'} / 백분위: ${s.국어_백분위 || '-'} / 등급: ${s.국어_등급 || '-'}`;
+        const mathResult = `표점: ${s.수학_표준점수 || '-'} / 백분위: ${s.수학_백분위 || '-'} / 등급: ${s.수학_등급 || '-'}`;
+        const engResult = `등급: ${s.영어_등급 || '-'}`;
+        const histResult = `등급: ${s.한국사_등급 || '-'}`;
+        const t1Result = `표점: ${s.탐구1_표준점수 || '-'} / 백분위: ${s.탐구1_백분위 || '-'} / 등급: ${s.탐구1_등급 || '-'}`;
+        const t2Result = `표점: ${s.탐구2_표준점수 || '-'} / 백분위: ${s.탐구2_백분위 || '-'} / 등급: ${s.탐구2_등급 || '-'}`;
+
+        // <span>에 텍스트 채우기 (표준점수나 등급이 있어야만 표시)
+        document.getElementById('국어_계산결과').textContent = (s.국어_표준점수 != null) ? korResult : '';
+        document.getElementById('수학_계산결과').textContent = (s.수학_표준점수 != null) ? mathResult : '';
+        document.getElementById('영어_계산결과').textContent = (s.영어_등급 != null) ? engResult : '';
+        document.getElementById('한국사_계산결과').textContent = (s.한국사_등급 != null) ? histResult : '';
+        document.getElementById('탐구1_계산결과').textContent = (s.탐구1_표준점수 != null) ? t1Result : '';
+        document.getElementById('탐구2_계산결과').textContent = (s.탐구2_표준점수 != null) ? t2Result : '';
+
+        // <span> 보이게 하기 (결과가 있을 때만)
+        document.querySelectorAll('.calculated-score').forEach(el => {
+            if (el.textContent.trim() !== '') {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        });
+    }
+    // ▲▲▲▲▲ [신규] 헬퍼 함수 끝 ▲▲▲▲▲
+
 
     // --- 5. 로그아웃 함수 ---
     function logout() {
