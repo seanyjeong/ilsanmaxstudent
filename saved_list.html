@@ -14,6 +14,57 @@
             --success: #28a745; --danger: #dc3545; --warning: #ffc107;
             --info: #17a2b8; /* 기록 보기 버튼 색상 */
         }
+        
+        /* ⭐️ 모달 점수판 스타일 ⭐️ */
+        .score-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background-color: var(--light);
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .score-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .score-item label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+        .score-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        .score-item .value .fas { /* 로딩 스피너 */
+            font-size: 15px;
+            color: var(--gray);
+        }
+        .score-item.total-row {
+            grid-column: 1 / -1; 
+            border-top: 1px dashed var(--gray);
+            padding-top: 10px;
+            margin-top: 5px;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .score-item.total-row label {
+            font-size: 16px;
+            color: var(--dark);
+        }
+        .score-item.total-row .value {
+            font-size: 22px;
+        }
+        /* ⭐️ 총점 색상 (파랑/빨강) ⭐️ */
+        .value.total-score-high { color: var(--primary) !important; }
+        .value.total-score-low { color: var(--danger) !important; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f4f7f6; margin: 0; padding: 20px; color: var(--dark);
@@ -41,22 +92,53 @@
             box-shadow: var(--card-shadow);
             border: 1px solid var(--gray-light);
             position: relative;
-            /* ⭐️ 클릭 영역과 버튼 영역 분리 */
         }
-        .card-main-content { /* ⭐️ 클릭 시 모달 열리는 영역 */
+        .card-main-content {
              padding: 15px;
              cursor: pointer; 
              transition: background-color 0.2s ease;
         }
         .saved-card:hover .card-main-content { background-color: #f8f9fa; }
-        .saved-card .uni-name { font-weight: 600; font-size: 17px; margin-bottom: 3px; padding-right: 30px; /* 삭제 버튼 공간 확보 */ }
+        .saved-card .uni-name { font-weight: 600; font-size: 17px; margin-bottom: 3px; padding-right: 30px; }
         .saved-card .dept-name { color: #555; font-size: 14px; margin-bottom: 10px; }
-        .saved-card .saved-score {
-            font-size: 14px; font-weight: 500; color: var(--dark);
+        
+        /* ⭐️ [수정] 카드 내부 점수 표시 스타일 ⭐️ */
+        .saved-card .saved-timestamp {
+            font-size: 11px;
+            color: var(--gray);
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed var(--gray-light);
         }
-        .saved-card .saved-score .score-value {
-            font-weight: 700; font-size: 1.1em; color: var(--primary);
+        /* ⭐️ [신규] 카드 점수 레이아웃용 ⭐️ */
+        .saved-card .saved-score-details {
+            display: flex; /* ⭐️ flex column으로 변경 */
+            flex-direction: column; 
+            gap: 8px; /* ⭐️ 줄 간격 */
+            font-size: 13px;
         }
+        .score-details-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 15px; /* ⭐️ (수정) 상하/좌우 간격 */
+        }
+        .saved-card .detail-item {
+            color: #333;
+            flex-shrink: 0; 
+        }
+        .saved-card .detail-item .score-value {
+            font-weight: 700;
+            color: var(--dark);
+            margin-left: 4px;
+        }
+        /* ⭐️ [신규] 카드 총점 색상 ⭐️ */
+        .saved-card .total-score-high .score-value {
+            color: var(--primary);
+        }
+        .saved-card .total-score-low .score-value {
+            color: var(--danger);
+        }
+
         .delete-btn {
             position: absolute; top: 10px; right: 10px;
             background: none; border: none; font-size: 16px;
@@ -64,7 +146,6 @@
         }
         .delete-btn:hover { color: var(--danger); }
         
-        /* ⭐️ 카드 하단 버튼 영역 (다시 추가) */
         .card-actions {
             border-top: 1px solid var(--gray-light);
             padding: 10px 15px;
@@ -79,7 +160,7 @@
             background-color: var(--info);
             color: white;
             cursor: pointer;
-            text-decoration: none; /* ⭐️ a 태그 대비 */
+            text-decoration: none;
             transition: var(--transition);
         }
         .view-history-btn:hover { background-color: #138496; }
@@ -104,6 +185,7 @@
             display: flex; flex-direction: column;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             transform: scale(0.95); transition: transform 0.3s ease;
+            cursor: default; 
         }
         .modal-overlay.show .modal-content { transform: scale(1); }
         .modal-header {
@@ -117,9 +199,6 @@
         .modal-group label {
             display: flex; justify-content: space-between; align-items: center;
             font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--dark);
-        }
-        .modal-group .score-display {
-            font-size: 18px; font-weight: 700; color: var(--primary);
         }
         .modal-group input[type="text"], .modal-group input[type="number"] {
             width: 100%; padding: 10px; font-size: 14px;
@@ -136,6 +215,7 @@
         .modal-footer {
             padding: 15px 20px; border-top: 1px solid var(--gray-light);
             background-color: var(--light);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
         }
         .calculate-btn {
             width: 100%; padding: 12px; font-size: 16px; font-weight: 600;
@@ -145,13 +225,6 @@
         }
         .calculate-btn:hover { background-color: #3a54d8; }
         .calculate-btn:disabled { background-color: var(--gray); }
-        .total-score-display {
-            margin-top: 15px; text-align: center;
-            font-size: 16px; font-weight: 500;
-        }
-        .total-score-display strong {
-            font-size: 20px; font-weight: 700; color: var(--danger);
-        }
         
         .spinner { text-align: center; padding: 30px; font-size: 20px; color: var(--primary); }
         
@@ -175,6 +248,10 @@
         let currentStudentProfile = null;
         let currentModal_F_data = null;
         
+        let currentOpenCardElement = null; 
+        let currentModalBranchCutoff = null; 
+        let allCutoffsMap = {}; 
+
         function getEventRules(eventName) {
             eventName = eventName || '';
             const LOW_IS_BETTER_KEYWORDS = [ 'm', 'run', '런', '왕복', '초', '벽','지그','z' ];
@@ -285,6 +362,8 @@
                             displaySpan.className = `deduction-display ${deduction === 0 ? 'success' : ''}`;
                         }
                     }
+                    
+                    updateModalTotalScore();
                 });
             });
         }
@@ -329,17 +408,15 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="detail-modal">
-        <div class="modal-content">
+    <div class="modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h3 id="modal-title">대학 정보</h3>
-                <button class="close-btn" onclick="closeDetailModal()">&times;</button>
-            </div>
+                <button class="close-btn" onclick="closeDetailModal(null)">&times;</button> </div>
             <div class="modal-body" id="modal-body-content">
                 </div>
             <div class="modal-footer" id="modal-footer-content" style="display: none;">
-                <button class="calculate-btn" id="calculate-total-btn" onclick="calculateAndSaveTotalScore()">총점 계산 및 기록하기</button>
-                <div class="total-score-display" id="total-score-result"></div>
+                <button class="calculate-btn" id="calculate-total-btn" onclick="calculateAndSaveTotalScore()">기록하기</button>
             </div>
         </div>
     </div>
@@ -350,9 +427,11 @@
             <div class="card-main-content">
                 <div class="uni-name">대학명</div>
                 <div class="dept-name">학과명</div>
-                <div class="saved-score">
-                    저장된 수능점수: <span class="score-value">0점</span>
-                </div>
+                
+                <div class="saved-timestamp">--</div>
+                <div class="saved-score-details">
+                    </div>
+
             </div>
             <div class="card-actions">
                 <button class="view-history-btn"><i class="fa-solid fa-chart-line"></i> 기록 보기</button>
@@ -367,7 +446,6 @@
         const modalBody = document.getElementById('modal-body-content');
         const modalFooter = document.getElementById('modal-footer-content');
         const modalTitle = document.getElementById('modal-title');
-        const totalScoreResult = document.getElementById('total-score-result');
 
         // --- ⭐️ 3. 메인 함수 정의 (DOM 요소 변수 뒤, 실행부 앞) ---
 
@@ -383,6 +461,7 @@
             } catch (err) {
                 console.error('학생 프로필 로드 실패:', err);
                 alert(`학생 정보를 불러오지 못했습니다: ${err.message}`);
+                currentStudentProfile = null; 
             }
         }
 
@@ -414,38 +493,38 @@
                         const card = document.getElementById('saved-card-template').content.cloneNode(true).firstElementChild;
                         card.querySelector('.uni-name').textContent = item.대학명;
                         card.querySelector('.dept-name').textContent = item.학과명;
-                        card.querySelector('.saved-score .score-value').textContent = `${item.calculated_suneung_score || 'N/A'}점`;
+                        
+                        const branchCutoff = allCutoffsMap[item.U_ID];
+                        card.dataset.branchCutoff = (branchCutoff !== null && branchCutoff !== undefined) ? branchCutoff : '';
+                        
+                        card.dataset.savedSuneungScore = item.calculated_suneung_score || 0;
 
                         card.dataset.uid = item.U_ID;
                         card.dataset.year = item.학년도;
                         card.dataset.gun = item.군;
-                        card.dataset.savedScore = item.calculated_suneung_score || 0;
                         card.dataset.savedId = item.saved_id;
 
-                        // ⭐️ 카드 클릭(모달 열기)은 .card-main-content 영역만
                         card.querySelector('.card-main-content').addEventListener('click', (e) => {
-                            // ⭐️ 삭제 버튼 클릭 시 모달이 열리지 않도록 예외 처리
                             if (e.target.closest('.delete-btn')) return; 
                             openDetailModal(card);
                         });
                         
-                        // 삭제 버튼 이벤트
                         card.querySelector('.delete-btn').addEventListener('click', async (e) => {
-                            e.stopPropagation(); // ⭐️ 카드 클릭(모달 열기) 방지
+                            e.stopPropagation();
                             await deleteSavedItem(card, item.saved_id, gun);
                         });
                         
-                        // ⭐️ "기록 보기" 버튼 이벤트 리스너 추가
                         card.querySelector('.view-history-btn').addEventListener('click', (e) => {
-                             e.stopPropagation(); // ⭐️ 카드 클릭(모달 열기) 방지
+                             e.stopPropagation();
                              const uid = item.U_ID;
                              const year = item.학년도;
                              const name = encodeURIComponent(`${item.대학명} - ${item.학과명}`);
-                             // ⭐️ history_view.html 페이지로 이동
                              window.location.href = `history_view.html?uid=${uid}&year=${year}&name=${name}`;
                         });
                         
                         container.appendChild(card);
+                        
+                        loadAndDisplayLatestHistory(card, item.U_ID, item.학년도);
                     }
                 });
             } catch (err) {
@@ -479,27 +558,27 @@
             }
         }
 
-      async function openDetailModal(card) {
+        async function openDetailModal(card) {
             if (!currentStudentProfile) {
                 alert('학생 정보가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
                 return;
             }
 
+            currentOpenCardElement = card;
+            currentModalBranchCutoff = card.dataset.branchCutoff ? parseFloat(card.dataset.branchCutoff) : null;
+
             const uid = card.dataset.uid;
             const year = card.dataset.year;
-            const savedScore = parseFloat(card.dataset.savedScore || 0);
+            const savedScore = parseFloat(card.dataset.savedSuneungScore || 0);
 
             modalTitle.textContent = '정보 로딩 중...';
             modalBody.innerHTML = '<div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>';
             modalFooter.style.display = 'none';
-            totalScoreResult.innerHTML = '';
             currentModal_F_data = null;
             modalOverlay.classList.add('show');
 
-            // --- ⭐️ 1. 오늘 최고 기록 불러오기 API 호출 ---
-            let todayBestRecords = {}; // 기본값 빈 객체
+            let todayBestRecords = {};
             try {
-                console.log('Fetching today\'s best records...');
                 const bestRes = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/today-best`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -507,17 +586,10 @@
                 if (bestRes.ok && bestData.success) {
                     todayBestRecords = bestData.bestRecords || {};
                     console.log('Today\'s best records loaded:', todayBestRecords);
-                } else {
-                    console.warn('Failed to load today\'s best records:', bestData.message);
-                }
-            } catch (err) {
-                console.error('Error fetching today\'s best records:', err);
-                // 에러 발생해도 모달 로딩은 계속 진행 (기록 자동 채우기만 안 됨)
-            }
-            // --- ⭐️ API 호출 끝 ---
+                } else { console.warn('Failed to load today\'s best records:', bestData.message); }
+            } catch (err) { console.error('Error fetching today\'s best records:', err); }
 
             try {
-                // --- 대학 상세 정보 로드 (기존과 동일) ---
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -530,28 +602,57 @@
                 const F = currentModal_F_data;
 
                 modalTitle.textContent = `${F.대학명} - ${F.학과명}`;
-                modalBody.innerHTML = ''; // 내용 초기화
+                modalBody.innerHTML = ''; 
 
-                // 수능 점수 표시 (기존과 동일)
+                // ⭐️ [수정] 내신 반영 여부에 따라 모달 상단 점수 요약판 HTML 생성
+                let naeshinGridItemHtml = '';
+                if (F.내신 && Number(F.내신) > 0) {
+                    naeshinGridItemHtml = `
+                        <div class="score-item">
+                            <label>내신</label>
+                            <span class="value" id="modal-naeshin-score">0.00</span>
+                        </div>`;
+                }
+
                 modalBody.innerHTML += `
-                    <div class="modal-group">
-                        <label><i class="fa-solid fa-calculator"></i> 수능 환산 점수 (저장값)</label>
-                        <div class="score-display" id="modal-suneung-score">${savedScore.toFixed(2)} 점</div>
+                    <div class="score-summary-grid">
+                        <div class="score-item">
+                            <label>수능환산점수</label>
+                            <span class="value" id="modal-suneung-score">${savedScore.toFixed(2)}</span>
+                        </div>
+                        ${naeshinGridItemHtml}
+                        <div class="score-item">
+                            <label>실기</label>
+                            <span class="value" id="modal-silgi-score">0.00</span>
+                        </div>
+                        <div class="score-item">
+                            <label>지점 총점컷</label>
+                            <span class="value" id="modal-cutoff-score">${currentModalBranchCutoff !== null ? currentModalBranchCutoff.toFixed(2) : '-'}</span>
+                        </div>
+                        <div class="score-item total-row">
+                            <label>총점</label>
+                            <span class="value" id="modal-total-score">0.00</span>
+                        </div>
                     </div>
                 `;
-
-                // 내신 입력칸 (기존과 동일)
+                
+                // ⭐️ [수정] 내신 입력칸 (내신 반영할 때만)
                 if (F.내신 && Number(F.내신) > 0) {
+                    // ⭐️ [신규] 카드에 저장된 최신 내신 점수를 가져옴
+                    const savedNaeshinScore = card.dataset.latestNaeshinScore || '';
+                    
                     modalBody.innerHTML += `
                         <div class="modal-group">
                             <label for="naeshin-score-input"><i class="fa-solid fa-book-open"></i> 해당학교의 진학사내신점수입력 (최종 ${F.내신}%)</label>
-                            <input type="number" id="naeshin-score-input" placeholder="진학사 내신 점수 입력 (예: 95.5)">
+                            <input type="number" id="naeshin-score-input" placeholder="진학사 내신 점수 입력 (예: 95.5)" value="${savedNaeshinScore}">
                             <small style="color:var(--gray); font-size:11px;">* 이 대학의 내신 반영비율(${F.내신}%)이 적용된 최종 점수를 입력하세요.</small>
                         </div>
                     `;
+                    setTimeout(() => { 
+                         document.getElementById('naeshin-score-input')?.addEventListener('input', updateModalTotalScore);
+                    }, 0);
                 }
 
-                // --- ⭐️ 실기 입력칸 생성 수정 ---
                 if (F.실기 && Number(F.실기) > 0 && F.실기배점 && F.실기배점.length > 0) {
                     let silgiInputsHtml = '<div class="silgi-input-grid">';
                     const gender = currentStudentProfile.gender;
@@ -562,9 +663,7 @@
                     if(events.length > 0) {
                         events.forEach(eventName => {
                             const eventId = eventName.replace(/[\s\(\)]/g, '-');
-                            // ⭐️ 오늘 최고 기록 가져오기
                             const bestRecordValue = todayBestRecords[eventName];
-                            // ⭐️ input 태그에 value 속성 추가 (값이 있을 때만)
                             const valueAttribute = (bestRecordValue !== undefined && bestRecordValue !== null) ? `value="${bestRecordValue}"` : '';
 
                             silgiInputsHtml += `
@@ -584,10 +683,8 @@
                                 ${silgiInputsHtml}
                             </div>
                         `;
-                        addSilgiInputListeners(); // 리스너 추가 (기존과 동일)
+                        addSilgiInputListeners();
 
-                        // --- ⭐️⭐️⭐️ 중요: 미리 채워진 값에 대해 감수 업데이트 트리거 ---
-                        // 모달이 완전히 표시된 후에 실행되도록 약간의 딜레이 추가
                         setTimeout(() => {
                             events.forEach(eventName => {
                                 const bestRecordValue = todayBestRecords[eventName];
@@ -595,22 +692,21 @@
                                     const eventId = eventName.replace(/[\s\(\)]/g, '-');
                                     const inputElement = document.getElementById(`silgi-input-${eventId}`);
                                     if (inputElement) {
-                                        // input 이벤트 강제 발생시켜서 addSilgiInputListeners 안의 로직 실행
                                         inputElement.dispatchEvent(new Event('input', { bubbles: true }));
                                         console.log(`Triggered input event for ${eventName} with value ${bestRecordValue}`);
                                     }
                                 }
                             });
-                        }, 100); // 0.1초 딜레이 (필요시 조정)
-                        // --- ⭐️⭐️⭐️ 트리거 끝 ---
+                        }, 100);
 
                     } else {
                          modalBody.innerHTML += `<p style="color:var(--danger); font-size:12px;">실기(${F.실기}%) 반영 대학이나, 학생 성별(${gender})에 맞는 실기 배점표 데이터가 없습니다.</p>`;
                     }
                 }
-                // --- ⭐️ 실기 입력칸 생성 수정 끝 ---
 
-                modalFooter.style.display = 'block'; // 푸터 표시 (기존과 동일)
+                modalFooter.style.display = 'block';
+                
+                setTimeout(updateModalTotalScore, 110); 
 
             } catch (err) {
                 console.error('모달 데이터 로드 오류:', err);
@@ -618,9 +714,19 @@
             }
         }
         
-        function closeDetailModal() {
+        function closeDetailModal(event) {
+            if (event && event.target !== modalOverlay) {
+                return; 
+            }
+            
             modalOverlay.classList.remove('show');
             currentModal_F_data = null;
+            currentModalBranchCutoff = null;
+            
+            if (currentOpenCardElement) {
+                updateCardDisplayAfterClose(currentOpenCardElement);
+                currentOpenCardElement = null; 
+            }
         }
 
         async function calculateAndSaveTotalScore() {
@@ -628,20 +734,17 @@
             
             const btn = document.getElementById('calculate-total-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 계산/저장 중...';
-            totalScoreResult.innerHTML = '';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 기록 중...';
             
-            let suneungScore = 0;
-            let naeshinScore = 0;
-            let silgiScore = 0;
-            let totalScore = 0;
+            let suneungScore = parseFloat(document.getElementById('modal-suneung-score')?.textContent || 0);
+            let naeshinScoreEl = document.getElementById('modal-naeshin-score');
+            let naeshinScore = naeshinScoreEl ? parseFloat(naeshinScoreEl.textContent || 0) : 0;
+            let silgiScore = parseFloat(document.getElementById('modal-silgi-score')?.textContent || 0);
+            let totalScore = parseFloat(document.getElementById('modal-total-score')?.textContent || 0);
+            
             let silgiRecordsPayload = []; 
             
             try {
-                suneungScore = parseFloat(document.getElementById('modal-suneung-score').textContent || 0);
-                const naeshinInput = document.getElementById('naeshin-score-input');
-                naeshinScore = naeshinInput ? parseFloat(naeshinInput.value || 0) : 0;
-                
                 const silgiInputs = document.querySelectorAll('.silgi-record-input');
                 if (silgiInputs.length > 0) {
                     const practicals = Array.from(silgiInputs).map(input => ({
@@ -663,8 +766,6 @@
                     const silgiData = await silgiRes.json();
                     if (!silgiData.success) throw new Error(silgiData.message || '실기 점수 계산 실패');
                     
-                    silgiScore = parseFloat(silgiData.result.totalScore || 0);
-                    
                     if (silgiData.result.breakdown && silgiData.result.breakdown.events) {
                         silgiRecordsPayload = silgiData.result.breakdown.events.map(evt => ({
                             event: evt.event,
@@ -673,19 +774,8 @@
                             gam: evt.deduction_level
                         }));
                     }
-                    console.log('Calculated Weighted Silgi Score:', silgiScore);
                 }
-
-                totalScore = suneungScore + naeshinScore + silgiScore;
                 
-                totalScoreResult.innerHTML = `
-                    수능: ${suneungScore.toFixed(2)}점 + 
-                    내신: ${naeshinScore.toFixed(2)}점 + 
-                    실기: ${silgiScore.toFixed(2)}점 = 
-                    <strong>${totalScore.toFixed(2)}점</strong>
-                `;
-
-                // ⭐️ [신규] 계산된 점수를 history DB에 저장
                 const historyBody = {
                     U_ID: currentModal_F_data.U_ID,
                     year: currentModal_F_data.학년도,
@@ -714,12 +804,201 @@
                 }
 
             } catch (err) {
-                console.error('총점 계산/저장 오류:', err);
-                totalScoreResult.innerHTML = `<span style="color:var(--danger);">계산/저장 오류: ${err.message}</span>`;
+                console.error('기록 오류:', err);
                 showToast(`❌ 오류: ${err.message}`, true);
             } finally {
                  btn.disabled = false;
-                 btn.innerHTML = '총점 계산 및 기록하기';
+                 btn.innerHTML = '기록하기';
+            }
+        }
+
+        async function loadAllCutoffs() {
+            if (currentStudentProfile && currentStudentProfile.학년도) {
+                try {
+                    const res = await fetch(`${JUNGSI_SVR}/jungsi/cutoffs/${currentStudentProfile.학년도}`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await res.json();
+                    if (data.success && data.cutoffs) {
+                        data.cutoffs.forEach(item => {
+                            allCutoffsMap[item.U_ID] = item.지점_총점컷; 
+                        });
+                        console.log('All cutoffs (total) loaded:', allCutoffsMap);
+                    }
+                } catch (err) {
+                    console.error('Failed to load all cutoffs:', err);
+                }
+            } else {
+                 console.warn('Cannot load cutoffs, student profile (year) not ready.');
+            }
+        }
+
+        // ⭐️ [신규/수정] 카드 표시 함수 (레이아웃, 색상, toFixed 버그 모두 수정)
+        async function loadAndDisplayLatestHistory(cardElement, uid, year) {
+            const timestampEl = cardElement.querySelector('.saved-timestamp');
+            const detailsEl = cardElement.querySelector('.saved-score-details');
+            const cutoffRaw = allCutoffsMap[uid];
+            // ⭐️ [수정] '-' 대신 parseFloat 가능한 숫자 또는 null
+            const cutoffNum = (cutoffRaw !== null && cutoffRaw !== undefined && cutoffRaw !== '') ? parseFloat(cutoffRaw) : null;
+            const cutoffDisplay = cutoffNum !== null ? cutoffNum.toFixed(2) : '-';
+            
+            const fData = await fetchFData(uid, year); 
+
+            try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/get-history/${uid}/${year}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                
+                // ⭐️ [수정] 기록이 없을 때의 HTML 구조
+                if (!data.success || !data.history || data.history.length === 0) {
+                    timestampEl.textContent = '최근 기록 없음';
+                    detailsEl.innerHTML = `
+                        <div class="score-details-row">
+                            <span class="detail-item">수능: <strong class="score-value">-</strong></span>
+                        </div>
+                        <div class="score-details-row">
+                            <span class="detail-item">총점: <strong class="score-value">-</strong></span>
+                            <span class="detail-item">지점컷: <strong class="score-value">${cutoffDisplay}</strong></span>
+                        </div>
+                    `;
+                    cardElement.dataset.latestNaeshinScore = '';
+                    return; 
+                }
+                
+                const latest = data.history[0]; 
+                const recordDate = new Date(latest.record_date);
+                const dateString = `${recordDate.getMonth() + 1}/${recordDate.getDate()} ${recordDate.getHours()}:${String(recordDate.getMinutes()).padStart(2, '0')}`;
+                
+                timestampEl.textContent = `최근 저장: ${dateString}`;
+                cardElement.dataset.latestNaeshinScore = latest.naeshin_score || '';
+
+                // ⭐️ [BUG FIX] parseFloat으로 점수들 숫자형으로 변환
+                const suneungVal = parseFloat(latest.suneung_score || 0).toFixed(2);
+                const naeshinVal = parseFloat(latest.naeshin_score || 0).toFixed(2);
+                const silgiVal = parseFloat(latest.silgi_score || 0).toFixed(2);
+                const totalVal = parseFloat(latest.total_score || 0); // ⭐️ 비교를 위해 toFixed(2) 안함
+                
+                // --- Row 1 (수능, 내신, 실기) ---
+                let row1Html = `<div class="score-details-row">`;
+                row1Html += `<span class="detail-item">수능: <strong class="score-value">${suneungVal}</strong></span>`;
+                if (fData && fData.내신 && Number(fData.내신) > 0) {
+                    row1Html += `<span class="detail-item">내신: <strong class="score-value">${naeshinVal}</strong></span>`;
+                }
+                if (fData && fData.실기 && Number(fData.실기) > 0) {
+                    row1Html += `<span class="detail-item">실기: <strong class="score-value">${silgiVal}</strong></span>`;
+                }
+                row1Html += `</div>`;
+
+                // --- Row 2 (총점, 지점컷) ---
+                let totalScoreClass = '';
+                if (cutoffNum !== null) { // ⭐️ 숫자일 때만 비교
+                    if (totalVal > cutoffNum) {
+                        totalScoreClass = 'total-score-high';
+                    } else if (totalVal < cutoffNum) {
+                        totalScoreClass = 'total-score-low';
+                    }
+                }
+                
+                let row2Html = `<div class="score-details-row">`;
+                row2Html += `<span class="detail-item ${totalScoreClass}">총점: <strong class="score-value">${totalVal.toFixed(2)}</strong></span>`;
+                row2Html += `<span class="detail-item">지점컷: <strong class="score-value">${cutoffDisplay}</strong></span>`;
+                row2Html += `</div>`;
+                
+                detailsEl.innerHTML = row1Html + row2Html;
+
+            } catch (err) {
+                console.error(`Failed to load history for card ${uid}:`, err);
+                timestampEl.textContent = '기록 로드 실패';
+                detailsEl.innerHTML = `
+                    <div class="score-details-row">
+                        <span class="detail-item">수능: <strong class="score-value">-</strong></span>
+                    </div>
+                    <div class="score-details-row">
+                        <span class="detail-item">총점: <strong class="score-value">-</strong></span>
+                        <span class="detail-item">지점컷: <strong class="score-value">${cutoffDisplay}</strong></span>
+                    </div>
+                `;
+                cardElement.dataset.latestNaeshinScore = '';
+            }
+        }
+        
+        async function fetchFData(uid, year) {
+             try {
+                const res = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ U_ID: uid, year: year })
+                });
+                const data = await res.json();
+                if (data.success) return data.data;
+                else return null;
+             } catch(e) { return null; }
+        }
+
+        function updateCardDisplayAfterClose(cardElement) {
+            if (!cardElement) return;
+            const uid = cardElement.dataset.uid;
+            const year = cardElement.dataset.year;
+            if (uid && year) {
+                console.log(`Updating card ${uid} after modal close...`);
+                loadAndDisplayLatestHistory(cardElement, uid, year);
+            }
+        }
+
+        async function updateModalTotalScore() {
+            if (!currentModal_F_data || !currentStudentProfile) return;
+
+            const suneungScore = parseFloat(document.getElementById('modal-suneung-score').textContent || 0);
+            
+            const naeshinInput = document.getElementById('naeshin-score-input');
+            const naeshinScore = naeshinInput ? parseFloat(naeshinInput.value || 0) : 0;
+            
+            const naeshinScoreEl = document.getElementById('modal-naeshin-score');
+            if (naeshinScoreEl) {
+                naeshinScoreEl.textContent = naeshinScore.toFixed(2);
+            }
+            
+            let silgiScore = 0;
+            const silgiScoreEl = document.getElementById('modal-silgi-score');
+            silgiScoreEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
+            
+            const silgiInputs = document.querySelectorAll('.silgi-record-input');
+            if (silgiInputs.length > 0) {
+                const practicals = Array.from(silgiInputs).map(input => ({
+                    event: input.dataset.event,
+                    value: input.value
+                }));
+                const sDataForSilgi = { gender: currentStudentProfile.gender, practicals: practicals };
+                
+                try {
+                    const silgiRes = await fetch(`${JUNGSI_SVR}/silgi/calculate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ F_data: currentModal_F_data, S_data: sDataForSilgi })
+                    });
+                    const silgiData = await silgiRes.json();
+                    if (silgiData.success) {
+                        silgiScore = parseFloat(silgiData.result.totalScore || 0);
+                    }
+                } catch (err) {
+                    console.error('Silgi calc error:', err);
+                    silgiScore = 0; 
+                }
+            }
+            silgiScoreEl.textContent = parseFloat(silgiScore || 0).toFixed(2);
+
+            const totalScore = suneungScore + naeshinScore + silgiScore;
+            const totalScoreEl = document.getElementById('modal-total-score');
+            totalScoreEl.textContent = totalScore.toFixed(2);
+
+            totalScoreEl.classList.remove('total-score-high', 'total-score-low');
+            if (currentModalBranchCutoff !== null) {
+                if (totalScore > currentModalBranchCutoff) {
+                    totalScoreEl.classList.add('total-score-high'); 
+                } else if (totalScore < currentModalBranchCutoff) {
+                    totalScoreEl.classList.add('total-score-low');
+                }
             }
         }
 
@@ -730,11 +1009,18 @@
                 window.parent.location.href = 'student_login.html';
                 return;
             }
-            // ⭐️ 함수들이 먼저 정의된 후에 DOMContentLoaded가 실행됨
-            await Promise.all([
-                loadStudentProfile(),
-                loadSavedList()
-            ]);
+            
+            // ⭐️ [수정] 레이스 컨디션 해결 (순차적 로드)
+            await loadStudentProfile(); // 1. 프로필 먼저
+            
+            if (currentStudentProfile) {
+                await loadAllCutoffs();   // 2. 컷 로드
+                await loadSavedList();  // 3. 목록 로드
+            } else {
+                 document.getElementById('empty-ga').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
+                 document.getElementById('empty-na').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
+                 document.getElementById('empty-da').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
+            }
         });
 
     </script>
