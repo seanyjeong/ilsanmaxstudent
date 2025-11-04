@@ -12,7 +12,7 @@
             --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
             --transition: all 0.3s ease;
             --success: #28a745; --danger: #dc3545; --warning: #ffc107;
-            /* --info: #17a2b8; /* 상위컷 색상 제거 */
+            --orange: #fd7e14; /* ⭐️ 선택 과목용 주황색 */
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -49,6 +49,52 @@
         .gun-filter-buttons button { padding: 8px 16px; margin: 0 5px; font-size: 14px; font-weight: 600; border: 1px solid var(--gray-light); border-radius: 20px; background-color: #fff; color: var(--dark); cursor: pointer; transition: var(--transition); }
         .gun-filter-buttons button:hover { background-color: var(--gray-light); }
         .gun-filter-buttons button.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+        .tag-legend-container {
+            padding: 5px 20px 10px 20px; /* 위/양옆/아래 패딩 */
+            background-color: #f4f7f6; /* body 배경색과 동일하게 */
+            display: none; /* JS로 컨트롤 (초기 숨김) */
+            flex-wrap: wrap;
+            justify-content: center; /* 가운데 정렬 */
+            align-items: center;
+            gap: 15px; /* 항목 간 간격 */
+            font-size: 12px; /* 폰트 크기 */
+            color: #555;
+            border-bottom: 1px solid var(--gray-light); /* 리스트와 구분선 */
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px; /* 네모와 텍스트 간 간격 */
+        }
+        .legend-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            /* 아래 tag-required/optional 클래스에서 스타일을 받음 */
+        }
+        /* ⭐️ 범례용 태그 스타일 (카드 안의 태그와 별도) ⭐️ */
+        .legend-box.tag-required {
+            background-color: #e7f3ff;
+            border: 1px solid var(--primary);
+        }
+        .legend-box.tag-optional {
+            background-color: #fff8f0;
+            border: 1px solid var(--orange);
+        }
+
+        .legend-box.tag-optional {
+            background-color: #fff8f0;
+            border: 1px solid var(--orange);
+        }
+
+        /* ⭐️ [신규] 저장 제한 안내 스타일 ⭐️ */
+        .legend-save-limit {
+            color: var(--primary); /* 파란색으로 강조 */
+            font-weight: 600; /* 살짝 굵게 */
+        }
+        .legend-save-limit i {
+            margin-right: 3px; /* 아이콘과 텍스트 간격 */
+        }
         .university-list { padding: 10px 20px 20px 20px; }
         .university-card { background-color: #fff; border-radius: var(--border-radius); margin-bottom: 15px; padding: 15px; box-shadow: var(--card-shadow); font-size: 14px; transition: var(--transition); position: relative; overflow: hidden; display: block; }
         .university-card.hidden-by-filter { display: none; }
@@ -56,7 +102,58 @@
         .uni-name { font-weight: 700; font-size: 17px; margin-bottom: 3px; flex-grow: 1; padding-right: 50px; }
         .dept-name { color: #555; margin-bottom: 10px; font-size: 14px; }
         .uni-info { margin-bottom: 10px; }
+        
+        /* ⭐️ 기본 태그 스타일 (기존) */
         .uni-info span { display: inline-block; background-color: var(--gray-light); color: #555; font-size: 11px; padding: 3px 8px; border-radius: 10px; margin-right: 5px; margin-bottom: 5px; line-height: 1.4; }
+        
+        /* ⭐️ 과목/비율 태그 스타일 */
+        .subject-tags-wrapper {
+            display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px;
+        }
+        .subject-tags {
+            display: flex; flex-wrap: wrap; gap: 5px;
+        }
+        .tag-subject {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px; /* 둥근 사각형 */
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        /* 1. 필수 과목 (파랑) */
+        .uni-info .tag-required {
+            color: var(--primary);
+            background-color: #e7f3ff; /* 연한 파랑 */
+            border: 1px solid var(--primary);
+        }
+        /* 2. 선택 과목 (주황) */
+        .uni-info .tag-optional {
+            color: var(--orange);
+            background-color: #fff8f0; /* 연한 주황 */
+            border: 1px solid var(--orange);
+        }
+        /* 3. 반영 없음 / 전체 비율 (회색) */
+        .uni-info .tag-none {
+            color: #555;
+            background-color: #f0f0f0;
+            border: 1px solid var(--gray);
+        }
+
+        /* ⭐️ [신규] 1단계 태그 스타일 (빨강) */
+        .uni-info .tag-stage {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-right: 5px; margin-bottom: 5px;
+            line-height: 1.4;
+            font-weight: 600;
+            color: var(--danger);
+            background-color: #fdeeee;
+            border: 1px solid var(--danger);
+        }
+        
         .uni-score-section {
              margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--gray-light);
              display: flex;
@@ -68,7 +165,6 @@
         .uni-cutoff-score {
             font-size: 13px; font-weight: 500; color: var(--warning); text-align: left;
         }
-        /* .uni-top10-cutoff-score 삭제 */
         .uni-cutoff-score .score-value { font-weight: 600; }
         .uni-calculated-score { font-size: 15px; font-weight: 700; color: var(--primary); text-align: right; }
         .uni-calculated-score .score-value { font-size: 17px; margin-left: 5px; }
@@ -91,6 +187,25 @@
         const EXCLUDE_EVENTS_LIST = [ "좌전굴", "체전굴", "체후굴", "메디신볼던지기", "윗몸일으키기", "제자리멀리뛰기" ];
         let allUniversitiesData = [];
         let cutoffsMap = {}; // 지점컷 저장용
+
+        // ⭐️ 과목 태그 포맷팅 헬퍼 함수
+        function formatSubjectTag(raw) {
+            if (!raw || raw.trim() === '') {
+                return null; 
+            }
+            const s = raw.trim();
+            if (s.startsWith('(') && s.endsWith(')')) {
+                return {
+                    text: s.slice(1, -1), // 괄호 안의 내용 (예: "30", "70/30", "감점")
+                    type: 'optional' 
+                };
+            } else {
+                return {
+                    text: s, // 내용 그대로 (예: "30", "가산점", "필수")
+                    type: 'required' 
+                };
+            }
+        }
     </script>
 
     <div class="header">
@@ -116,6 +231,25 @@
                 <button class="filter-teaching" data-teaching="X">불가능</button>
             </div>
         </div>
+        
+        <div class="filter-group">
+            <label><i class="fa-solid fa-book"></i> 제외할 반영 과목 (선택 시 해당 과목 *필수* 대학만 제외)</label>
+            <div class="filter-options" id="excludeSubjectsFilters">
+                <button class="filter-exclude-subject" data-subject="국어">국어</button>
+                <button class="filter-exclude-subject" data-subject="수학">수학</button>
+                <button class="filter-exclude-subject" data-subject="영어">영어</button>
+                <button class="filter-exclude-subject" data-subject="탐구">탐구</button>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label><i class="fa-solid fa-flask"></i> 탐구 반영 개수 (1개 또는 2개)</label>
+            <div class="filter-options">
+                <button class="filter-inquiry-count active" data-count="전체">전체</button>
+                <button class="filter-inquiry-count" data-count="1">1개</button>
+                <button class="filter-inquiry-count" data-count="2">2개</button>
+            </div>
+        </div>
+        
         <div class="filter-group">
             <label><i class="fa-solid fa-person-running"></i> 제외할 실기 종목 (선택 시 해당 종목 없는 대학만 표시)</label>
             <div class="filter-options" id="excludeEventsFilters">
@@ -133,6 +267,18 @@
         <button class="gun-filter" data-gun-filter="나">나군</button>
         <button class="gun-filter" data-gun-filter="다">다군</button>
     </div>
+    <div class="tag-legend-container" id="tagLegendContainer">
+        <span class="legend-item">
+            <span class="legend-box tag-required"></span> : 필수반영
+        </span>
+        <span class="legend-item">
+            <span class="legend-box tag-optional"></span> : 선택반영
+        </span>
+        <span class="legend-item legend-save-limit">
+            <i class="fa-solid fa-circle-info"></i> 각 군당 3개 저장 가능
+        </span>
+    </div>
+    <div class="university-list" id="universityList">
 
     <div class="university-list" id="universityList">
         <p class="message-area" id="messageArea">필터를 설정하고 '적용하기' 버튼을 눌러주세요.</p>
@@ -144,6 +290,7 @@
         const universityList = document.getElementById('universityList');
         const messageArea = document.getElementById('messageArea');
         const gunFilterButtonsContainer = document.getElementById('gunFilterButtons');
+        const tagLegendContainer = document.getElementById('tagLegendContainer');
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!token) {
@@ -225,7 +372,6 @@
             }
         }
 
-        // --- ⭐️ 신규: 지역 필터 동적 로드 함수 ---
         async function loadRegionFilters() {
             const container = document.getElementById('regionFilters');
             if (!currentStudentProfile || !currentStudentProfile.학년도) {
@@ -237,21 +383,19 @@
             console.log('API 요청 (지역 목록):', apiUrl);
 
             try {
-                const res = await fetch(apiUrl, { headers: { 'Authorization': 'Bearer ' + token }}); // ⭐️ 학생도 접근 가능해야 함 (authStudentOnlyMiddleware 또는 no auth)
+                const res = await fetch(apiUrl, { headers: { 'Authorization': 'Bearer ' + token }});
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] 지역 목록 로드 실패`);
                 if (!data.success || !Array.isArray(data.regions)) throw new Error('지역 목록 로드 실패 (Success: false)');
 
-                container.innerHTML = ''; // 로딩 메시지 지우기
+                container.innerHTML = '';
                 
-                // '전체' 버튼 추가
                 const allBtn = document.createElement('button');
-                allBtn.className = 'filter-region active'; // 기본 활성화
+                allBtn.className = 'filter-region active';
                 allBtn.dataset.region = '전체';
                 allBtn.textContent = '전체';
                 container.appendChild(allBtn);
 
-                // API로 받은 지역 버튼 추가
                 data.regions.forEach(region => {
                     const button = document.createElement('button');
                     button.className = 'filter-region';
@@ -260,7 +404,6 @@
                     container.appendChild(button);
                 });
 
-                // ⭐️ 동적으로 생성된 버튼들에 이벤트 리스너 추가
                 container.querySelectorAll('.filter-region').forEach(button => {
                     button.addEventListener('click', () => handleMultiSelectWithAll(button, '.filter-region', '전체'));
                 });
@@ -290,12 +433,12 @@
         }
 
         function setupActionButtons() {
-            // ⭐️ 지역 필터 버튼 로직은 loadRegionFilters로 이동
-            // document.querySelectorAll('.filter-region').forEach(button => button.addEventListener('click', () => handleMultiSelectWithAll(button, '.filter-region', '전체')));
-            
             document.querySelectorAll('.filter-teaching').forEach(button => button.addEventListener('click', () => handleSingleSelect(button, '.filter-teaching')));
             document.querySelectorAll('.filter-exclude-event').forEach(button => button.addEventListener('click', () => button.classList.toggle('active')));
             
+            document.querySelectorAll('.filter-exclude-subject').forEach(button => button.addEventListener('click', () => button.classList.toggle('active')));
+            document.querySelectorAll('.filter-inquiry-count').forEach(button => button.addEventListener('click', () => handleSingleSelect(button, '.filter-inquiry-count')));
+
             document.querySelectorAll('.gun-filter').forEach(button => {
                 button.addEventListener('click', () => {
                     document.querySelectorAll('.gun-filter.active').forEach(b => b.classList.remove('active'));
@@ -377,17 +520,20 @@
             filterPanel.classList.remove('open');
             filterBtn.innerHTML = '<i class="fa-solid fa-filter"></i>';
             gunFilterButtonsContainer.style.display = 'none';
+            tagLegendContainer.style.display = 'none';
             allUniversitiesData = [];
 
-            // ⭐️ 동적으로 생성된 지역 필터에서 값 읽기
             const selectedRegions = Array.from(document.querySelectorAll('.filter-region.active')).map(b => b.dataset.region).filter(r => r !== '전체');
             const selectedExcludeEvents = Array.from(document.querySelectorAll('.filter-exclude-event.active')).map(b => b.dataset.event);
+            const selectedExcludeSubjects = Array.from(document.querySelectorAll('.filter-exclude-subject.active')).map(b => b.dataset.subject);
+            const selectedInquiryCount = document.querySelector('.filter-inquiry-count.active')?.dataset.count || '전체';
             
             const params = new URLSearchParams();
             if (selectedRegions.length > 0) params.append('region', selectedRegions.join(','));
             if (selectedExcludeEvents.length > 0) params.append('exclude_events', selectedExcludeEvents.join(','));
-            
-            // ⭐️ 백엔드 API는 /public/schools/.. 사용 (교직 필터는 프론트에서)
+            if (selectedExcludeSubjects.length > 0) params.append('exclude_subjects', selectedExcludeSubjects.join(','));
+            if (selectedInquiryCount !== '전체') params.append('inquiry_count', selectedInquiryCount);
+
             const apiUrl = `${JUNGSI_SVR}/jungsi/public/schools/${currentStudentProfile.학년도}?${params.toString()}`;
             console.log('API 요청 (대학 목록):', apiUrl);
 
@@ -411,7 +557,7 @@
                 let createdCardsCount = 0;
                 for (let i = 0; i < allUniversitiesData.length; i += batchSize) {
                     const batch = allUniversitiesData.slice(i, i + batchSize);
-                    const cardPromises = batch.map(uni => processUniversity(uni)); // ⭐️ 상위 10% 컷 API 호출 제거
+                    const cardPromises = batch.map(uni => processUniversity(uni));
                     const cards = await Promise.all(cardPromises);
                     cards.filter(card => card !== null).forEach(card => {
                         universityList.appendChild(card);
@@ -426,6 +572,7 @@
                 } else if (createdCardsCount > 0) {
                      messageArea.style.display = 'none';
                      gunFilterButtonsContainer.style.display = 'flex';
+                     tagLegendContainer.style.display = 'flex';
                      document.querySelectorAll('.gun-filter.active').forEach(b => b.classList.remove('active'));
                      document.querySelector('.gun-filter[data-gun-filter="전체"]').classList.add('active');
                      filterCardsByAllCriteria();
@@ -456,11 +603,11 @@
                  }
                  if (universityList.children.length === 0) {
                     gunFilterButtonsContainer.style.display = 'none';
+                    tagLegendContainer.style.display = 'none';
                  }
             }
         }
 
-        // ⭐️ 상위 10% 컷 API 호출 제거
         async function processUniversity(uni) {
             try {
                 const detailRes = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
@@ -482,10 +629,7 @@
                 if (calculateData.success && calculateData.result.totalScore) calculatedScore = parseFloat(calculateData.result.totalScore).toFixed(2);
                 else console.warn(`점수 계산 실패 (U_ID: ${uni.U_ID}): ${calculateData.message}`);
 
-                // ⭐️ 상위 10% 컷 API 호출 제거
-                // const top10CutoffScore = null; // 제거
-
-                const card = createUniversityCard(uni, F_data, calculatedScore); // ⭐️ 파라미터 제거
+                const card = createUniversityCard(uni, F_data, calculatedScore);
                 card.dataset.teaching = uni.teacher || '';
                 card.dataset.gun = uni.gun || '';
                 return card;
@@ -515,17 +659,77 @@
         function resetFilters() {
             handleMultiSelectWithAll(document.querySelector('.filter-region[data-region="전체"]'), '.filter-region', '전체');
             handleSingleSelect(document.querySelector('.filter-teaching[data-teaching="전체"]'), '.filter-teaching');
+            
+            document.querySelectorAll('.filter-exclude-subject.active').forEach(b => b.classList.remove('active'));
+            handleSingleSelect(document.querySelector('.filter-inquiry-count[data-count="전체"]'), '.filter-inquiry-count');
+            
             document.querySelectorAll('.filter-exclude-event.active').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.gun-filter.active').forEach(b => b.classList.remove('active'));
             document.querySelector('.gun-filter[data-gun-filter="전체"]').classList.add('active');
             applyFilters();
         }
 
-        // --- ⭐️ 대학 카드 HTML 생성 함수 (상위 10% 컷 표시 제거) ---
-        function createUniversityCard(uni, fData, calculatedScore) { // ⭐️ 파라미터 제거
+        // =============================================
+        // ⭐️ [최종 수정] 대학 카드 HTML 생성 함수 (모든 태그 반영)
+        // =============================================
+        function createUniversityCard(uni, fData, calculatedScore) {
             const div = document.createElement('div');
             div.className = 'university-card';
+            
+            // --- 1. 과목별 반영 태그 (국/수/영/탐/한) ---
+            const subjects = [];
+            const korTag = formatSubjectTag(uni.국어_raw);
+            if (korTag) subjects.push({ name: '국', ...korTag });
 
+            const mathTag = formatSubjectTag(uni.수학_raw);
+            if (mathTag) subjects.push({ name: '수', ...mathTag });
+
+            const engTag = formatSubjectTag(uni.영어_raw);
+            if (engTag) subjects.push({ name: '영', ...engTag });
+
+            const tamTag = formatSubjectTag(uni.탐구_raw);
+            if (tamTag) {
+                const count = uni.탐구수_raw || ''; // "1", "2", or ""
+                subjects.push({ name: `탐${count}`, ...tamTag });
+            }
+            
+            const hanTag = formatSubjectTag(uni.한국사_raw);
+            if (hanTag) subjects.push({ name: '한', ...hanTag });
+
+            let subjectsHtml = '';
+            if (subjects.length > 0) {
+                subjectsHtml = '<div class="subject-tags">' + subjects.map(tag => {
+                    let displayText = tag.text;
+                    if (!isNaN(parseFloat(displayText)) && isFinite(displayText)) {
+                         displayText = `${displayText}%`; // "30" -> "30%"
+                    }
+                    // ⭐️ 가독성 수정: "국" + " " + "30%"
+                    return `<span class="tag-subject tag-${tag.type}">${tag.name} ${displayText}</span>`;
+                }).join(' ') + '</div>';
+            } else {
+                subjectsHtml = '<div class="subject-tags"><span class="tag-subject tag-none">수능반영X</span></div>';
+            }
+
+            // --- 2. ⭐️ 전체 반영 비율 태그 (수/내/실) ---
+            const suneungR = uni.suneungRatio || 0;
+            const naeshinR = uni.naeshinRatio || 0;
+            const practicalR = uni.practicalRatio || 0;
+            // 수능/내신/실기 중 하나라도 0% 이상이면 태그 생성
+            let ratioHtml = '';
+            if (suneungR > 0 || naeshinR > 0 || practicalR > 0) {
+                 ratioHtml = `<div class="subject-tags">
+                               <span class="tag-subject tag-none">수능 ${suneungR}% + 내신 ${naeshinR}% + 실기 ${practicalR}%</span>
+                           </div>`;
+            }
+
+            // --- 3. ⭐️ 단계별 전형 태그 (1단계 5배수) ---
+            let stageTag = '';
+            if (uni.stageMultiple && Number(uni.stageMultiple) > 0) {
+                // ⭐️ CSS에 .tag-stage (빨간색) 스타일 추가됨
+                stageTag = `<span class="tag-stage">1단계 ${uni.stageMultiple}배수</span>`;
+            }
+
+            // --- 4. 기타 정보 태그 (군, 지역, 교직, 정원) ---
              const infoTags = [
                 uni.gun ? `<span>${uni.gun}</span>` : '',
                 uni.regionWide ? `<span>${uni.regionWide}</span>` : '',
@@ -535,10 +739,12 @@
                 uni.quota ? `<span>정원 ${uni.quota}명</span>` : (fData?.모집정원 ? `<span>정원 ${fData.모집정원}명</span>` : ''),
             ].filter(Boolean).join('');
 
+            // --- 5. 실기 종목 태그 ---
             const events = uni.events && uni.events.length > 0
                 ? `<span>실기: ${uni.events.join(', ')}</span>`
                 : '<span style="color: gray; border: 1px solid gray; background: #f0f0f0;">실기X</span>';
 
+            // --- 6. 저장 버튼 로직 (동일) ---
             const isSaved = savedUniversities[uni.U_ID] !== undefined;
             const gun = uni.gun || '';
             const isLimitReached = gun && savedCountsByGun[gun] >= MAX_SAVE_PER_GUN && !isSaved;
@@ -551,13 +757,14 @@
                  saveButtonClass += ' limit-reached'; saveButtonTitle = `${gun}군 저장 (${MAX_SAVE_PER_GUN}개) 제한 도달`;
             }
 
-            // 지점컷 점수 찾기
+            // --- 7. 지점컷 로직 (동일) ---
             const branchCutoffScore = cutoffsMap[uni.U_ID];
             let cutoffHtml = '<span style="color: var(--gray);">지점컷 없음</span>';
             if (branchCutoffScore !== null && branchCutoffScore !== undefined) {
                 cutoffHtml = `지점컷: <span class="score-value">${branchCutoffScore}점</span>`;
             }
 
+            // --- 8. ⭐️ HTML 조립 (모든 태그를 .uni-info 안에 배치) ---
             div.innerHTML = `
                 <div class="uni-header">
                     <div class="uni-name">${uni.university}</div>
@@ -566,11 +773,15 @@
                     </button>
                 </div>
                 <div class="dept-name">${uni.department}</div>
-                <div class="uni-info"> ${infoTags} ${events} </div>
+                
+                <div class="uni-info">
+                    ${subjectsHtml} ${ratioHtml}    ${stageTag}     ${infoTags}     ${events}       </div>
+
                 <div class="uni-score-section">
                     <div class="uni-cutoff-score">${cutoffHtml}</div> <div class="uni-calculated-score"> 내 점수: ${calculatedScore !== null ? `<span class="score-value">${calculatedScore}점</span>` : '<span class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 계산중..</span>'} </div>
                 </div>
             `;
+            // =============================================
 
              const saveBtn = div.querySelector('.save-button');
              if (saveBtn && !isLimitReached) saveBtn.onclick = (e) => { e.stopPropagation(); handleSaveClick(saveBtn, uni.U_ID, gun); };
