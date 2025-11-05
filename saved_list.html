@@ -280,6 +280,9 @@
             return { method };
         }
         
+        // ⭐️ (수정) 이 프론트엔드 파일에서는 lookupScore, lookupDeductionLevel 함수가 더 이상
+        // ⭐️ 실시간 계산에 사용되지 않음. (서버 API가 전부 처리함)
+        // ⭐️ 하지만 혹시 모르니 일단 남겨둠. (다른 곳에서 쓸 수도 있으니)
         function lookupScore(studentRecord, method, scoreTable) {
             if (!scoreTable || scoreTable.length === 0) return '0';
             const studentValueStr = String(studentRecord).trim();
@@ -349,39 +352,19 @@
             return (levelIndex === -1) ? 0 : levelIndex; 
         }
         
+        // ▼▼▼▼▼ [수정됨] 2단계: `addSilgiInputListeners` 함수 ▼▼▼▼▼
+        // 실시간 점수/감수 계산 로직을 *삭제*하고, 
+        // 그냥 서버 API를 호출하는 `updateModalTotalScore`만 부르도록 수정
         function addSilgiInputListeners() {
             document.querySelectorAll('.silgi-record-input').forEach(input => {
                 input.addEventListener('input', (e) => {
-                    const record = e.target.value;
-                    const eventName = e.target.dataset.event;
-                    const gender = currentStudentProfile.gender;
-                    if (!currentModal_F_data || !gender) return;
-                    const scoreTable = currentModal_F_data.실기배점?.filter(
-                        item => item.종목명 === eventName && item.성별 === gender
-                    ) || [];
-                    if (scoreTable.length === 0) return;
-                    const { method } = getEventRules(eventName);
-                    const score = lookupScore(record, method, scoreTable);
-                    const deduction = lookupDeductionLevel(score, scoreTable);
-                    const eventId = eventName.replace(/[\s\(\)]/g, '-');
-                    const displaySpan = document.getElementById(`silgi-gam-${eventId}`);
-                    if (displaySpan) {
-                        if (!record.trim()) {
-                             displaySpan.textContent = "- (0감)";
-                             displaySpan.className = 'deduction-display';
-                        } else if (isNaN(Number(score))) {
-                            displaySpan.textContent = `${score}`;
-                            displaySpan.className = 'deduction-display';
-                        } else {
-                            displaySpan.textContent = `${score}점 (${deduction}감)`;
-                            displaySpan.className = `deduction-display ${deduction === 0 ? 'success' : ''}`;
-                        }
-                    }
-                    
+                    // ⭐️ 프론트엔드에서 lookupScore/lookupDeductionLevel 하던 로직 *전부 삭제*
+                    // ⭐️ 그냥 서버 API를 호출하는 updateModalTotalScore()만 실행
                     updateModalTotalScore();
                 });
             });
         }
+        // ▲▲▲▲▲ [수정됨] ▲▲▲▲▲
         
         function showToast(message, isError = false) {
             const t = document.createElement('div');
@@ -582,6 +565,7 @@ if (item.logo_url) {
             }
         }
 
+        // ▼▼▼▼▼ [수정됨] 1단계: `openDetailModal` 함수 ▼▼▼▼▼
         async function openDetailModal(card) {
             if (!currentStudentProfile) {
                 alert('학생 정보가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
@@ -628,7 +612,7 @@ if (item.logo_url) {
                 modalTitle.textContent = `${F.대학명} - ${F.학과명}`;
                 modalBody.innerHTML = ''; 
 
-                // ⭐️ [수정] 내신 반영 여부에 따라 모달 상단 점수 요약판 HTML 생성
+                // ⭐️ 점수 요약판 (내신 반영 여부)
                 let naeshinGridItemHtml = '';
                 if (F.내신 && Number(F.내신) > 0) {
                     naeshinGridItemHtml = `
@@ -660,11 +644,9 @@ if (item.logo_url) {
                     </div>
                 `;
                 
-                // ⭐️ [수정] 내신 입력칸 (내신 반영할 때만)
+                // ⭐️ 내신 입력칸 (내신 반영할 때만)
                 if (F.내신 && Number(F.내신) > 0) {
-                    // ⭐️ [신규] 카드에 저장된 최신 내신 점수를 가져옴
                     const savedNaeshinScore = card.dataset.latestNaeshinScore || '';
-                    
                     modalBody.innerHTML += `
                         <div class="modal-group">
                             <label for="naeshin-score-input"><i class="fa-solid fa-book-open"></i> 해당학교의 진학사내신점수입력 (최종 ${F.내신}%)</label>
@@ -677,14 +659,25 @@ if (item.logo_url) {
                     }, 0);
                 }
 
-                if (F.실기 && Number(F.실기) > 0 && F.실기배점 && F.실기배점.length > 0) {
+                // ▼▼▼▼▼ [수정됨] 실기 입력칸 생성 로직 ▼▼▼▼▼
+                if (F.실기 && Number(F.실기) > 0) { // 1. 실기 반영하는지?
                     let silgiInputsHtml = '<div class="silgi-input-grid">';
                     const gender = currentStudentProfile.gender;
-                    const events = [...new Set(
-                        F.실기배점.filter(item => item.성별 === gender).map(item => item.종목명)
-                    )];
+                    let events = []; // ⭐️ 종목 리스트
 
-                    if(events.length > 0) {
+                    if (F.실기모드 === 'special' && F.U_ID === 13) {
+                        // ⭐️ 2. Case 13 (동국대)는 DB 배점표가 없으므로 종목을 수동으로 정의
+                        console.log('Special Case 13: 수동으로 실기 종목 리스트 생성');
+                        events = ['배근력', '좌전굴', '제자리멀리뛰기', '중량메고달리기'];
+                    } else if (F.실기배점 && F.실기배점.length > 0) {
+                        // ⭐️ 3. 그 외 (Basic, Case 2, 3 등)는 DB 배점표에서 종목 추출
+                        events = [...new Set(
+                            F.실기배점.filter(item => item.성별 === gender).map(item => item.종목명)
+                        )];
+                    }
+
+                    // ⭐️ 4. (이하 로직은 동일)
+                    if (events.length > 0) {
                         events.forEach(eventName => {
                             const eventId = eventName.replace(/[\s\(\)]/g, '-');
                             const bestRecordValue = todayBestRecords[eventName];
@@ -707,7 +700,7 @@ if (item.logo_url) {
                                 ${silgiInputsHtml}
                             </div>
                         `;
-                        addSilgiInputListeners();
+                        addSilgiInputListeners(); // ⭐️ 중요: 이 함수는 2단계에서 수정됨
 
                         setTimeout(() => {
                             events.forEach(eventName => {
@@ -727,16 +720,18 @@ if (item.logo_url) {
                          modalBody.innerHTML += `<p style="color:var(--danger); font-size:12px;">실기(${F.실기}%) 반영 대학이나, 학생 성별(${gender})에 맞는 실기 배점표 데이터가 없습니다.</p>`;
                     }
                 }
+                // ▲▲▲▲▲ [수정됨] ▲▲▲▲▲
 
                 modalFooter.style.display = 'block';
                 
-                setTimeout(updateModalTotalScore, 110); 
+                setTimeout(updateModalTotalScore, 110); // ⭐️ 중요: 이 함수는 3단계에서 수정됨
 
             } catch (err) {
                 console.error('모달 데이터 로드 오류:', err);
                 modalBody.innerHTML = `<p style="color:var(--danger);">오류: ${err.message}</p>`;
             }
         }
+        // ▲▲▲▲▲ [수정됨] 1단계: `openDetailModal` 함수 끝 ▲▲▲▲▲
         
         function closeDetailModal(event) {
             if (event && event.target !== modalOverlay) {
@@ -790,12 +785,13 @@ if (item.logo_url) {
                     const silgiData = await silgiRes.json();
                     if (!silgiData.success) throw new Error(silgiData.message || '실기 점수 계산 실패');
                     
+                    // ⭐️ 서버가 보내준 breakdown.events (case 13 점수 포함)를 payload로 저장
                     if (silgiData.result.breakdown && silgiData.result.breakdown.events) {
                         silgiRecordsPayload = silgiData.result.breakdown.events.map(evt => ({
                             event: evt.event,
                             record: evt.record,
                             score: evt.score,
-                            gam: evt.deduction_level
+                            gam: evt.deduction_level // ⭐️ gam 키로 저장
                         }));
                     }
                 }
@@ -805,7 +801,7 @@ if (item.logo_url) {
                     year: currentModal_F_data.학년도,
                     suneungScore: suneungScore,
                     naeshinScore: naeshinScore,
-                    silgiRecordsJson: silgiRecordsPayload,
+                    silgiRecordsJson: silgiRecordsPayload, // ⭐️ case 13 점수 포함
                     silgiScore: silgiScore,
                     totalScore: totalScore
                 };
@@ -857,12 +853,11 @@ if (item.logo_url) {
             }
         }
 
-        // ⭐️ [신규/수정] 카드 표시 함수 (레이아웃, 색상, toFixed 버그 모두 수정)
+        // ▼▼▼▼▼ [수정됨] 4단계: `loadAndDisplayLatestHistory` 함수 ▼▼▼▼▼
         async function loadAndDisplayLatestHistory(cardElement, uid, year) {
             const timestampEl = cardElement.querySelector('.saved-timestamp');
             const detailsEl = cardElement.querySelector('.saved-score-details');
             const cutoffRaw = allCutoffsMap[uid];
-            // ⭐️ [수정] '-' 대신 parseFloat 가능한 숫자 또는 null
             const cutoffNum = (cutoffRaw !== null && cutoffRaw !== undefined && cutoffRaw !== '') ? parseFloat(cutoffRaw) : null;
             const cutoffDisplay = cutoffNum !== null ? cutoffNum.toFixed(2) : '-';
             
@@ -874,7 +869,6 @@ if (item.logo_url) {
                 });
                 const data = await res.json();
                 
-                // ⭐️ [수정] 기록이 없을 때의 HTML 구조
                 if (!data.success || !data.history || data.history.length === 0) {
                     timestampEl.textContent = '최근 기록 없음';
                     detailsEl.innerHTML = `
@@ -897,11 +891,10 @@ if (item.logo_url) {
                 timestampEl.textContent = `최근 저장: ${dateString}`;
                 cardElement.dataset.latestNaeshinScore = latest.naeshin_score || '';
 
-                // ⭐️ [BUG FIX] parseFloat으로 점수들 숫자형으로 변환
                 const suneungVal = parseFloat(latest.suneung_score || 0).toFixed(2);
                 const naeshinVal = parseFloat(latest.naeshin_score || 0).toFixed(2);
-                const silgiVal = parseFloat(latest.silgi_score || 0).toFixed(2);
-                const totalVal = parseFloat(latest.total_score || 0); // ⭐️ 비교를 위해 toFixed(2) 안함
+                const silgiVal = parseFloat(latest.silgi_score || 0).toFixed(2); // ⭐️ 이건 총점 (e.g., 400.00)
+                const totalVal = parseFloat(latest.total_score || 0);
                 
                 // --- Row 1 (수능, 내신, 실기) ---
                 let row1Html = `<div class="score-details-row">`;
@@ -909,14 +902,34 @@ if (item.logo_url) {
                 if (fData && fData.내신 && Number(fData.내신) > 0) {
                     row1Html += `<span class="detail-item">내신: <strong class="score-value">${naeshinVal}</strong></span>`;
                 }
+                
+                // ▼▼▼▼▼ [수정] 실기 총점 대신 개별 점수 표시 ▼▼▼▼▼
                 if (fData && fData.실기 && Number(fData.실기) > 0) {
-                    row1Html += `<span class="detail-item">실기: <strong class="score-value">${silgiVal}</strong></span>`;
+                    // ⭐️ history에 저장된 silgiRecordsJson (e.g., [{event: '배근력', score: 95.5, gam: 0}, ...])
+                    const silgiEventsJson = latest.silgiRecordsJson; 
+                    
+                    if (silgiEventsJson && Array.isArray(silgiEventsJson) && silgiEventsJson.length > 0) {
+                        // ⭐️ JSON에 개별 점수가 있으면, 그것들을 표시
+                        silgiEventsJson.forEach(ev => {
+                            if (ev.record === '') return; // 기록 없는 건 표시 안 함
+                            const eventNameShort = ev.event.substring(0, 4); // "제자리멀리뛰기" -> "제자리멀"
+                            const eventScore = parseFloat(ev.score || 0).toFixed(1); // 95.5
+                            const eventGam = ev.gam ?? 0;
+                            // ⭐️ 예: "배근력: 95.5(0감)"
+                            row1Html += `<span class="detail-item">${eventNameShort}: <strong class="score-value">${eventScore}(${eventGam}감)</strong></span>`;
+                        });
+                    } else {
+                        // ⭐️ JSON이 없으면 (옛날 데이터), 그냥 총점이라도 표시
+                        row1Html += `<span class="detail-item">실기(총): <strong class="score-value">${silgiVal}</strong></span>`;
+                    }
                 }
+                // ▲▲▲▲▲ [수정] ▲▲▲▲▲
+                
                 row1Html += `</div>`;
 
                 // --- Row 2 (총점, 지점컷) ---
                 let totalScoreClass = '';
-                if (cutoffNum !== null) { // ⭐️ 숫자일 때만 비교
+                if (cutoffNum !== null) { 
                     if (totalVal > cutoffNum) {
                         totalScoreClass = 'total-score-high';
                     } else if (totalVal < cutoffNum) {
@@ -946,6 +959,7 @@ if (item.logo_url) {
                 cardElement.dataset.latestNaeshinScore = '';
             }
         }
+        // ▲▲▲▲▲ [수정됨] 4단계: `loadAndDisplayLatestHistory` 함수 끝 ▲▲▲▲▲
         
         async function fetchFData(uid, year) {
              try {
@@ -970,6 +984,7 @@ if (item.logo_url) {
             }
         }
 
+        // ▼▼▼▼▼ [수정됨] 3단계: `updateModalTotalScore` 함수 ▼▼▼▼▼
         async function updateModalTotalScore() {
             if (!currentModal_F_data || !currentStudentProfile) return;
 
@@ -987,6 +1002,16 @@ if (item.logo_url) {
             const silgiScoreEl = document.getElementById('modal-silgi-score');
             silgiScoreEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
             
+            // ⭐️ 입력 안 된 종목의 감수 표시 초기화
+            document.querySelectorAll('.deduction-display').forEach(span => {
+                const inputId = span.id.replace('silgi-gam-', 'silgi-input-');
+                const input = document.getElementById(inputId);
+                if (input && input.value === '') {
+                     span.textContent = "- (0감)";
+                     span.className = 'deduction-display';
+                }
+            });
+
             const silgiInputs = document.querySelectorAll('.silgi-record-input');
             if (silgiInputs.length > 0) {
                 const practicals = Array.from(silgiInputs).map(input => ({
@@ -1002,8 +1027,39 @@ if (item.logo_url) {
                         body: JSON.stringify({ F_data: currentModal_F_data, S_data: sDataForSilgi })
                     });
                     const silgiData = await silgiRes.json();
+                    
                     if (silgiData.success) {
                         silgiScore = parseFloat(silgiData.result.totalScore || 0);
+                        
+                        // ▼▼▼▼▼ [수정] 서버 응답으로 개별 점수/감수 UI 업데이트 ▼▼▼▼▼
+                        if (silgiData.result.breakdown && silgiData.result.breakdown.events) {
+                            silgiData.result.breakdown.events.forEach(ev => {
+                                // ⭐️ 서버가 계산한 개별 종목 점수/감수 (case 13 포함)
+                                const score = ev.score;
+                                const deduction = ev.deduction_level ?? 0; 
+                                
+                                // ⭐️ 이걸 표시할 UI span 찾기
+                                const eventId = ev.event.replace(/[\s\(\)]/g, '-');
+                                const displaySpan = document.getElementById(`silgi-gam-${eventId}`);
+                                
+                                if (displaySpan) {
+                                    if (ev.record === '') {
+                                        // 입력값이 없으면 (위에서 이미 초기화했지만, 한 번 더)
+                                        displaySpan.textContent = "- (0감)";
+                                        displaySpan.className = 'deduction-display';
+                                    } else if (isNaN(Number(score))) {
+                                        // "P", "F" 등 문자 점수
+                                        displaySpan.textContent = `${score}`;
+                                        displaySpan.className = 'deduction-display';
+                                    } else {
+                                        // ⭐️ case 13의 95.5점 같은 숫자 점수
+                                        displaySpan.textContent = `${Number(score).toFixed(2)}점 (${deduction}감)`;
+                                        displaySpan.className = `deduction-display ${deduction === 0 ? 'success' : ''}`;
+                                    }
+                                }
+                            });
+                        }
+                        // ▲▲▲▲▲ [수정] ▲▲▲▲▲
                     }
                 } catch (err) {
                     console.error('Silgi calc error:', err);
@@ -1025,6 +1081,7 @@ if (item.logo_url) {
                 }
             }
         }
+        // ▲▲▲▲▲ [수정됨] 3단계: `updateModalTotalScore` 함수 끝 ▲▲▲▲▲
 
         // --- ⭐️ 4. 페이지 로드 시 실행 (함수 정의가 끝난 후) ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1043,7 +1100,7 @@ if (item.logo_url) {
             } else {
                  document.getElementById('empty-ga').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
                  document.getElementById('empty-na').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
-                 document.getElementById('empty-da').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
+                 document.getElementById('empty-da').textContent = '학생 정보(성DBC)를 먼저 입력해주세요.';
             }
         });
 
