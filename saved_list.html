@@ -101,6 +101,21 @@
         .saved-card:hover .card-main-content { background-color: #f8f9fa; }
         .saved-card .uni-name { font-weight: 600; font-size: 17px; margin-bottom: 3px; padding-right: 30px; }
         .saved-card .dept-name { color: #555; font-size: 14px; margin-bottom: 10px; }
+/* ⭐️ [신규] 카드 우측 상단 로고 스타일 ⭐️ */
+        .uni-logo-icon {
+            position: absolute;
+            top: 10px;     /* ⭐️ 12px -> 10px (X버튼과 동일) */
+            right: 40px; 
+            width: 56px;   /* ⭐️ 28px -> 56px (두 배) */
+            height: 56px;  /* ⭐️ 28px -> 56px (두 배) */
+            border-radius: 50%;
+            background-color: var(--gray-light);
+            border: 1px solid var(--gray-light);
+            background-size: contain; /* ⭐️ contain으로 로고가 안 잘리게 */
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 3; /* ⭐️ X버튼(z-index: 5)보다 아래 */
+        }
         
         /* ⭐️ [수정] 카드 내부 점수 표시 스타일 ⭐️ */
         .saved-card .saved-timestamp {
@@ -493,6 +508,15 @@
                         const card = document.getElementById('saved-card-template').content.cloneNode(true).firstElementChild;
                         card.querySelector('.uni-name').textContent = item.대학명;
                         card.querySelector('.dept-name').textContent = item.학과명;
+                        
+                        
+if (item.logo_url) {
+                            const logoDiv = document.createElement('div');
+                            logoDiv.className = 'uni-logo-icon';
+                            logoDiv.style.backgroundImage = `url(${JUNGSI_SVR + item.logo_url})`;
+                            // ⭐️ 카드 상단(.card-main-content)에 로고 추가
+                            card.querySelector('.card-main-content').appendChild(logoDiv);
+                        }
                         
                         const branchCutoff = allCutoffsMap[item.U_ID];
                         card.dataset.branchCutoff = (branchCutoff !== null && branchCutoff !== undefined) ? branchCutoff : '';
