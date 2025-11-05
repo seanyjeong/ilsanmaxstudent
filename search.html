@@ -12,7 +12,7 @@
             --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
             --transition: all 0.3s ease;
             --success: #28a745; --danger: #dc3545; --warning: #ffc107;
-            --orange: #fd7e14; /* ⭐️ 선택 과목용 주황색 */
+            --orange: #fd7e14;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -26,6 +26,41 @@
         }
         .header h2 { margin: 0; font-size: 20px; font-weight: 700; }
         .header-icons button { background: none; border: none; font-size: 18px; color: var(--dark); cursor: pointer; margin-left: 15px; }
+
+        /* 🔍 검색 바 */
+        .search-bar {
+            display: none;
+            padding: 8px 16px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--gray-light);
+            align-items: center;
+            gap: 8px;
+        }
+        .search-bar.open {
+            display: flex;
+        }
+        .search-input {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-light);
+            font-size: 14px;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .search-clear-btn {
+            border: none;
+            background: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        .search-clear-btn:hover {
+            color: var(--dark);
+        }
+
         .filter-panel {
             background-color: var(--light); padding: 20px;
             border-bottom: 1px solid var(--gray-light); display: none;
@@ -45,34 +80,34 @@
         .reset-btn:hover { background-color: #dee2e6; }
         .apply-btn { background-color: var(--primary); color: #fff; }
         .apply-btn:hover { background-color: #3a54d8; }
+
         .gun-filter-buttons { display: flex; justify-content: center; padding: 15px 20px 5px 20px; background-color: #f4f7f6; }
         .gun-filter-buttons button { padding: 8px 16px; margin: 0 5px; font-size: 14px; font-weight: 600; border: 1px solid var(--gray-light); border-radius: 20px; background-color: #fff; color: var(--dark); cursor: pointer; transition: var(--transition); }
         .gun-filter-buttons button:hover { background-color: var(--gray-light); }
         .gun-filter-buttons button.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+
         .tag-legend-container {
-            padding: 5px 20px 10px 20px; /* 위/양옆/아래 패딩 */
-            background-color: #f4f7f6; /* body 배경색과 동일하게 */
-            display: none; /* JS로 컨트롤 (초기 숨김) */
+            padding: 5px 20px 10px 20px;
+            background-color: #f4f7f6;
+            display: none;
             flex-wrap: wrap;
-            justify-content: center; /* 가운데 정렬 */
+            justify-content: center;
             align-items: center;
-            gap: 15px; /* 항목 간 간격 */
-            font-size: 12px; /* 폰트 크기 */
+            gap: 15px;
+            font-size: 12px;
             color: #555;
-            border-bottom: 1px solid var(--gray-light); /* 리스트와 구분선 */
+            border-bottom: 1px solid var(--gray-light);
         }
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 5px; /* 네모와 텍스트 간 간격 */
+            gap: 5px;
         }
         .legend-box {
             width: 12px;
             height: 12px;
             border-radius: 3px;
-            /* 아래 tag-required/optional 클래스에서 스타일을 받음 */
         }
-        /* ⭐️ 범례용 태그 스타일 (카드 안의 태그와 별도) ⭐️ */
         .legend-box.tag-required {
             background-color: #e7f3ff;
             border: 1px solid var(--primary);
@@ -81,20 +116,14 @@
             background-color: #fff8f0;
             border: 1px solid var(--orange);
         }
-
-        .legend-box.tag-optional {
-            background-color: #fff8f0;
-            border: 1px solid var(--orange);
-        }
-
-        /* ⭐️ [신규] 저장 제한 안내 스타일 ⭐️ */
         .legend-save-limit {
-            color: var(--primary); /* 파란색으로 강조 */
-            font-weight: 600; /* 살짝 굵게 */
+            color: var(--primary);
+            font-weight: 600;
         }
         .legend-save-limit i {
-            margin-right: 3px; /* 아이콘과 텍스트 간격 */
+            margin-right: 3px;
         }
+
         .university-list { padding: 10px 20px 20px 20px; }
         .university-card { background-color: #fff; border-radius: var(--border-radius); margin-bottom: 15px; padding: 15px; box-shadow: var(--card-shadow); font-size: 14px; transition: var(--transition); position: relative; overflow: hidden; display: block; }
         .university-card.hidden-by-filter { display: none; }
@@ -102,11 +131,9 @@
         .uni-name { font-weight: 700; font-size: 17px; margin-bottom: 3px; flex-grow: 1; padding-right: 50px; }
         .dept-name { color: #555; margin-bottom: 10px; font-size: 14px; }
         .uni-info { margin-bottom: 10px; }
-        
-        /* ⭐️ 기본 태그 스타일 (기존) */
+
         .uni-info span { display: inline-block; background-color: var(--gray-light); color: #555; font-size: 11px; padding: 3px 8px; border-radius: 10px; margin-right: 5px; margin-bottom: 5px; line-height: 1.4; }
-        
-        /* ⭐️ 과목/비율 태그 스타일 */
+
         .subject-tags-wrapper {
             display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px;
         }
@@ -117,30 +144,25 @@
             display: inline-block;
             font-size: 11px;
             padding: 3px 8px;
-            border-radius: 6px; /* 둥근 사각형 */
+            border-radius: 6px;
             font-weight: 600;
             line-height: 1.4;
         }
-        /* 1. 필수 과목 (파랑) */
         .uni-info .tag-required {
             color: var(--primary);
-            background-color: #e7f3ff; /* 연한 파랑 */
+            background-color: #e7f3ff;
             border: 1px solid var(--primary);
         }
-        /* 2. 선택 과목 (주황) */
         .uni-info .tag-optional {
             color: var(--orange);
-            background-color: #fff8f0; /* 연한 주황 */
+            background-color: #fff8f0;
             border: 1px solid var(--orange);
         }
-        /* 3. 반영 없음 / 전체 비율 (회색) */
         .uni-info .tag-none {
             color: #555;
             background-color: #f0f0f0;
             border: 1px solid var(--gray);
         }
-
-        /* ⭐️ [신규] 1단계 태그 스타일 (빨강) */
         .uni-info .tag-stage {
             display: inline-block;
             font-size: 11px;
@@ -153,14 +175,14 @@
             background-color: #fdeeee;
             border: 1px solid var(--danger);
         }
-        
+
         .uni-score-section {
-             margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--gray-light);
-             display: flex;
-             justify-content: space-between;
-             align-items: center;
-             gap: 15px;
-             flex-wrap: wrap;
+            margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         .uni-cutoff-score {
             font-size: 13px; font-weight: 500; color: var(--warning); text-align: left;
@@ -169,10 +191,12 @@
         .uni-calculated-score { font-size: 15px; font-weight: 700; color: var(--primary); text-align: right; }
         .uni-calculated-score .score-value { font-size: 17px; margin-left: 5px; }
         .uni-calculated-score .loading-spinner { font-size: 14px; color: var(--gray); margin-left: 5px; }
+
         .save-button { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray); transition: color 0.2s; padding: 5px; }
         .save-button:hover { color: var(--primary); }
         .save-button.saved { color: var(--success); }
         .save-button.limit-reached { color: var(--gray); cursor: not-allowed; opacity: 0.6; }
+
         .message-area { text-align: center; color: var(--gray); padding: 30px; }
     </style>
 </head>
@@ -187,23 +211,18 @@
         const EXCLUDE_EVENTS_LIST = [ "좌전굴", "체전굴", "체후굴", "메디신볼던지기", "윗몸일으키기", "제자리멀리뛰기" ];
         let allUniversitiesData = [];
         let cutoffsMap = {}; // 지점컷 저장용
+        let currentSearchQuery = ''; // 🔍 검색어 상태
 
-        // ⭐️ 과목 태그 포맷팅 헬퍼 함수
+        // 과목 태그 포맷팅 헬퍼
         function formatSubjectTag(raw) {
             if (!raw || raw.trim() === '') {
                 return null; 
             }
             const s = raw.trim();
             if (s.startsWith('(') && s.endsWith(')')) {
-                return {
-                    text: s.slice(1, -1), // 괄호 안의 내용 (예: "30", "70/30", "감점")
-                    type: 'optional' 
-                };
+                return { text: s.slice(1, -1), type: 'optional' };
             } else {
-                return {
-                    text: s, // 내용 그대로 (예: "30", "가산점", "필수")
-                    type: 'required' 
-                };
+                return { text: s, type: 'required' };
             }
         }
     </script>
@@ -211,9 +230,22 @@
     <div class="header">
         <h2>대학 찾기</h2>
         <div class="header-icons">
-            <button id="searchBtn" title="대학명 검색 (미구현)"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button id="searchBtn" title="대학명/학과명 검색"><i class="fa-solid fa-magnifying-glass"></i></button>
             <button id="filterBtn" title="필터 열기/닫기"><i class="fa-solid fa-filter"></i></button>
         </div>
+    </div>
+
+    <!-- 🔍 검색 바 (필터 적용 후 카드에서만 검색) -->
+    <div class="search-bar" id="searchBar">
+        <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="대학명 또는 학과명으로 검색"
+        >
+        <button id="searchClearBtn" class="search-clear-btn" title="검색 초기화">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
     </div>
 
     <div class="filter-panel" id="filterPanel">
@@ -252,8 +284,7 @@
         
         <div class="filter-group">
             <label><i class="fa-solid fa-person-running"></i> 제외할 실기 종목 (선택 시 해당 종목 없는 대학만 표시)</label>
-            <div class="filter-options" id="excludeEventsFilters">
-                </div>
+            <div class="filter-options" id="excludeEventsFilters"></div>
         </div>
         <div class="filter-actions">
             <button class="reset-btn" onclick="resetFilters()">초기화</button>
@@ -267,6 +298,7 @@
         <button class="gun-filter" data-gun-filter="나">나군</button>
         <button class="gun-filter" data-gun-filter="다">다군</button>
     </div>
+
     <div class="tag-legend-container" id="tagLegendContainer">
         <span class="legend-item">
             <span class="legend-box tag-required"></span> : 필수반영
@@ -278,7 +310,6 @@
             <i class="fa-solid fa-circle-info"></i> 각 군당 3개 저장 가능
         </span>
     </div>
-    <div class="university-list" id="universityList">
 
     <div class="university-list" id="universityList">
         <p class="message-area" id="messageArea">필터를 설정하고 '적용하기' 버튼을 눌러주세요.</p>
@@ -292,24 +323,52 @@
         const gunFilterButtonsContainer = document.getElementById('gunFilterButtons');
         const tagLegendContainer = document.getElementById('tagLegendContainer');
 
+        const searchBtn = document.getElementById('searchBtn');
+        const searchBar = document.getElementById('searchBar');
+        const searchInput = document.getElementById('searchInput');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+
         document.addEventListener('DOMContentLoaded', async () => {
             if (!token) {
-                 alert('로그인이 필요합니다.');
-                 window.parent.location.href = 'student_login.html';
-                 return;
+                alert('로그인이 필요합니다.');
+                window.parent.location.href = 'student_login.html';
+                return;
             }
-            await loadStudentProfile(); // 1. 프로필 로드 (학년도 확인)
+            await loadStudentProfile();
             if (currentStudentProfile) {
-                // 2. 프로필 로드 성공 후 병렬 로드
                 await Promise.all([
-                    loadSavedUniversities(), // 저장 목록
-                    loadCutoffData(),        // 지점컷
-                    loadRegionFilters()      // ⭐️ 지역 필터 목록
+                    loadSavedUniversities(),
+                    loadCutoffData(),
+                    loadRegionFilters()
                 ]);
-                // 3. 나머지 UI 설정
                 populateEventFilters();
-                setupActionButtons(); // ⭐️ 지역 필터 제외한 버튼들 이벤트 연결
+                setupActionButtons();
             }
+
+            // 🔍 검색 버튼 토글
+            searchBtn.addEventListener('click', () => {
+                const isOpen = searchBar.classList.toggle('open');
+                if (isOpen) {
+                    searchInput.focus();
+                } else {
+                    // 검색창 닫을 때도 현재 검색어 기준으로 필터 유지
+                    filterCardsByAllCriteria();
+                }
+            });
+
+            // 🔍 입력할 때마다 필터링 (이미 렌더된 카드들 위에서만)
+            searchInput.addEventListener('input', () => {
+                currentSearchQuery = searchInput.value;
+                filterCardsByAllCriteria();
+            });
+
+            // ❌ 검색 초기화 버튼
+            searchClearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                currentSearchQuery = '';
+                filterCardsByAllCriteria();
+                searchInput.focus();
+            });
         });
 
         async function loadStudentProfile() {
@@ -335,7 +394,7 @@
         async function loadSavedUniversities() {
             savedUniversities = {};
             savedCountsByGun = { '가': 0, '나': 0, '다': 0 };
-             try {
+            try {
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/saved-universities`, { headers: { 'Authorization': 'Bearer ' + token }});
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] 저장 목록 로드 실패`);
@@ -349,7 +408,7 @@
                 console.error('저장된 대학 목록 로드 실패:', err);
             }
         }
-        
+
         async function loadCutoffData() {
             cutoffsMap = {};
             if (!currentStudentProfile || !currentStudentProfile.학년도) return;
@@ -366,7 +425,9 @@
                         cutoffsMap[item.U_ID] = item.지점_수능컷;
                     });
                     console.log('Branch Cutoff Data Loaded:', cutoffsMap);
-                } else { console.warn('No cutoffs data received.'); }
+                } else {
+                    console.warn('No cutoffs data received.');
+                }
             } catch (err) {
                 console.error('컷점수 로드 실패:', err);
             }
@@ -409,11 +470,10 @@
                 });
 
             } catch (err) {
-                 console.error('지역 필터 로드 실패:', err);
-                 container.innerHTML = `<span style="font-size: 12px; color: var(--danger);">오류: ${err.message}</span>`;
+                console.error('지역 필터 로드 실패:', err);
+                container.innerHTML = `<span style="font-size: 12px; color: var(--danger);">오류: ${err.message}</span>`;
             }
         }
-
 
         filterBtn.addEventListener('click', () => {
             filterPanel.classList.toggle('open');
@@ -433,11 +493,18 @@
         }
 
         function setupActionButtons() {
-            document.querySelectorAll('.filter-teaching').forEach(button => button.addEventListener('click', () => handleSingleSelect(button, '.filter-teaching')));
-            document.querySelectorAll('.filter-exclude-event').forEach(button => button.addEventListener('click', () => button.classList.toggle('active')));
-            
-            document.querySelectorAll('.filter-exclude-subject').forEach(button => button.addEventListener('click', () => button.classList.toggle('active')));
-            document.querySelectorAll('.filter-inquiry-count').forEach(button => button.addEventListener('click', () => handleSingleSelect(button, '.filter-inquiry-count')));
+            document.querySelectorAll('.filter-teaching').forEach(button =>
+                button.addEventListener('click', () => handleSingleSelect(button, '.filter-teaching'))
+            );
+            document.querySelectorAll('.filter-exclude-event').forEach(button =>
+                button.addEventListener('click', () => button.classList.toggle('active'))
+            );
+            document.querySelectorAll('.filter-exclude-subject').forEach(button =>
+                button.addEventListener('click', () => button.classList.toggle('active'))
+            );
+            document.querySelectorAll('.filter-inquiry-count').forEach(button =>
+                button.addEventListener('click', () => handleSingleSelect(button, '.filter-inquiry-count'))
+            );
 
             document.querySelectorAll('.gun-filter').forEach(button => {
                 button.addEventListener('click', () => {
@@ -446,16 +513,17 @@
                     filterCardsByAllCriteria();
                 });
             });
+
             document.querySelectorAll('.filter-teaching').forEach(button => {
                 button.addEventListener('click', () => {
-                     setTimeout(filterCardsByAllCriteria, 0); 
+                    setTimeout(filterCardsByAllCriteria, 0);
                 });
             });
         }
 
         function handleSingleSelect(clickedButton, selector) {
-             document.querySelectorAll(`${selector}.active`).forEach(b => b.classList.remove('active'));
-             clickedButton.classList.add('active');
+            document.querySelectorAll(`${selector}.active`).forEach(b => b.classList.remove('active'));
+            clickedButton.classList.add('active');
         }
 
         function handleMultiSelectWithAll(clickedButton, selector, allValue) {
@@ -465,10 +533,10 @@
                 document.querySelectorAll(`${selector}.active`).forEach(b => b.classList.remove('active'));
                 if (allButton) allButton.classList.add('active');
             } else {
-                if(allButton) allButton.classList.remove('active');
+                if (allButton) allButton.classList.remove('active');
                 clickedButton.classList.toggle('active');
                 if (!document.querySelector(`${selector}.active`)) {
-                    if(allButton) allButton.classList.add('active');
+                    if (allButton) allButton.classList.add('active');
                 }
             }
         }
@@ -476,7 +544,9 @@
         function filterCardsByAllCriteria() {
             const selectedGun = document.querySelector('.gun-filter.active')?.dataset.gunFilter || '전체';
             const selectedTeaching = document.querySelector('.filter-teaching.active')?.dataset.teaching || '전체';
-            console.log("Filtering by Gun:", selectedGun, "Teaching:", selectedTeaching);
+            const q = (currentSearchQuery || '').trim().toLowerCase();   // 🔍 검색어
+
+            console.log("Filtering by Gun:", selectedGun, "Teaching:", selectedTeaching, "Query:", q);
 
             const cards = universityList.querySelectorAll('.university-card');
             let visibleCount = 0;
@@ -487,11 +557,19 @@
 
                 const gunMatch = (selectedGun === '전체' || cardGun === selectedGun);
                 let teachingMatch = false;
-                if (selectedTeaching === '전체') { teachingMatch = true; }
-                else if (selectedTeaching === 'O') { teachingMatch = (cardTeaching === 'O' || cardTeaching === '△'); }
-                else { teachingMatch = (cardTeaching === selectedTeaching); }
+                if (selectedTeaching === '전체') {
+                    teachingMatch = true;
+                } else if (selectedTeaching === 'O') {
+                    teachingMatch = (cardTeaching === 'O' || cardTeaching === '△');
+                } else {
+                    teachingMatch = (cardTeaching === selectedTeaching);
+                }
 
-                if (gunMatch && teachingMatch) {
+                const uniName = (card.querySelector('.uni-name')?.textContent || '').toLowerCase();
+                const deptName = (card.querySelector('.dept-name')?.textContent || '').toLowerCase();
+                const textMatch = !q || uniName.includes(q) || deptName.includes(q);
+
+                if (gunMatch && teachingMatch && textMatch) {
                     card.classList.remove('hidden-by-filter');
                     visibleCount++;
                 } else {
@@ -500,7 +578,7 @@
             });
 
             if (visibleCount === 0 && cards.length > 0) {
-                messageArea.textContent = '선택한 조건에 맞는 대학이 없습니다.';
+                messageArea.textContent = '선택한 조건 및 검색어에 맞는 대학이 없습니다.';
                 messageArea.style.display = 'block';
             } else if (cards.length > 0) {
                 messageArea.style.display = 'none';
@@ -509,10 +587,11 @@
 
         async function applyFilters() {
             if (!currentStudentProfile || !currentStudentProfile.scores) {
-                 messageArea.textContent = currentStudentProfile ? '수능 성적 정보가 없습니다. 마이페이지에서 먼저 입력해주세요.' : '학생 정보를 먼저 불러와야 합니다.';
-                 messageArea.style.display = 'block';
-                 gunFilterButtonsContainer.style.display = 'none';
-                 return;
+                messageArea.textContent = currentStudentProfile ? '수능 성적 정보가 없습니다. 마이페이지에서 먼저 입력해주세요.' : '학생 정보를 먼저 불러와야 합니다.';
+                messageArea.style.display = 'block';
+                gunFilterButtonsContainer.style.display = 'none';
+                tagLegendContainer.style.display = 'none';
+                return;
             }
             messageArea.textContent = '대학 목록 검색 중... 잠시만 기다려주세요.';
             messageArea.style.display = 'block';
@@ -545,9 +624,9 @@
                 allUniversitiesData = listData.universities || [];
 
                 if (allUniversitiesData.length === 0) {
-                     messageArea.textContent = '조건에 맞는 대학이 없습니다.';
-                     messageArea.style.display = 'block';
-                     return;
+                    messageArea.textContent = '조건에 맞는 대학이 없습니다.';
+                    messageArea.style.display = 'block';
+                    return;
                 }
 
                 messageArea.textContent = `총 ${allUniversitiesData.length}개 대학 정보 로딩 및 점수 계산 중...`;
@@ -563,55 +642,47 @@
                         universityList.appendChild(card);
                         createdCardsCount++;
                     });
-                     messageArea.textContent = `총 ${allUniversitiesData.length}개 중 ${Math.min(i + batchSize, allUniversitiesData.length)}개 처리 완료...`;
+                    messageArea.textContent = `총 ${allUniversitiesData.length}개 중 ${Math.min(i + batchSize, allUniversitiesData.length)}개 처리 완료...`;
                 }
 
                 if (createdCardsCount === 0 && allUniversitiesData.length > 0) {
                     messageArea.textContent = '결과를 표시하는 중 오류가 발생했습니다.';
                     messageArea.style.display = 'block';
                 } else if (createdCardsCount > 0) {
-                     messageArea.style.display = 'none';
-                     gunFilterButtonsContainer.style.display = 'flex';
-                     tagLegendContainer.style.display = 'flex';
-                     document.querySelectorAll('.gun-filter.active').forEach(b => b.classList.remove('active'));
-                     document.querySelector('.gun-filter[data-gun-filter="전체"]').classList.add('active');
-                     filterCardsByAllCriteria();
+                    messageArea.style.display = 'none';
+                    gunFilterButtonsContainer.style.display = 'flex';
+                    tagLegendContainer.style.display = 'flex';
+                    document.querySelectorAll('.gun-filter.active').forEach(b => b.classList.remove('active'));
+                    document.querySelector('.gun-filter[data-gun-filter="전체"]').classList.add('active');
+                    filterCardsByAllCriteria();
                 } else {
                     messageArea.textContent = '조건에 맞는 대학이 없습니다.';
                     messageArea.style.display = 'block';
                 }
 
             } catch (err) {
-                 if (err instanceof SyntaxError) {
-                     console.error("JSON 파싱 오류:", err);
-                     messageArea.textContent = '서버 응답 형식이 잘못되었습니다. (JSON 오류)';
-                 } else {
-                     console.error(err);
-                     messageArea.textContent = `오류: ${err.message}`;
-                 }
-                 messageArea.style.color = 'red';
-                 messageArea.style.display = 'block';
+                if (err instanceof SyntaxError) {
+                    console.error("JSON 파싱 오류:", err);
+                    messageArea.textContent = '서버 응답 형식이 잘못되었습니다. (JSON 오류)';
+                } else {
+                    console.error(err);
+                    messageArea.textContent = `오류: ${err.message}`;
+                }
+                messageArea.style.color = 'red';
+                messageArea.style.display = 'block';
             } finally {
-                 if (universityList.children.length > 0 && messageArea.style.display !== 'none') {
-                     // Keep message
-                 } else if (universityList.children.length === 0 && (messageArea.textContent.includes('검색 중') || messageArea.textContent.includes('처리 완료'))) {
-                     if (!messageArea.textContent.includes('조건에 맞는 대학이 없습니다')) {
-                        messageArea.textContent = '오류가 발생했거나 결과가 없습니다.';
-                        messageArea.style.color = 'red';
-                        messageArea.style.display = 'block';
-                     }
-                 }
-                 if (universityList.children.length === 0) {
+                if (universityList.children.length === 0) {
                     gunFilterButtonsContainer.style.display = 'none';
                     tagLegendContainer.style.display = 'none';
-                 }
+                }
             }
         }
 
         async function processUniversity(uni) {
             try {
                 const detailRes = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ U_ID: uni.U_ID, year: currentStudentProfile.학년도 })
                 });
                 if (!detailRes.ok) throw new Error(`상세 정보 로드 실패 (${detailRes.status})`);
@@ -620,14 +691,22 @@
                 const F_data = detailData.data;
 
                 const calculateRes = await fetch(`${JUNGSI_SVR}/jungsi/calculate`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ U_ID: uni.U_ID, year: currentStudentProfile.학년도, studentScores: { subjects: convertProfileToSubjects(currentStudentProfile.scores) } })
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({
+                        U_ID: uni.U_ID,
+                        year: currentStudentProfile.학년도,
+                        studentScores: { subjects: convertProfileToSubjects(currentStudentProfile.scores) }
+                    })
                 });
                 if (!calculateRes.ok) throw new Error(`점수 계산 실패 (${calculateRes.status})`);
                 const calculateData = await calculateRes.json();
                 let calculatedScore = null;
-                if (calculateData.success && calculateData.result.totalScore) calculatedScore = parseFloat(calculateData.result.totalScore).toFixed(2);
-                else console.warn(`점수 계산 실패 (U_ID: ${uni.U_ID}): ${calculateData.message}`);
+                if (calculateData.success && calculateData.result.totalScore) {
+                    calculatedScore = parseFloat(calculateData.result.totalScore).toFixed(2);
+                } else {
+                    console.warn(`점수 계산 실패 (U_ID: ${uni.U_ID}): ${calculateData.message}`);
+                }
 
                 const card = createUniversityCard(uni, F_data, calculatedScore);
                 card.dataset.teaching = uni.teacher || '';
@@ -644,7 +723,13 @@
             const subjects = [];
             const addSubject = (name, subjectKey, stdKey, pctKey, gradeKey) => {
                 if (scores[subjectKey] || scores[gradeKey]) {
-                    subjects.push({ name: name, subject: scores[subjectKey] || null, std: scores[stdKey] || null, percentile: scores[pctKey] || null, grade: scores[gradeKey] || null });
+                    subjects.push({
+                        name: name,
+                        subject: scores[subjectKey] || null,
+                        std: scores[stdKey] || null,
+                        percentile: scores[pctKey] || null,
+                        grade: scores[gradeKey] || null
+                    });
                 }
             };
             addSubject('국어', '국어_선택과목', '국어_표준점수', '국어_백분위', '국어_등급');
@@ -666,17 +751,19 @@
             document.querySelectorAll('.filter-exclude-event.active').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.gun-filter.active').forEach(b => b.classList.remove('active'));
             document.querySelector('.gun-filter[data-gun-filter="전체"]').classList.add('active');
+
+            currentSearchQuery = '';
+            if (searchInput) searchInput.value = '';
+
             applyFilters();
         }
 
-        // =============================================
-        // ⭐️ [최종 수정] 대학 카드 HTML 생성 함수 (모든 태그 반영)
-        // =============================================
+        // ============================ 대학 카드 생성 ============================
         function createUniversityCard(uni, fData, calculatedScore) {
             const div = document.createElement('div');
             div.className = 'university-card';
             
-            // --- 1. 과목별 반영 태그 (국/수/영/탐/한) ---
+            // 1. 과목별 반영 태그
             const subjects = [];
             const korTag = formatSubjectTag(uni.국어_raw);
             if (korTag) subjects.push({ name: '국', ...korTag });
@@ -689,7 +776,7 @@
 
             const tamTag = formatSubjectTag(uni.탐구_raw);
             if (tamTag) {
-                const count = uni.탐구수_raw || ''; // "1", "2", or ""
+                const count = uni.탐구수_raw || '';
                 subjects.push({ name: `탐${count}`, ...tamTag });
             }
             
@@ -701,50 +788,57 @@
                 subjectsHtml = '<div class="subject-tags">' + subjects.map(tag => {
                     let displayText = tag.text;
                     if (!isNaN(parseFloat(displayText)) && isFinite(displayText)) {
-                         displayText = `${displayText}%`; // "30" -> "30%"
+                        displayText = `${displayText}%`;
                     }
-                    // ⭐️ 가독성 수정: "국" + " " + "30%"
                     return `<span class="tag-subject tag-${tag.type}">${tag.name} ${displayText}</span>`;
                 }).join(' ') + '</div>';
             } else {
                 subjectsHtml = '<div class="subject-tags"><span class="tag-subject tag-none">수능반영X</span></div>';
             }
 
-            // --- 2. ⭐️ 전체 반영 비율 태그 (수/내/실) ---
+            // 2. 전체 비율 태그
             const suneungR = uni.suneungRatio || 0;
             const naeshinR = uni.naeshinRatio || 0;
             const practicalR = uni.practicalRatio || 0;
-            // 수능/내신/실기 중 하나라도 0% 이상이면 태그 생성
             let ratioHtml = '';
             if (suneungR > 0 || naeshinR > 0 || practicalR > 0) {
-                 ratioHtml = `<div class="subject-tags">
-                               <span class="tag-subject tag-none">수능 ${suneungR}% + 내신 ${naeshinR}% + 실기 ${practicalR}%</span>
-                           </div>`;
+                ratioHtml = `
+                    <div class="subject-tags">
+                        <span class="tag-subject tag-none">
+                            수능 ${suneungR}% + 내신 ${naeshinR}% + 실기 ${practicalR}%
+                        </span>
+                    </div>`;
             }
 
-            // --- 3. ⭐️ 단계별 전형 태그 (1단계 5배수) ---
+            // 3. 단계별 전형 태그
             let stageTag = '';
             if (uni.stageMultiple && Number(uni.stageMultiple) > 0) {
-                // ⭐️ CSS에 .tag-stage (빨간색) 스타일 추가됨
                 stageTag = `<span class="tag-stage">1단계 ${uni.stageMultiple}배수</span>`;
             }
 
-            // --- 4. 기타 정보 태그 (군, 지역, 교직, 정원) ---
-             const infoTags = [
+            // 4. 기타 정보 태그
+            const infoTags = [
                 uni.gun ? `<span>${uni.gun}</span>` : '',
                 uni.regionWide ? `<span>${uni.regionWide}</span>` : '',
-                uni.teacher === 'O' ? '<span style="color: green; border: 1px solid green; background: #e6f7e6;">교직O</span>' :
-                (uni.teacher === '△' ? '<span style="color: orange; border: 1px solid orange; background: #fff3e0;">교직△</span>' :
-                (uni.teacher === 'X' ? '<span style="color: red; border: 1px solid red; background: #ffe6e6;">교직X</span>' : '')),
-                uni.quota ? `<span>정원 ${uni.quota}명</span>` : (fData?.모집정원 ? `<span>정원 ${fData.모집정원}명</span>` : ''),
+                uni.teacher === 'O'
+                    ? '<span style="color: green; border: 1px solid green; background: #e6f7e6;">교직O</span>'
+                    : (uni.teacher === '△'
+                        ? '<span style="color: orange; border: 1px solid orange; background: #fff3e0;">교직△</span>'
+                        : (uni.teacher === 'X'
+                            ? '<span style="color: red; border: 1px solid red; background: #ffe6e6;">교직X</span>'
+                            : '')
+                    ),
+                uni.quota
+                    ? `<span>정원 ${uni.quota}명</span>`
+                    : (fData?.모집정원 ? `<span>정원 ${fData.모집정원}명</span>` : ''),
             ].filter(Boolean).join('');
 
-            // --- 5. 실기 종목 태그 ---
+            // 5. 실기 종목 태그
             const events = uni.events && uni.events.length > 0
                 ? `<span>실기: ${uni.events.join(', ')}</span>`
                 : '<span style="color: gray; border: 1px solid gray; background: #f0f0f0;">실기X</span>';
 
-            // --- 6. 저장 버튼 로직 (동일) ---
+            // 6. 저장 버튼
             const isSaved = savedUniversities[uni.U_ID] !== undefined;
             const gun = uni.gun || '';
             const isLimitReached = gun && savedCountsByGun[gun] >= MAX_SAVE_PER_GUN && !isSaved;
@@ -752,19 +846,22 @@
             let saveButtonIcon = 'fa-regular fa-heart';
             let saveButtonTitle = '저장하기';
             if (isSaved) {
-                saveButtonClass += ' saved'; saveButtonIcon = 'fa-solid fa-heart'; saveButtonTitle = '저장됨 (클릭하여 취소)';
+                saveButtonClass += ' saved';
+                saveButtonIcon = 'fa-solid fa-heart';
+                saveButtonTitle = '저장됨 (클릭하여 취소)';
             } else if (isLimitReached) {
-                 saveButtonClass += ' limit-reached'; saveButtonTitle = `${gun}군 저장 (${MAX_SAVE_PER_GUN}개) 제한 도달`;
+                saveButtonClass += ' limit-reached';
+                saveButtonTitle = `${gun}군 저장 (${MAX_SAVE_PER_GUN}개) 제한 도달`;
             }
 
-            // --- 7. 지점컷 로직 (동일) ---
+            // 7. 지점컷
             const branchCutoffScore = cutoffsMap[uni.U_ID];
             let cutoffHtml = '<span style="color: var(--gray);">지점컷 없음</span>';
             if (branchCutoffScore !== null && branchCutoffScore !== undefined) {
                 cutoffHtml = `지점컷: <span class="score-value">${branchCutoffScore}점</span>`;
             }
 
-            // --- 8. ⭐️ HTML 조립 (모든 태그를 .uni-info 안에 배치) ---
+            // 8. HTML 조립
             div.innerHTML = `
                 <div class="uni-header">
                     <div class="uni-name">${uni.university}</div>
@@ -775,17 +872,35 @@
                 <div class="dept-name">${uni.department}</div>
                 
                 <div class="uni-info">
-                    ${subjectsHtml} ${ratioHtml}    ${stageTag}     ${infoTags}     ${events}       </div>
+                    ${subjectsHtml}
+                    ${ratioHtml}
+                    ${stageTag}
+                    ${infoTags}
+                    ${events}
+                </div>
 
                 <div class="uni-score-section">
-                    <div class="uni-cutoff-score">${cutoffHtml}</div> <div class="uni-calculated-score"> 내 점수: ${calculatedScore !== null ? `<span class="score-value">${calculatedScore}점</span>` : '<span class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 계산중..</span>'} </div>
+                    <div class="uni-cutoff-score">${cutoffHtml}</div>
+                    <div class="uni-calculated-score">
+                        내 점수:
+                        ${
+                            calculatedScore !== null
+                                ? `<span class="score-value">${calculatedScore}점</span>`
+                                : '<span class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> 계산중..</span>'
+                        }
+                    </div>
                 </div>
             `;
-            // =============================================
 
-             const saveBtn = div.querySelector('.save-button');
-             if (saveBtn && !isLimitReached) saveBtn.onclick = (e) => { e.stopPropagation(); handleSaveClick(saveBtn, uni.U_ID, gun); };
-             else if (saveBtn && isLimitReached) saveBtn.onclick = (e) => e.stopPropagation();
+            const saveBtn = div.querySelector('.save-button');
+            if (saveBtn && !isLimitReached) {
+                saveBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    handleSaveClick(saveBtn, uni.U_ID, gun);
+                };
+            } else if (saveBtn && isLimitReached) {
+                saveBtn.onclick = (e) => e.stopPropagation();
+            }
 
             return div;
         }
@@ -795,10 +910,9 @@
             const savedId = savedUniversities[uId];
             const scoreToSave = button.dataset.score ? parseFloat(button.dataset.score) : null;
 
-            // ⭐️ 1. 저장하려는 동작일 때 3개 꽉 찼는지 한 번 더 확인
             if (!isCurrentlySaved && gun && savedCountsByGun[gun] >= MAX_SAVE_PER_GUN) {
                 alert(`${gun}군은 최대 ${MAX_SAVE_PER_GUN}개까지만 저장할 수 있습니다.`);
-                return; // 함수 종료
+                return;
             }
 
             button.disabled = true;
@@ -811,94 +925,83 @@
                 let body = {};
 
                 if (isCurrentlySaved && savedId) {
-                    // [저장 취소]
                     apiUrl = `${JUNGSI_SVR}/jungsi/student/remove-university`;
                     method = 'POST';
                     body = { savedId: savedId };
                 } else {
-                    // [저장] (위에서 3개 찼는지 이미 검사했음)
                     apiUrl = `${JUNGSI_SVR}/jungsi/student/save-university`;
                     method = 'POST';
                     body = { universityId: uId, 학년도: currentStudentProfile.학년도, calculatedScore: scoreToSave };
                 }
                 
-                const res = await fetch(apiUrl, { method: method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(body) });
+                const res = await fetch(apiUrl, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(body)
+                });
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || (isCurrentlySaved ? '취소 실패' : '저장 실패')}`);
                 if (!data.success) throw new Error(data.message || (isCurrentlySaved ? '취소 실패 (Success: false)' : '저장 실패 (Success: false)'));
 
-                // ⭐️ 2. (성공 시) 상태 업데이트
                 if (isCurrentlySaved) {
-                    // 2a. 저장 취소 성공
-                    delete savedUniversities[uId]; 
+                    delete savedUniversities[uId];
                     if (gun && savedCountsByGun[gun] > 0) savedCountsByGun[gun]--;
-                    console.log('저장 취소 성공:', uId, savedCountsByGun); 
+                    console.log('저장 취소 성공:', uId, savedCountsByGun);
                 } else {
-                    // 2b. 저장 성공
-                    savedUniversities[uId] = data.savedId || true; 
+                    savedUniversities[uId] = data.savedId || true;
                     if (gun) savedCountsByGun[gun]++;
-                    console.log('저장 성공:', uId, savedCountsByGun); 
+                    console.log('저장 성공:', uId, savedCountsByGun);
                 }
-                // ⭐️ 3. (중요) 성공 시 모든 버튼 상태 업데이트
-                updateSaveButtonStates(gun); 
+
+                updateSaveButtonStates(gun);
 
             } catch (err) {
-                // ⭐️ 4. (실패 시)
                 console.error('저장/취소 오류:', err);
-                if (err.message !== 'Limit reached') { // 'Limit reached'는 위에서 잡아서 alert 안 뜸
-                     alert(`오류: ${err.message}`);
+                if (err.message !== 'Limit reached') {
+                    alert(`오류: ${err.message}`);
                 }
-                // ⭐️ 에러 시 버튼/아이콘 원상복구
-                button.disabled = false; 
-                if (isCurrentlySaved) icon.className = 'fa-solid fa-heart'; else icon.className = 'fa-regular fa-heart';
-            } 
-            // ⭐️ 5. (Finally 블록 삭제)
-            // updateSaveButtonStates가 모든 버튼의 최종 상태를 관리하므로 finally 삭제
+                button.disabled = false;
+                if (isCurrentlySaved) icon.className = 'fa-solid fa-heart';
+                else icon.className = 'fa-regular fa-heart';
+            }
         }
-function updateSaveButtonStates(targetGun) {
+
+        function updateSaveButtonStates(targetGun) {
             if (!targetGun) return;
             
-            // 1. 현재 '가'군 저장 개수 (e.g., 2개)로 제한 여부 확인
-            const isLimitReachedForTargetGun = savedCountsByGun[targetGun] >= MAX_SAVE_PER_GUN; // false
+            const isLimitReachedForTargetGun = savedCountsByGun[targetGun] >= MAX_SAVE_PER_GUN;
             
-            // 2. '가'군의 *모든* 버튼을 순회 (고려대, 국민대, 연세대...)
             document.querySelectorAll(`.save-button[data-gun="${targetGun}"]`).forEach(btn => {
                 const uId = btn.dataset.uid;
                 const gun = btn.dataset.gun;
                 const isSaved = savedUniversities[uId] !== undefined;
-                
-                // 3. (중요) 일단 모든 버튼에 올바른 클릭 리스너를 다시 설정
-                //    (이벤트 리스너가 중복으로 쌓이지 않도록, onclick을 사용)
-                btn.onclick = (e) => { e.stopPropagation(); handleSaveClick(btn, uId, gun); };
+
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    handleSaveClick(btn, uId, gun);
+                };
 
                 if (!isSaved) {
-                    // 4a. (국민대, 고려대) 저장 안 된 버튼
-                    btn.classList.remove('saved'); // ⭐️ 녹색 테두리 제거
+                    btn.classList.remove('saved');
                     
                     if (isLimitReachedForTargetGun) {
-                        // ⭐️ 3/3 꽉 차서 저장 불가능한 상태
-                        btn.classList.add('limit-reached'); 
-                        btn.disabled = true; 
+                        btn.classList.add('limit-reached');
+                        btn.disabled = true;
                         btn.title = `${targetGun}군 저장 (${MAX_SAVE_PER_GUN}개) 제한 도달`;
                         btn.querySelector('i').className = 'fa-regular fa-heart';
-                        // ⭐️ (중요) 꽉 찼으면 리스너를 다시 '아무것도 안 함'으로 막음
-                        btn.onclick = (e) => e.stopPropagation(); 
+                        btn.onclick = (e) => e.stopPropagation();
                     } else {
-                        // ⭐️ 2/3 상태 (저장 가능)
-                        btn.classList.remove('limit-reached'); 
-                        btn.disabled = false; 
-                        btn.title = '저장하기'; 
+                        btn.classList.remove('limit-reached');
+                        btn.disabled = false;
+                        btn.title = '저장하기';
                         btn.querySelector('i').className = 'fa-regular fa-heart';
-                        // (리스너는 3번에서 이미 설정됨)
                     }
                 } else {
-                    // 4b. (연세대) 이미 저장된 버튼
-                    btn.classList.add('saved'); // ⭐️ 녹색 테두리 추가
-                    btn.classList.remove('limit-reached'); 
-                    btn.disabled = false; 
-                    btn.title = '저장됨 (클릭하여 취소)'; 
+                    btn.classList.add('saved');
+                    btn.classList.remove('limit-reached');
+                    btn.disabled = false;
+                    btn.title = '저장됨 (클릭하여 취소)';
                     btn.querySelector('i').className = 'fa-solid fa-heart';
-                    // (리스너는 3번에서 이미 설정됨)
                 }
             });
         }
@@ -909,8 +1012,6 @@ function updateSaveButtonStates(targetGun) {
                 window.parent.location.href = 'student_login.html';
             }
         }
-
     </script>
-
 </body>
 </html>
