@@ -1,117 +1,392 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>로그인</title>
-<style>
-body { font-family:sans-serif; max-width:360px; margin:40px auto; text-align:center; padding: 0 20px; }
-/* ⭐️ 로고 스타일 추가 */
-.logo {
-    width: 200px; /* 로고 크기, 적절히 조절해 */
-    margin-bottom: 10px;
-}
-h2 { margin-bottom: 8px; }
-input { width:100%; padding:12px; font-size:1rem; margin:8px 0; box-sizing:border-box; }
-button { width:100%; padding:12px; font-size:1rem; font-weight:600; background:#2563eb; color:#fff; border:0; border-radius:6px; cursor:pointer; margin-top:12px; }
-.status { min-height:20px; font-size:.9rem; color:#ef4444; margin-top:12px; white-space:pre-line; }
-.ok { color:#10b981; }
-.note { font-size:.8rem; color:#64748b; line-height:1.4; margin-top:0; }
-/* ⭐️ 회원가입 링크 스타일 추가 */
-.link-container {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-}
-.register-link {
-    font-size: 0.9rem;
-    color: #374151;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background-color 0.2s;
-}
-.register-link:hover {
-    background-color: #f3f4f6;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>로그인</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 360px;
+      margin: 40px auto;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .logo {
+      width: 200px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin-top: 12px;
+      font-weight: 600;
+      background: #2563eb;
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .status {
+      min-height: 20px;
+      font-size: 0.9rem;
+      color: #ef4444;
+      margin-top: 12px;
+      white-space: pre-line;
+    }
+
+    .status.ok {
+      color: #10b981;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: #64748b;
+      line-height: 1.4;
+      margin-top: 0;
+    }
+
+    .link-container {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .register-link {
+      font-size: 0.9rem;
+      color: #374151;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+      display: inline-block;
+      width: auto;
+    }
+
+    .register-link:hover {
+      background-color: #f3f4f6;
+    }
+
+    /* 비밀번호 재설정 버튼은 링크처럼 보이게 */
+    #showResetAreaBtn {
+      background: transparent;
+      color: #374151;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      width: auto;
+      margin-top: 0;
+    }
+
+    #showResetAreaBtn:hover {
+      background-color: #f3f4f6;
+    }
+  </style>
 </head>
 <body>
 
-<img src="https://github.com/seanyjeong/ilsanmaxstudent/blob/main/%EC%9D%BC%EB%A7%A5%EB%A1%9C%EA%B3%A0.png?raw=true" alt="IMAX 로고" class="logo">
+  <img
+    src="https://github.com/seanyjeong/ilsanmaxstudent/blob/main/%EC%9D%BC%EB%A7%A5%EB%A1%9C%EA%B3%A0.png?raw=true"
+    alt="IMAX 로고"
+    class="logo"
+  />
 
+  <p class="note">회원가입 후 원장님 승인이있어야 로그인되요.</p>
 
-<p class="note">회원가입 후 원장님 승인이있어야 로그인되요.</p>
+  <!-- 로그인 영역 -->
+  <input id="idInput" placeholder="아이디" />
+  <input id="pwInput" type="password" placeholder="비밀번호" />
+  <button id="loginBtn" type="button">로그인</button>
 
-<input id="idInput" placeholder="아이디" />
-<input id="pwInput" type="password" placeholder="비밀번호" />
-<button id="loginBtn">로그인</button>
+  <div id="loginStatus" class="status"></div>
 
-<div id="loginStatus" class="status"></div>
-
-<div class="link-container">
+  <!-- 회원가입 링크 -->
+  <div class="link-container">
     <a href="student_register.html" class="register-link">
-        아직 계정이 없나요? 회원가입
+      아직 계정이 없나요? 회원가입
     </a>
-</div>
+  </div>
 
-<script>
-const SVR = 'https://supermax.kr';
+  <!-- 비밀번호 재설정 열기 버튼 -->
+  <div class="link-container">
+    <button id="showResetAreaBtn" type="button">
+      비밀번호를 잊으셨나요?
+    </button>
+  </div>
 
-document.getElementById('loginBtn').addEventListener('click', async () => {
-  const userid = document.getElementById('idInput').value.trim();
-  const password = document.getElementById('pwInput').value.trim();
-  const statusEl = document.getElementById('loginStatus');
+  <!-- 비밀번호 재설정 영역 -->
+  <div id="resetArea" style="display:none; text-align:left; margin-top:16px; font-size:0.9rem;">
+    <p style="margin-bottom:8px;">① 아이디와 가입한 전화번호를 입력 후 승인번호(인증번호)를 받으세요.</p>
+    <input id="resetUserIdInput" placeholder="아이디" />
+    <input id="resetPhoneInput" placeholder="전화번호 (숫자만)" />
 
-  if (!userid || !password) {
-    statusEl.textContent = '아이디/비번을 모두 입력해주세요.';
-    return;
-  }
+    <button id="sendResetSmsBtn" type="button" style="margin-top:8px; width:100%; padding:8px;">
+      승인번호 발송
+    </button>
 
-  // 1️⃣ 먼저 학생 로그인 시도
-  let res = await fetch(`${SVR}/26susi_student/login`, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ userid, password })
-  });
-  let data = await res.json();
+    <p style="margin:12px 0 4px;">② 문자로 받은 승인번호(인증번호)를 입력하세요.</p>
+    <input id="resetCodeInput" placeholder="승인번호 / 인증번호" />
 
-  // 2️⃣ 학생 로그인 실패 시 → 원장 로그인 시도
-  if (!data.success || !data.token) {
-    res = await fetch(`${SVR}/26susi_owner/login`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ userid, password })
-    });
-    data = await res.json();
-  }
+    <button id="verifyResetCodeBtn" type="button" style="margin-top:8px; width:100%; padding:8px;">
+      승인번호 확인
+    </button>
 
-  // 3️⃣ 성공 시 토큰 저장
-  if (data.success && data.token) {
-    // ⭐️ 학생/원장 토큰을 'jwt_token'이라는 이름으로 통일해서 저장
-    localStorage.setItem('jwt_token', data.token);
-    statusEl.textContent = '로그인 성공!';
-    statusEl.className = 'status ok';
+    <p style="margin:12px 0 4px;">③ 새 비밀번호를 입력하세요.</p>
+    <input id="newPwInput" type="password" placeholder="새 비밀번호" />
+    <input id="newPwConfirmInput" type="password" placeholder="새 비밀번호 확인" />
 
-    // ⭐️ 역할에 따라 페이지 분기
-    const payload = JSON.parse(atob(data.token.split('.')[1]));
-    if (payload.role === 'owner' || payload.role === 'admin') {
-      // 원장/관리자면 승인 페이지로
-      location.href = 'admin_student_approve.html'; 
-    } else {
-      // 학생이면 대시보드로
-      location.href = 'index.html'; // (이 페이지는 만들어야 함)
+    <button id="doResetPwBtn" type="button" style="margin-top:8px; width:100%; padding:8px;">
+      비밀번호 변경
+    </button>
+
+    <div id="resetStatus" class="status"></div>
+  </div>
+
+  <script>
+    const SVR = 'https://supermax.kr';
+
+    // =========================
+    // 로그인 관련
+    // =========================
+    const idInput = document.getElementById('idInput');
+    const pwInput = document.getElementById('pwInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const statusEl = document.getElementById('loginStatus');
+
+    async function handleLogin() {
+      const userid = idInput.value.trim();
+      const password = pwInput.value.trim();
+
+      if (!userid || !password) {
+        statusEl.textContent = '아이디/비번을 모두 입력해주세요.';
+        statusEl.className = 'status';
+        return;
+      }
+
+      try {
+        statusEl.textContent = '로그인 시도 중...';
+        statusEl.className = 'status';
+
+        const res = await fetch(`${SVR}/26susi_student/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userid, password })
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.token) {
+          localStorage.setItem('jwt_token', data.token);
+          statusEl.textContent = '로그인 성공!';
+          statusEl.className = 'status ok';
+          location.href = 'index.html';
+        } else {
+          statusEl.textContent = data.message || '로그인에 실패했습니다.';
+          statusEl.className = 'status';
+        }
+      } catch (err) {
+        console.error('로그인 중 예외 발생:', err);
+        statusEl.textContent =
+          '로그인 중 오류가 발생했습니다.\n서버 또는 네트워크 연결을 확인해주세요.';
+        statusEl.className = 'status';
+      }
     }
 
-  } else {
-    // 4️⃣ 둘 다 실패 시
-    statusEl.textContent = data.message || '로그인 실패';
-    statusEl.className = 'status';
-  }
-});
+    loginBtn.addEventListener('click', handleLogin);
 
-</script>
+    // 엔터키로도 로그인
+    pwInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        handleLogin();
+      }
+    });
 
+    // =========================
+    // 비밀번호 재설정 관련
+    // =========================
+    const showResetAreaBtn = document.getElementById('showResetAreaBtn');
+    const resetArea = document.getElementById('resetArea');
+    const resetUserIdInput = document.getElementById('resetUserIdInput');
+    const resetPhoneInput = document.getElementById('resetPhoneInput');
+    const resetCodeInput = document.getElementById('resetCodeInput');
+    const newPwInput = document.getElementById('newPwInput');
+    const newPwConfirmInput = document.getElementById('newPwConfirmInput');
+    const sendResetSmsBtn = document.getElementById('sendResetSmsBtn');
+    const verifyResetCodeBtn = document.getElementById('verifyResetCodeBtn');
+    const doResetPwBtn = document.getElementById('doResetPwBtn');
+    const resetStatus = document.getElementById('resetStatus');
+
+    let resetVerified = false; // 인증 완료 여부
+
+    // 재설정 영역 열기/닫기
+    showResetAreaBtn.addEventListener('click', () => {
+      const now = resetArea.style.display;
+      resetArea.style.display = (now === 'none' || now === '') ? 'block' : 'none';
+    });
+
+    // 공통: 재설정 입력값 초기화 함수
+    function clearResetForm() {
+      resetUserIdInput.value = '';
+      resetPhoneInput.value = '';
+      resetCodeInput.value = '';
+      newPwInput.value = '';
+      newPwConfirmInput.value = '';
+      resetStatus.textContent = '';
+      resetStatus.className = 'status';
+      resetVerified = false;
+    }
+
+    // 1) 승인번호(SMS) 발송
+    sendResetSmsBtn.addEventListener('click', async () => {
+      const userid = resetUserIdInput.value.trim();
+      const phone = resetPhoneInput.value.trim();
+
+      resetStatus.textContent = '';
+      resetStatus.className = 'status';
+      resetVerified = false;
+
+      if (!userid || !phone) {
+        resetStatus.textContent = '아이디와 전화번호를 모두 입력해주세요.';
+        return;
+      }
+
+      try {
+        resetStatus.textContent = '승인번호 발송 중...';
+
+        const res = await fetch(`${SVR}/26susi_student/request-reset-sms`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userid, phone })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          resetStatus.textContent = data.message || '승인번호(인증번호)가 발송되었습니다.';
+          resetStatus.className = 'status ok';
+          // 알림 팝업도 같이
+          alert('승인번호(인증번호)가 문자로 발송되었습니다.');
+        } else {
+          resetStatus.textContent = data.message || '승인번호 발송에 실패했습니다.';
+          resetStatus.className = 'status';
+        }
+      } catch (err) {
+        console.error('reset sms error:', err);
+        resetStatus.textContent = '승인번호 발송 중 오류가 발생했습니다.';
+        resetStatus.className = 'status';
+      }
+    });
+
+    // 2) 승인번호 확인 (/26susi/verify-code)
+    verifyResetCodeBtn.addEventListener('click', async () => {
+      const phone = resetPhoneInput.value.trim();
+      const code = resetCodeInput.value.trim();
+
+      if (!phone || !code) {
+        resetStatus.textContent = '전화번호와 승인번호를 모두 입력해주세요.';
+        resetStatus.className = 'status';
+        return;
+      }
+
+      try {
+        resetStatus.textContent = '승인번호 확인 중...';
+        resetStatus.className = 'status';
+
+        const res = await fetch(`${SVR}/26susi/verify-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, code })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          resetVerified = true;
+          resetStatus.textContent = '승인번호 인증에 성공했습니다. 새 비밀번호를 입력해주세요.';
+          resetStatus.className = 'status ok';
+        } else {
+          resetVerified = false;
+          resetStatus.textContent = data.message || '승인번호 인증에 실패했습니다.';
+          resetStatus.className = 'status';
+        }
+      } catch (err) {
+        console.error('verify code error:', err);
+        resetStatus.textContent = '승인번호 확인 중 오류가 발생했습니다.';
+        resetStatus.className = 'status';
+      }
+    });
+
+    // 3) 새 비밀번호 변경 (비밀번호 확인 포함)
+    doResetPwBtn.addEventListener('click', async () => {
+      const userid = resetUserIdInput.value.trim();
+      const newPassword = newPwInput.value.trim();
+      const newPasswordConfirm = newPwConfirmInput.value.trim();
+
+      if (!resetVerified) {
+        resetStatus.textContent = '먼저 승인번호 인증을 완료해주세요.';
+        resetStatus.className = 'status';
+        return;
+      }
+
+      if (!userid || !newPassword || !newPasswordConfirm) {
+        resetStatus.textContent = '아이디와 새 비밀번호, 비밀번호 확인을 모두 입력해주세요.';
+        resetStatus.className = 'status';
+        return;
+      }
+
+      if (newPassword !== newPasswordConfirm) {
+        resetStatus.textContent = '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+        resetStatus.className = 'status';
+        return;
+      }
+
+      try {
+        resetStatus.textContent = '비밀번호 변경 중...';
+        resetStatus.className = 'status';
+
+        const res = await fetch(`${SVR}/26susi_student/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userid, newPassword })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          resetStatus.textContent =
+            data.message || '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요.';
+          resetStatus.className = 'status ok';
+
+          // 알림 + 폼 초기화 + 재설정 영역 닫기
+          alert('비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 다시 로그인해주세요.');
+
+          clearResetForm();
+          resetArea.style.display = 'none';
+        } else {
+          resetStatus.textContent = data.message || '비밀번호 변경에 실패했습니다.';
+          resetStatus.className = 'status';
+        }
+      } catch (err) {
+        console.error('reset password error:', err);
+        resetStatus.textContent = '비밀번호 변경 중 오류가 발생했습니다.';
+        resetStatus.className = 'status';
+      }
+    });
+  </script>
 </body>
 </html>
