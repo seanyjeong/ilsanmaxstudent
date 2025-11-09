@@ -10,7 +10,7 @@
             --primary: #4361ee;
             --primary-light: #4895ef;
             --secondary: #3f37c9;
-            --success: #28a745; /* 완료 색상 변경 */
+            --success: #28a745;
             --danger: #f72585;
             --warning: #f8961e;
             --dark: #1e1e2e;
@@ -20,7 +20,7 @@
             --border-radius: 16px;
             --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
-            --text-secondary: #6c757d; /* 텍스트 보조 색상 추가 */
+            --text-secondary: #6c757d; 
         }
 
         body {
@@ -30,13 +30,7 @@
             padding: 20px;
             box-sizing: border-box;
             color: var(--dark);
-            /* 스크롤바 숨기기 (필요시) */
-            /* overflow-y: scroll; */
-            /* -ms-overflow-style: none; */ /* IE and Edge */
-            /* scrollbar-width: none; */ /* Firefox */
         }
-        /* body::-webkit-scrollbar { display: none; } */ /* Chrome, Safari, Opera */
-
 
         .container {
             max-width: 500px;
@@ -57,7 +51,7 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
         }
 
-        /* ⭐️ 1. 헤더 (로고 + 웰컴 메시지) */
+        /* 1. 헤더 */
         .welcome-header {
             display: flex;
             align-items: center;
@@ -69,23 +63,19 @@
             box-shadow: var(--card-shadow);
         }
 
-        /* ⭐️ 2. 지점 로고 */
+        /* 2. 지점 로고 */
         #branchLogo {
             width: 100px;
             height: 100px;
             background-color: rgb(255, 255, 255);
             border-radius: 50%;
-
             justify-content: center;
             font-size: 12px;
-            
-           
-            
             flex-shrink: 0;
-            object-fit: fill; /* 이미지 비율 유지 */
+            object-fit: fill;
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        /* 이미지 로딩 실패 시 대비용 텍스트 로고 스타일 (JS에서 사용) */
+        
         #branchLogoTextDiv {
              width: 60px;
              height: 60px;
@@ -94,7 +84,7 @@
              display: flex;
              align-items: center;
              justify-content: center;
-             font-size: 14px; /* 글씨 크기 살짝 키움 */
+             font-size: 14px;
              font-weight: bold;
              color: white;
              text-align: center;
@@ -120,7 +110,6 @@
             margin: 0;
         }
 
-        /* 카드 공통 타이틀 */
         .card h3 {
             font-size: 18px;
             font-weight: 700;
@@ -137,12 +126,12 @@
             color: var(--primary);
         }
 
-        /* --- ⭐️ 오늘의 필수 운동 리스트 --- */
+        /* --- 오늘의 필수 운동 리스트 --- */
         .assignment-list {
             list-style: none; padding-left: 0; margin: 0;
         }
         .assignment-item {
-            display: flex; align-items: flex-start; /* 체크박스와 내용 상단 정렬 */
+            display: flex; align-items: flex-start;
             padding: 12px 5px; border-bottom: 1px solid var(--gray-light);
             transition: background-color 0.2s;
         }
@@ -150,56 +139,52 @@
         .assignment-item input[type="checkbox"] {
             width: 20px; height: 20px; margin-right: 15px; flex-shrink: 0;
             cursor: pointer; accent-color: var(--success);
-            margin-top: 2px; /* 내용과 높이 맞추기 */
+            margin-top: 2px;
         }
         .assignment-details { flex-grow: 1; font-size: 15px; }
         .assignment-details .exercise-name { font-weight: 600; display: block; margin-bottom: 3px; }
-        .assignment-details .target-info { font-size: 0.9em; color: var(--text-secondary); display: block; margin-bottom: 4px; } /* 줄바꿈 및 간격 */
+        .assignment-details .target-info { font-size: 0.9em; color: var(--text-secondary); display: block; margin-bottom: 4px; }
         .assignment-details .teacher-name { font-size: 0.8em; color: var(--gray); font-style: italic; }
 
         /* 완료된 항목 스타일 */
-        .assignment-item.completed { background-color: #f0fff4; /* 옅은 초록 배경 */ }
+        .assignment-item.completed { background-color: #f0fff4; }
         .assignment-item.completed .assignment-details { text-decoration: line-through; color: var(--gray); }
-        .assignment-item.completed .exercise-name { color: var(--success); text-decoration: none; } /* 완료 시 운동명 색상 변경, 밑줄 제거 */
-        .assignment-item.completed .target-info { text-decoration: none; } /* 밑줄 제거 */
-        .assignment-item.completed .teacher-name { text-decoration: none; } /* 밑줄 제거 */
-
+        .assignment-item.completed .exercise-name { color: var(--success); text-decoration: none; }
+        .assignment-item.completed .target-info { text-decoration: none; }
+        .assignment-item.completed .teacher-name { text-decoration: none; }
 
         .loading, .no-data { text-align: center; padding: 15px; color: var(--text-secondary); font-size: 14px;}
-        /* --- ⭐️ 오늘의 필수 운동 끝 --- */
 
-
-        /* 학원 공지 (링크 -> 버튼 역할) */
-        .notice-list button.notice-link { /* <a> 태그 대신 <button> 사용 */
-            display: block; /* 한 줄 전체 차지 */
-            width: 100%; /* 너비 꽉 채움 */
+        /* 학원 공지 (버튼 역할) */
+        .notice-list button.notice-link {
+            display: block; 
+            width: 100%;
             padding: 10px 5px;
             text-decoration: none;
             color: var(--dark);
-            border: none; /* 버튼 테두리 제거 */
-            background: none; /* 버튼 배경 제거 */
-            text-align: left; /* 텍스트 왼쪽 정렬 */
+            border: none;
+            background: none;
+            text-align: left;
             border-bottom: 1px solid var(--gray-light);
             transition: var(--transition);
-            cursor: pointer; /* 마우스 포인터 변경 */
+            cursor: pointer;
         }
         .notice-list button.notice-link:last-child { border-bottom: none; }
         .notice-list button.notice-link:hover { background-color: rgba(67, 97, 238, 0.05); border-radius: 8px; padding-left: 10px; }
         .notice-title {
             font-size: 15px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* 제목 길면 ... 처리 */
-            display: block; /* span 기본 inline 속성 변경 */
-            margin-bottom: 3px; /* 제목 아래 간격 */
-            pointer-events: none; /* 버튼 내 텍스트 클릭 방지 */
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            display: block;
+            margin-bottom: 3px;
+            pointer-events: none;
         }
         .notice-author {
             font-size: 0.8em;
             color: var(--gray);
             font-style: italic;
-            display: block; /* span 기본 inline 속성 변경 */
-            pointer-events: none; /* 버튼 내 텍스트 클릭 방지 */
+            display: block;
+            pointer-events: none;
         }
-
 
         /* 빠른 액션 버튼 */
         .quick-actions {
@@ -218,19 +203,19 @@
         .action-btn i { font-size: 24px; margin-bottom: 8px; color: var(--primary); }
         .action-btn span { font-size: 13px; font-weight: 600; }
 
-        /* --- ⭐️ Toast Popup --- */
+        /* --- Toast Popup --- */
         .toast-popup {
-            position: fixed; bottom: 85px; /* ⭐ 하단 네비게이션 위로 조정 */
+            position: fixed; bottom: 85px;
             left: 50%; transform: translateX(-50%);
             background-color: rgba(0,0,0,0.85); color: white; padding: 12px 20px; border-radius: 25px;
             font-size: 14px; z-index: 1001; opacity: 0;
             transition: opacity 0.4s ease, bottom 0.4s ease; white-space: nowrap;
         }
-        .toast-popup.show { opacity: 1; bottom: 105px; /* ⭐ 하단 네비게이션 위로 조정 */ }
+        .toast-popup.show { opacity: 1; bottom: 105px; }
         .toast-popup.success { background-color: rgba(40, 167, 69, 0.9); }
         .toast-popup.error { background-color: rgba(220, 38, 38, 0.9); }
 
-        /* --- ⭐️ 모달 스타일 --- */
+        /* --- 모달 스타일 --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.6); z-index: 1000;
@@ -240,7 +225,7 @@
         .modal-overlay.show { display: flex; opacity: 1; }
         .modal-content {
             background-color: #fff; border-radius: var(--border-radius);
-            width: 100%; max-width: 500px; max-height: 85vh; /* 높이 제한 추가 */
+            width: 100%; max-width: 500px; max-height: 85vh;
             display: flex; flex-direction: column;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             transform: scale(0.95); transition: transform 0.3s ease;
@@ -249,33 +234,96 @@
         .modal-header {
             padding: 15px 20px; border-bottom: 1px solid var(--gray-light);
             display: flex; justify-content: space-between; align-items: center;
-            flex-shrink: 0; /* 헤더 크기 고정 */
+            flex-shrink: 0;
         }
         .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--primary); font-weight: 700; }
         .modal-header .close-btn { background: none; border: none; font-size: 24px; color: var(--gray); cursor: pointer; padding: 0 5px; }
         .modal-body {
-            padding: 20px; overflow-y: auto; /* 내용 길면 스크롤 */
+            padding: 20px; overflow-y: auto;
             line-height: 1.6;
         }
         .notice-meta {
             font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;
         }
         .notice-content-area {
-             white-space: pre-wrap; /* 줄바꿈 및 공백 유지 */
-             word-break: break-word; /* 긴 단어 줄바꿈 */
+             white-space: pre-wrap;
+             word-break: break-word;
              font-size: 0.95rem;
         }
         hr { border: none; border-top: 1px solid var(--gray-light); margin: 15px 0; }
+
+        
+        /* ⭐️ [신규] 퀘스트 완료 애니메이션 CSS (폭죽 버전) ⭐️ */
+        .quest-complete-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3); /* 반투명 배경 */
+            z-index: 2000; /* 메뉴 바보다 위에 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* 초기 상태: 숨김 */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0s 0.5s;
+            backdrop-filter: blur(5px);
+            cursor: pointer; /* ⭐️ 클릭해서 닫기 */
+        }
+
+        .quest-complete-overlay.show {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease;
+        }
+
+        /* 완료 메시지 카드 */
+        .quest-complete-message {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px 40px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            
+            /* 초기 상태: 아래에서 위로 */
+            transform: translateY(50px);
+            opacity: 0;
+            transition: transform 0.5s ease-out 0.2s, opacity 0.5s ease-out 0.2s;
+            cursor: default; /* ⭐️ 메시지 클릭 시 닫기 방지 */
+        }
+
+        .quest-complete-overlay.show .quest-complete-message {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .quest-complete-message h2 {
+            font-size: 24px;
+            margin: 10px 0 5px 0;
+        }
+        .quest-complete-message p {
+            font-size: 14px;
+            margin: 0;
+            opacity: 0.9;
+        }
+        .quest-complete-message i {
+            font-size: 30px;
+            color: var(--warning);
+        }
+        /* ⭐️ [신규] 퀘스트 완료 CSS 끝 ⭐️ */
     </style>
 </head>
 <body>
     <div class="container">
         <div class="welcome-header">
             <img id="branchLogo" src="https://github.com/seanyjeong/ilsanmaxstudent/blob/main/ilsanmax.png?raw=true" alt="지점 로고">
-
-<div class="welcome-text">
-            <h2><span id="studentName">학생</span>님, 오늘도 반갑습니다.</h2>
-            <p>JUST ILSAN-MAX</p>
+            <div class="welcome-text">
+                <h2><span id="studentName">학생</span>님, 오늘도 반갑습니다.</h2>
+                <p>JUST ILSAN-MAX</p>
             </div>
         </div>
 
@@ -324,6 +372,16 @@
         </div>
     </div>
 
+    <div class="quest-complete-overlay" id="questCompleteOverlay" onclick="closeQuestAnimation()">
+        <div class="quest-complete-message" onclick="event.stopPropagation()">
+            <i class="fa-solid fa-trophy"></i> <h2>일일 퀘스트 완료!</h2>
+            <p>오늘의 미션을 모두 달성했습니다!</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+
     <script>
         // --- 0. 설정 ---
         const JUNGSI_SVR = 'https://supermax.kr';
@@ -331,21 +389,23 @@
 
         // --- 1. DOM 요소 ---
         const studentNameEl = document.getElementById('studentName');
-        const branchLogoEl = document.getElementById('branchLogo'); // 이미지 요소
-        const branchNameEl = document.getElementById('branchName');
+        const branchLogoEl = document.getElementById('branchLogo');
+        const branchWelcomeTextEl = document.querySelector('.welcome-text p');
         const assignmentListEl = document.getElementById('assignmentList');
         const assignmentLoadingEl = document.getElementById('assignmentLoading');
         const noticeListEl = document.getElementById('noticeList');
         const noticeLoadingEl = document.getElementById('noticeLoading');
-        // 모달 요소 추가
+        
         const noticeModalOverlay = document.getElementById('noticeModalOverlay');
         const modalNoticeTitle = document.getElementById('modalNoticeTitle');
         const modalNoticeAuthor = document.getElementById('modalNoticeAuthor');
         const modalNoticeDate = document.getElementById('modalNoticeDate');
         const modalNoticeContent = document.getElementById('modalNoticeContent');
 
-        // ⭐️ 공지사항 데이터 저장용 전역 변수
         let allNoticesMap = {};
+
+        // ⭐️ [수정] 퀘스트 완료 상태를 추적하는 전역 변수
+        let allQuestsWereAlreadyDone = false;
 
         // --- 2. 헬퍼 함수 ---
         function showToast(message, isSuccess = true) {
@@ -355,27 +415,119 @@
             setTimeout(() => { t.classList.remove('show'); setTimeout(() => { if (document.body.contains(t)) document.body.removeChild(t); }, 500); }, 2500);
         }
 
+        // ⭐️ [신규] 퀘스트 완료 애니메이션 관련 함수 (폭죽 버전) ⭐️
+        /**
+         * ⭐️ 퀘스트 완료 애니메이션을 실행하는 메인 함수
+         */
+        function triggerQuestAnimation() {
+            const overlay = document.getElementById('questCompleteOverlay');
+            if (!overlay || overlay.classList.contains('show')) return; // 이미 실행 중이면 중복 방지
+
+            // 1. 오버레이와 메시지 표시
+            overlay.classList.add('show');
+
+            // 2. 폭죽 애니메이션 실행 (라이브러리)
+            
+            // 2-1. 중앙에서 강하게 발사 (더 멋지게 수정)
+            confetti({
+                particleCount: 150, // 파티클 수 증가
+                spread: 120, // 더 넓게 퍼짐
+                startVelocity: 40, // 더 세게
+                origin: { y: 0.6 },
+                scalar: 1.2,
+                colors: ['#4361ee', '#4cc9f0', '#f8961e', '#f72585', '#ffffff', '#28a745'] // 색상 추가
+            });
+
+            // 2-2. 화면 양쪽에서 흩날리기 (더 멋지게 수정)
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+            
+            const animationEnd = Date.now() + 2500; // 2.5초간 지속
+            const interval = setInterval(function() {
+                if (Date.now() > animationEnd) {
+                    return clearInterval(interval);
+                }
+                // 왼쪽에서 발사
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: randomInRange(40, 70), // 퍼지는 각도 랜덤
+                    origin: { x: 0, y: randomInRange(0.6, 0.9) }, // Y축 위치 랜덤
+                    colors: ['#4361ee', '#f8961e', '#ffffff']
+                });
+                // 오른쪽에서 발사
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: randomInRange(40, 70),
+                    origin: { x: 1, y: randomInRange(0.6, 0.9) },
+                    colors: ['#4cc9f0', '#f72585', '#28a745']
+                });
+            }, 200); // 0.2초마다
+
+
+            // 3. 3.5초 뒤에 자동으로 오버레이 숨기기
+            setTimeout(() => {
+                closeQuestAnimation();
+            }, 3500);
+        }
+
+        /**
+         * ⭐️ 애니메이션 닫기 함수 (클릭 또는 시간 초과 시)
+         */
+        function closeQuestAnimation() {
+            const overlay = document.getElementById('questCompleteOverlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        }
+        window.closeQuestAnimation = closeQuestAnimation; // 전역 노출 (HTML onclick용)
+
+        /**
+         * ⭐️ [수정] 현재 DOM의 모든 퀘스트가 완료되었는지 확인 (true/false 반환)
+         */
+        function areAllQuestsDoneNow() {
+            const questListContainer = document.getElementById('assignmentList'); 
+            if (!questListContainer) return false; 
+
+            const allCheckboxes = questListContainer.querySelectorAll('.assignment-item input[type="checkbox"]');
+            if (allCheckboxes.length === 0) return false; // 퀘스트가 없으면 '완료'가 아님
+
+            // 모든 체크박스가 :checked 상태인지 확인
+            return Array.from(allCheckboxes).every(cb => cb.checked);
+        }
+        // ⭐️ [신규] 애니메이션 관련 함수 끝 ⭐️
+
+
         // --- 3. 데이터 로딩 및 렌더링 함수 ---
 
-        // 오늘 할당된 운동 목록 API 호출 및 화면 렌더링 (선생님 이름 포함됨)
+        // ⭐️ [수정] 오늘 할당된 운동 목록 API 호출 (완료 체크 로직 수정)
         async function loadAssignments() {
             if (!token) return;
             try {
                 assignmentLoadingEl.style.display = 'block';
                 assignmentListEl.innerHTML = '';
                 assignmentListEl.appendChild(assignmentLoadingEl);
+                
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/today-assignment`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '운동 목록 로드 실패'}`);
                 if (!data.success) throw new Error(data.message || '운동 목록 로드 실패 (Success: false)');
+                
                 assignmentLoadingEl.style.display = 'none';
+                assignmentListEl.innerHTML = '';
+
                 const assignments = data.assignments || [];
                 if (assignments.length === 0) {
-                    assignmentListEl.innerHTML = '<p class="no-data">오늘 할당된 운동이 없습니다.</p>';
+                    assignmentListEl.innerHTML = '<p class="no-data">오늘 할당된 운동이 없습니다.</p';
+                    // ⭐️ [신규] 퀘스트가 없으면, '완료' 상태도 false로 초기화
+                    allQuestsWereAlreadyDone = false;
                     return;
                 }
+                
                 assignments.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'assignment-item';
@@ -399,21 +551,28 @@
                     `;
                     assignmentListEl.appendChild(li);
                 });
+
+                // ⭐️ [수정] 퀘스트 목록 로드 완료 후, 현재 완료 상태를 전역 변수에 저장
+                setTimeout(() => {
+                    allQuestsWereAlreadyDone = areAllQuestsDoneNow();
+                    console.log("페이지 로드. 현재 퀘스트 완료 상태:", allQuestsWereAlreadyDone);
+                }, 100); 
+
             } catch (err) {
                 console.error("오늘 운동 목록 로딩 실패:", err);
                 assignmentLoadingEl.style.display = 'none';
-                assignmentListEl.innerHTML = `<p class="no-data status-error">운동 목록 로드 중 오류 발생</p>`;
+                assignmentListEl.innerHTML = `<p class="no-data" style="color:var(--danger)">운동 목록 로드 중 오류 발생</p>`;
             }
         }
 
-        // 공지사항 목록 API 호출 및 화면 렌더링 (버튼 생성 및 모달 연결)
+        // 공지사항 목록 API 호출 및 화면 렌더링
         async function loadNotices() {
             if (!token) return;
             try {
                 noticeLoadingEl.style.display = 'block';
                 noticeListEl.innerHTML = '';
                 noticeListEl.appendChild(noticeLoadingEl);
-                allNoticesMap = {}; // 맵 초기화
+                allNoticesMap = {}; 
 
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/announcements`, {
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -421,22 +580,24 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '공지 로드 실패'}`);
                 if (!data.success) throw new Error(data.message || '공지 로드 실패 (Success: false)');
+                
                 noticeLoadingEl.style.display = 'none';
+                noticeListEl.innerHTML = ''; 
+
                 const notices = data.announcements || [];
                 if (notices.length === 0) {
                     noticeListEl.innerHTML = '<p class="no-data">등록된 공지사항이 없습니다.</p>';
                     return;
                 }
-                // 전체 공지 데이터 저장
+                
                 notices.forEach(notice => {
                     allNoticesMap[notice.notice_id] = notice;
                 });
 
-                // 최신 3개만 리스트에 버튼으로 표시
                 notices.slice(0, 3).forEach(notice => {
-                    const button = document.createElement('button'); // <a> 대신 <button>
-                    button.className = 'notice-link'; // 스타일 클래스
-                    button.onclick = () => openNoticeModal(notice.notice_id); // 클릭 시 모달 열기
+                    const button = document.createElement('button');
+                    button.className = 'notice-link';
+                    button.onclick = () => openNoticeModal(notice.notice_id); 
 
                     let authorDisplay = '관리자';
                     if (notice.author_name) {
@@ -454,18 +615,19 @@
             } catch (err) {
                  console.error("공지사항 로딩 실패:", err);
                  noticeLoadingEl.style.display = 'none';
-                 noticeListEl.innerHTML = `<p class="no-data status-error">공지 로드 중 오류 발생</p>`;
+                 noticeListEl.innerHTML = `<p class="no-data" style="color:var(--danger)">공지 로드 중 오류 발생</p>`;
             }
         }
 
-        // 운동 완료 상태 업데이트 API 호출 (변경 없음)
+        // ⭐️ [수정] 운동 완료 상태 업데이트 (애니메이션 트리거 로직 변경)
         async function updateAssignmentStatus(checkboxElement, assignmentId) {
-            // ... (기존 코드와 동일) ...
              if (!token) return;
             const isCompleted = checkboxElement.checked;
             const listItem = checkboxElement.closest('.assignment-item');
+            
             listItem.classList.toggle('completed', isCompleted);
             checkboxElement.disabled = true;
+            
             try {
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/assignment/complete`, {
                     method: 'POST',
@@ -475,11 +637,39 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '상태 업데이트 실패'}`);
                 if (!data.success) throw new Error(data.message || '상태 업데이트 실패 (Success: false)');
+
+                // ⭐️ [신규] API 호출 성공 후, 애니메이션 트리거 로직
+                
+                // 1. 현재 DOM 상태가 "모두 완료"인지 다시 확인
+                const allDoneNow = areAllQuestsDoneNow();
+
+                if (allDoneNow) {
+                    // 2. "모두 완료" 상태가 되었다면, "이전에도" 완료 상태였는지 확인
+                    if (!allQuestsWereAlreadyDone) {
+                        // 3. ⭐️ 이전엔 아니었는데(false) 지금 완료(true)됐다면 = "방금" 완료한 것!
+                        console.log("🎉 일일 퀘스트 모두 완료! 애니메이션 실행!");
+                        triggerQuestAnimation(); // 애니메이션 실행
+                    } else {
+                        console.log("퀘스트 완료. (하지만 이미 '모두 완료' 상태였음)");
+                    }
+                    // 4. 현재 상태를 '완료'로 기록
+                    allQuestsWereAlreadyDone = true;
+                } else {
+                    // 5. "모두 완료" 상태가 아니라면 (하나라도 체크 해제했다면)
+                    console.log("퀘스트 상태 변경. (아직 완료되지 않음)");
+                    allQuestsWereAlreadyDone = false; // ⭐️ 다음 완료를 위해 '미완료'로 기록
+                }
+
             } catch (err) {
                 console.error("운동 완료 상태 업데이트 실패:", err);
                 showToast(`❌ 상태 업데이트 오류: ${err.message}`, false);
+                // ⭐️ 실패 시 롤백
                 checkboxElement.checked = !isCompleted;
                 listItem.classList.toggle('completed', !isCompleted);
+                
+                // ⭐️ [신규] 롤백 시 상태 재확인
+                allQuestsWereAlreadyDone = areAllQuestsDoneNow();
+
             } finally {
                 checkboxElement.disabled = false;
             }
@@ -493,9 +683,7 @@
                 showToast('공지 정보를 찾을 수 없습니다.', false);
                 return;
             }
-
             modalNoticeTitle.textContent = notice.title || '제목 없음';
-
             let authorDisplay = '관리자';
             if (notice.author_name) {
                 authorDisplay = `${notice.author_name} 선생님`;
@@ -503,25 +691,21 @@
                 authorDisplay = notice.created_by === 'sean8320' ? '원장님' : `${notice.created_by}`;
             }
             modalNoticeAuthor.textContent = `작성자: ${authorDisplay}`;
-
             try {
                  modalNoticeDate.textContent = `작성일: ${new Date(notice.created_at).toISOString().split('T')[0]}`;
             } catch {
                  modalNoticeDate.textContent = '작성일: 알 수 없음';
             }
-
             modalNoticeContent.textContent = notice.content || '(내용 없음)';
-
             noticeModalOverlay.classList.add('show');
         }
-        window.openNoticeModal = openNoticeModal; // 전역 함수로 노출
+        window.openNoticeModal = openNoticeModal;
 
         function closeNoticeModal() {
             noticeModalOverlay.classList.remove('show');
         }
-        window.closeNoticeModal = closeNoticeModal; // 전역 함수로 노출
+        window.closeNoticeModal = closeNoticeModal;
 
-        // 모달 오버레이 클릭 시 닫기
         noticeModalOverlay.addEventListener('click', (event) => {
             if (event.target === noticeModalOverlay) {
                 closeNoticeModal();
@@ -541,28 +725,32 @@
                     const payload = JSON.parse(jsonPayload);
 
                     studentNameEl.textContent = payload.name || '학생';
+                    if (branchWelcomeTextEl) {
+                        branchWelcomeTextEl.textContent = payload.branch ? `MAX ${payload.branch.toUpperCase()}` : 'MAX';
+                    }
                     
-                    // ▼▼▼ [수정] 로고 설정 로직 ▼▼▼
                     const logoImg = document.getElementById('branchLogo');
-
-                    // 이미지 로딩 실패 시 처리
                     logoImg.onerror = () => {
                         console.warn('로고 이미지 로딩 실패. 텍스트 로고를 표시합니다.');
-                        // 이미지 대신 텍스트를 표시할 div 생성
                         const tempTextLogo = document.createElement('div');
-                        tempTextLogo.id = 'branchLogoTextDiv'; // 스타일 적용용 id
+                        tempTextLogo.id = 'branchLogoTextDiv';
                         tempTextLogo.textContent = payload.branch ? payload.branch.substring(0, 3).toUpperCase() : 'MAX';
-                        // 이미지 요소를 텍스트 div로 교체
                         logoImg.parentNode.replaceChild(tempTextLogo, logoImg);
                     };
-                    // src가 이미 HTML에 있으므로, 만약 로딩 실패 시 onerror가 실행됨
-                    // ▲▲▲ [수정] 로고 설정 로직 ▲▲▲
+                    
+                    let logoUrl = 'https://github.com/seanyjeong/ilsanmaxstudent/blob/main/ilsanmax.png?raw=true'; // 기본 로고
+                    if (payload.branch === '하남') {
+                         logoUrl = 'https://github.com/seanyjeong/ilsanmaxstudent/blob/main/hanammax.png?raw=true';
+                    }
+                    // (다른 지점 로고 추가)
+                    
+                    logoImg.src = logoUrl;
 
                 } catch (error) {
                     console.error("토큰 디코딩 오류:", error);
                     studentNameEl.textContent = '학생';
+                    if (branchWelcomeTextEl) branchWelcomeTextEl.textContent = 'MAX';
                     
-                    // 에러 시에도 텍스트 로고 표시
                     const logoImg = document.getElementById('branchLogo');
                     const tempTextLogo = document.createElement('div');
                     tempTextLogo.id = 'branchLogoTextDiv';
@@ -572,8 +760,8 @@
             } else {
                  console.warn("로그인 토큰을 찾을 수 없습니다.");
                  studentNameEl.textContent = '방문자';
+                 if (branchWelcomeTextEl) branchWelcomeTextEl.textContent = 'MAX';
                  
-                 // 로그인 안됐을 때 텍스트 로고 표시
                  const logoImg = document.getElementById('branchLogo');
                  const tempTextLogo = document.createElement('div');
                  tempTextLogo.id = 'branchLogoTextDiv';
