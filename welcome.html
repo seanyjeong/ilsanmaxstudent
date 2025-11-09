@@ -168,9 +168,18 @@
             border-bottom: 1px solid var(--gray-light);
             transition: var(--transition);
             cursor: pointer;
+            border-left: 4px solid transparent; /* ⭐️ 반짝임 효과를 위한 공간 확보 */
         }
         .notice-list button.notice-link:last-child { border-bottom: none; }
-        .notice-list button.notice-link:hover { background-color: rgba(67, 97, 238, 0.05); border-radius: 8px; padding-left: 10px; }
+        
+        /* ⭐️ [수정] :not(.notice-newest) 추가 (hover 충돌 방지) */
+        .notice-list button.notice-link:not(.notice-newest):hover { 
+            background-color: rgba(67, 97, 238, 0.05); 
+            border-radius: 8px; 
+            padding-left: 10px; 
+            border-left-color: var(--primary-light);
+        }
+        
         .notice-title {
             font-size: 15px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -185,6 +194,30 @@
             display: block;
             pointer-events: none;
         }
+
+        /* ⭐️ [신규] '반짝이는' 최신 공지 CSS */
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); /* --primary color, 40% opacity */
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); /* Glow effect */
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+            }
+        }
+
+        .notice-list button.notice-link.notice-newest {
+            background-color: #f8faff; /* 옅은 파란색 배경으로 강조 */
+            border-left: 4px solid var(--primary); /* 왼쪽에 강조선 */
+            padding-left: 10px; /* 안쪽 여백 */
+            
+            /* ⭐️ 반짝이는 애니메이션 적용 */
+            animation: pulse-glow 2s infinite;
+        }
+        /* ⭐️ [신규] CSS 끝 */
+
 
         /* 빠른 액션 버튼 */
         .quick-actions {
@@ -253,7 +286,7 @@
         hr { border: none; border-top: 1px solid var(--gray-light); margin: 15px 0; }
 
         
-        /* ⭐️ [신규] 퀘스트 완료 애니메이션 CSS (폭죽 버전) ⭐️ */
+        /* ⭐️ [수정] 퀘스트 완료 애니메이션 CSS (폭죽 버전) ⭐️ */
         .quest-complete-overlay {
             position: fixed;
             top: 0;
@@ -314,7 +347,6 @@
             font-size: 30px;
             color: var(--warning);
         }
-        /* ⭐️ [신규] 퀘스트 완료 CSS 끝 ⭐️ */
     </style>
 </head>
 <body>
@@ -594,9 +626,17 @@
                     allNoticesMap[notice.notice_id] = notice;
                 });
 
-                notices.slice(0, 3).forEach(notice => {
+                // ⭐️ [수정] 최신 3개 표시, 첫 번째 항목(index 0)에 'notice-newest' 클래스 추가
+                notices.slice(0, 3).forEach((notice, index) => { // ⭐️ index 추가
                     const button = document.createElement('button');
-                    button.className = 'notice-link';
+                    button.className = 'notice-link'; // 기본 클래스
+
+                    // ⭐️ [신규] 첫 번째 공지(index 0)에만 'notice-newest' 클래스 추가
+                    if (index === 0) {
+                        button.classList.add('notice-newest');
+                    }
+                    // ⭐️ [신규] 끝
+                    
                     button.onclick = () => openNoticeModal(notice.notice_id); 
 
                     let authorDisplay = '관리자';
