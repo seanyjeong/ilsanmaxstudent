@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>저장한 대학 (점수 계산/기록)</title>
+    <title>성적 기록 보기</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
@@ -12,1060 +12,291 @@
             --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
             --transition: all 0.3s ease;
             --success: #28a745; --danger: #dc3545; --warning: #ffc107;
-            --info: #17a2b8; /* 기록 보기 버튼 색상 */
+            --info: #17a2b8;
         }
-        
-        /* ⭐️ 모달 점수판 스타일 ⭐️ */
-        .score-summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            background-color: var(--light);
-            border: 1px solid var(--gray-light);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .score-item {
-            display: flex;
-            flex-direction: column;
-        }
-        .score-item label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--gray);
-            margin-bottom: 4px;
-        }
-        .score-item .value {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--dark);
-        }
-        .score-item .value .fas { /* 로딩 스피너 */
-            font-size: 15px;
-            color: var(--gray);
-        }
-        .score-item.total-row {
-            grid-column: 1 / -1; 
-            border-top: 1px dashed var(--gray);
-            padding-top: 10px;
-            margin-top: 5px;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .score-item.total-row label {
-            font-size: 16px;
-            color: var(--dark);
-        }
-        .score-item.total-row .value {
-            font-size: 22px;
-        }
-        /* ⭐️ 총점 색상 (파랑/빨강) ⭐️ */
-        .value.total-score-high { color: var(--primary) !important; }
-        .value.total-score-low { color: var(--danger) !important; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f4f7f6; margin: 0; padding: 20px; color: var(--dark);
         }
         .container { max-width: 600px; margin: 0 auto; }
+        
         .header {
             background-color: #fff; padding: 15px 20px;
             border-bottom: 1px solid var(--gray-light);
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-        }
-        .header h2 { margin: 0; font-size: 20px; font-weight: 700; text-align: center; }
-        
-        .gun-section { margin-bottom: 20px; }
-        .gun-header {
-            font-size: 18px; font-weight: 600; color: var(--primary);
-            padding: 10px 0; margin-bottom: 10px;
-            border-bottom: 2px solid var(--primary);
-        }
-        .card-list { display: flex; flex-direction: column; gap: 12px; }
-        
-        /* 저장된 대학 카드 */
-        .saved-card {
-            background-color: #fff; border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--gray-light);
-            position: relative;
-        }
-        .card-main-content {
-             padding: 15px;
-             cursor: pointer; 
-             transition: background-color 0.2s ease;
-        }
-        .saved-card:hover .card-main-content { background-color: #f8f9fa; }
-        .saved-card .uni-name { font-weight: 600; font-size: 17px; margin-bottom: 3px; padding-right: 30px; }
-        .saved-card .dept-name { color: #555; font-size: 14px; margin-bottom: 10px; }
-/* ⭐️ [신규] 카드 우측 상단 로고 스타일 ⭐️ */
-        .uni-logo-icon {
-            position: absolute;
-            top: 10px;    /* ⭐️ 12px -> 10px (X버튼과 동일) */
-            right: 40px; 
-            width: 56px;   /* ⭐️ 28px -> 56px (두 배) */
-            height: 56px;  /* ⭐️ 28px -> 56px (두 배) */
-            border-radius: 50%;
-            background-color: var(--gray-light);
-            border: 1px solid var(--gray-light);
-            background-size: contain; /* ⭐️ contain으로 로고가 안 잘리게 */
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 3; /* ⭐️ X버튼(z-index: 5)보다 아래 */
-        }
-        
-        /* ⭐️ [수정] 카드 내부 점수 표시 스타일 ⭐️ */
-        .saved-card .saved-timestamp {
-            font-size: 11px;
-            color: var(--gray);
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px dashed var(--gray-light);
-        }
-        /* ⭐️ [신규] 카드 점수 레이아웃용 ⭐️ */
-        .saved-card .saved-score-details {
-            display: flex; /* ⭐️ flex column으로 변경 */
-            flex-direction: column; 
-            gap: 8px; /* ⭐️ 줄 간격 */
-            font-size: 13px;
-        }
-        .score-details-row {
+            margin-bottom: 20px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px 15px; /* ⭐️ (수정) 상하/좌우 간격 */
+            align-items: center;
+            justify-content: space-between;
         }
-        .saved-card .detail-item {
-            color: #333;
-            flex-shrink: 0; 
+        .header h2 { 
+            margin: 0; font-size: 18px; font-weight: 700; 
+            text-align: center; flex-grow: 1;
         }
-        .saved-card .detail-item .score-value {
-            font-weight: 700;
+        .back-btn {
+            font-size: 16px;
             color: var(--dark);
-            margin-left: 4px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background-color: var(--gray-light);
+            font-weight: 500;
         }
-        /* ⭐️ [신규] 카드 총점 색상 ⭐️ */
-        .saved-card .total-score-high .score-value {
-            color: var(--primary);
-        }
-        .saved-card .total-score-low .score-value {
-            color: var(--danger);
-        }
-
-        .delete-btn {
-            position: absolute; top: 10px; right: 10px;
-            background: none; border: none; font-size: 16px;
-            color: var(--gray); cursor: pointer; padding: 5px; z-index: 5;
-        }
-        .delete-btn:hover { color: var(--danger); }
+        .back-btn:hover { background-color: #dde1e5; }
         
-        .card-actions {
-            border-top: 1px solid var(--gray-light);
+        .history-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* 기록 카드 스타일 */
+        .history-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--gray-light);
+            overflow: hidden; /* 내부 테이블 radius 적용 */
+        }
+        .history-date {
             padding: 10px 15px;
             background-color: var(--light);
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            border-bottom: 1px solid var(--gray-light);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
         }
-        .view-history-btn {
-            display: block; width: 100%; text-align: center;
-            padding: 8px 12px;
-            font-size: 14px; font-weight: 600;
-            border: none; border-radius: 8px;
-            background-color: var(--info);
-            color: white;
-            cursor: pointer;
-            text-decoration: none;
-            transition: var(--transition);
+        .history-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        .view-history-btn:hover { background-color: #138496; }
+        .total-score-big {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        .total-score-big strong {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--danger);
+            margin-left: 8px;
+        }
         
-        .empty-list-msg {
+        /* 점수 표 스타일 */
+        .score-breakdown, .silgi-details-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .score-breakdown th, .score-breakdown td,
+        .silgi-details-table th, .silgi-details-table td {
+            padding: 8px 10px;
+            border: 1px solid var(--gray-light);
+            text-align: center;
+        }
+        .score-breakdown th, .silgi-details-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: 33.33%;
+        }
+        .silgi-details-table th {
+             width: 25%; /* 실기 상세는 4칸 */
+        }
+        .score-breakdown td {
+            font-weight: 700;
+        }
+        .score-breakdown td.suneung { color: var(--primary); }
+        .score-breakdown td.naeshin { color: var(--warning); }
+        .score-breakdown td.silgi { color: var(--success); }
+        .silgi-details-table td:nth-child(4) { /* '감' 수 */
+            color: var(--danger);
+            font-weight: 700;
+        }
+        .silgi-details-table td:nth-child(4).success {
+            color: var(--success);
+        }
+        
+        .empty-msg, .loading-msg {
             text-align: center; color: var(--gray); font-size: 14px;
             padding: 20px; background-color: #fff; border-radius: var(--border-radius);
             border: 1px dashed var(--gray-light);
         }
-
-        /* 모달 스타일 */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); z-index: 100;
-            display: none; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-content {
-            background-color: #fff; border-radius: var(--border-radius);
-            width: 90%; max-width: 500px; max-height: 80vh;
-            display: flex; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transform: scale(0.95); transition: transform 0.3s ease;
-            cursor: default; 
-        }
-        .modal-overlay.show .modal-content { transform: scale(1); }
-        .modal-header {
-            padding: 15px 20px; border-bottom: 1px solid var(--gray-light);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .modal-header h3 { margin: 0; font-size: 16px; }
-        .modal-header .close-btn { background: none; border: none; font-size: 20px; color: var(--gray); cursor: pointer; }
-        .modal-body { padding: 20px; overflow-y: auto; }
-        .modal-group { margin-bottom: 15px; }
-        .modal-group label {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--dark);
-        }
-        .modal-group input[type="text"], .modal-group input[type="number"] {
-            width: 100%; padding: 10px; font-size: 14px;
-            border: 1px solid var(--gray-light); border-radius: 8px;
-            box-sizing: border-box; background-color: var(--light);
-        }
-        .silgi-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .deduction-display {
-            font-size: 13px; font-weight: 700; color: var(--danger);
-            padding: 2px 6px; background-color: #fff5f5; border-radius: 6px;
-        }
-        .deduction-display.success { color: var(--success); background-color: #f0fff4; }
         
-        .modal-footer {
-            padding: 15px 20px; border-top: 1px solid var(--gray-light);
-            background-color: var(--light);
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
-        }
-        .calculate-btn {
-            width: 100%; padding: 12px; font-size: 16px; font-weight: 600;
-            border: none; border-radius: 8px; cursor: pointer;
-            background-color: var(--primary); color: #fff;
-            transition: var(--transition);
-        }
-        .calculate-btn:hover { background-color: #3a54d8; }
-        .calculate-btn:disabled { background-color: var(--gray); }
-        
-        .spinner { text-align: center; padding: 30px; font-size: 20px; color: var(--primary); }
-        
-        .toast-popup {
-            position: fixed; bottom: 30px; left: 50%;
-            transform: translateX(-50%); background-color: rgba(0,0,0,0.85);
-            color: white; padding: 12px 20px; border-radius: 25px;
-            font-size: 14px; z-index: 1001; opacity: 0;
-            transition: opacity 0.4s ease, bottom 0.4s ease; white-space: nowrap;
-        }
-        .toast-popup.show { opacity: 1; bottom: 50px; }
-        .toast-popup.error { background-color: rgba(220, 38, 38, 0.9); }
-        .toast-popup.success { background-color: rgba(40, 167, 69, 0.9); }
     </style>
 </head>
 <body>
     <script>
-        // --- ⭐️ 1. 전역 변수 및 헬퍼 함수 정의 (먼저 선언) ---
+        // --- 1. 전역 변수 및 헬퍼 함수 정의 ---
         const JUNGSI_SVR = 'https://supermax.kr';
         const token = localStorage.getItem('jwt_token');
-        let currentStudentProfile = null;
-        let currentModal_F_data = null;
-        
-        let currentOpenCardElement = null; 
-        let currentModalBranchCutoff = null; 
-        let allCutoffsMap = {}; 
 
-        function getEventRules(eventName) {
-            eventName = eventName || '';
-            const LOW_IS_BETTER_KEYWORDS = [ 'm', 'run', '런', '왕복', '초', '벽','지그','z' ];
-            let method = 'higher_is_better';
-            if (LOW_IS_BETTER_KEYWORDS.some((k) => eventName.includes(k))) {
-                method = 'lower_is_better';
-            }
-            if (eventName.includes('던지기') || eventName.includes('멀리뛰기')) {
-                method = 'higher_is_better';
-            }
-            return { method };
-        }
-        
-        function lookupScore(studentRecord, method, scoreTable) {
-            if (!scoreTable || scoreTable.length === 0) return '0';
-            const studentValueStr = String(studentRecord).trim();
-            const studentValueNum = Number(studentValueStr);
-            const isNumericInput = !Number.isNaN(studentValueNum) && studentValueStr !== '';
-            let numericLevels = [];
-            let exactMatchLevels = new Map();
-            let rangeLevels = [];
-            for (const level of scoreTable) {
-                const recordStr = String(level.기록).trim();
-                const recordNum = Number(recordStr);
-                if (!Number.isNaN(recordNum) && recordStr !== '') {
-                    numericLevels.push({ record: recordNum, grade: level.배점 });
-                } else if ( recordStr.includes('이상') || recordStr.includes('이하') || recordStr.includes('초과') || recordStr.includes('미만') ) {
-                    rangeLevels.push({ rangeStr: recordStr, grade: level.배점 });
-                } else {
-                    exactMatchLevels.set(recordStr, level.배점);
-                }
-            }
-            if (exactMatchLevels.has(studentValueStr)) {
-                return exactMatchLevels.get(studentValueStr);
-            }
-            if (isNumericInput) {
-                for (const level of rangeLevels) {
-                    const parts = level.rangeStr.match(/([0-9.]+)\s*(이상|이하|초과|미만)/);
-                    if (parts && parts[1]) {
-                        const limit = Number(parts[1]);
-                        const type = parts[2];
-                        if (type === '이상' && studentValueNum >= limit) return level.grade;
-                        if (type === '이하' && studentValueNum <= limit) return level.grade;
-                        if (type === '초과' && studentValueNum > limit) return level.grade;
-                        if (type === '미만' && studentValueNum < limit) return level.grade;
-                    }
-                }
-                if (numericLevels.length > 0) {
-                    if (method === 'lower_is_better') {
-                        numericLevels.sort((a, b) => b.record - a.record);
-                        for (const level of numericLevels) {
-                            if (studentValueNum >= level.record) return level.grade;
-                        }
-                        if (studentValueNum < numericLevels[numericLevels.length - 1].record) {
-                            return numericLevels[numericLevels.length - 1].grade;
-                        }
-                    } else {
-                        numericLevels.sort((a, b) => b.record - a.record);
-                        for (const level of numericLevels) {
-                            if (studentValueNum >= level.record) return level.grade;
-                        }
-                        if (numericLevels.length > 0 && studentValueNum > numericLevels[0].record) {
-                             return numericLevels[0].grade;
-                        }
-                    }
-                }
-            }
-            return '0';
-        }
-        
-        function lookupDeductionLevel(studentScore, scoreTable) {
-            if (!scoreTable || scoreTable.length === 0) return 0;
-            const allScores = [...new Set(
-                scoreTable.map(l => Number(l.배점)).filter(n => !Number.isNaN(n))
-            )];
-            allScores.sort((a, b) => b - a);
-            const studentScoreNum = Number(studentScore);
-            if (Number.isNaN(studentScoreNum)) return 0;
-            const levelIndex = allScores.indexOf(studentScoreNum);
-            return (levelIndex === -1) ? 0 : levelIndex; 
-        }
-        
-        function addSilgiInputListeners() {
-            document.querySelectorAll('.silgi-record-input').forEach(input => {
-                input.addEventListener('input', (e) => {
-                    updateModalTotalScore();
+        // 날짜 포맷팅 함수 (예: '2025년 10월 27일 오전 1:05')
+        function formatDateTime(isoString) {
+            if (!isoString) return '날짜 없음';
+            try {
+                const date = new Date(isoString);
+                // KST로 강제 변환 (DB가 UTC 기준일 경우 +9시간)
+                // const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
+                
+                // DB가 이미 KST(한국 표준시)로 저장했다고 가정
+                return date.toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
                 });
-            });
-        }
-        
-        function showToast(message, isError = false) {
-            const t = document.createElement('div');
-            t.textContent = message;
-            t.className = `toast-popup ${isError ? 'error' : 'success'}`;
-            document.body.appendChild(t);
-            setTimeout(() => { t.classList.add('show'); }, 10);
-            setTimeout(() => {
-                t.classList.remove('show');
-                setTimeout(() => { if (document.body.contains(t)) document.body.removeChild(t); }, 500);
-            }, 2500);
+            } catch (e) {
+                console.error('Date formatting error:', e);
+                return isoString; // 실패 시 원본 반환
+            }
         }
     </script>
 
     <div class="container">
         <div class="header">
-            <h2><i class="fa-solid fa-heart" style="color: var(--success);"></i> 저장한 대학 목록</h2>
+            <a href="saved_list.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 뒤로</a>
+            <h2 id="university-title">기록 보기</h2>
         </div>
 
-        <div class="gun-section">
-            <div class="gun-header">가군</div>
-            <div class="card-list" id="gun-ga-cards">
-                <p class="empty-list-msg" id="empty-ga">저장된 대학이 없습니다.</p>
-            </div>
-        </div>
-
-        <div class="gun-section">
-            <div class="gun-header">나군</div>
-            <div class="card-list" id="gun-na-cards">
-                <p class="empty-list-msg" id="empty-na">저장된 대학이 없습니다.</p>
-            </div>
-        </div>
-
-        <div class="gun-section">
-            <div class="gun-header">다군</div>
-            <div class="card-list" id="gun-da-cards">
-                <p class="empty-list-msg" id="empty-da">저장된 대학이 없습니다.</p>
-            </div>
+        <div class="history-list-container" id="history-list">
+            <p class="loading-msg" id="loading-msg">
+                <i class="fas fa-spinner fa-spin"></i> 기록을 불러오는 중...
+            </p>
         </div>
     </div>
 
-    <div class="modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 id="modal-title">대학 정보</h3>
-                <button class="close-btn" onclick="closeDetailModal(null)">&times;</button> </div>
-            <div class="modal-body" id="modal-body-content">
+    <template id="history-card-template">
+        <div class="history-card">
+            <div class="history-date">
+                <i class="fa-solid fa-calendar-check"></i> 
+                <span class="record-date">2025-10-27 12:00:00</span>
+            </div>
+            <div class="history-body">
+                <div class="total-score-big">
+                    총점 <strong>0점</strong>
                 </div>
-            <div class="modal-footer" id="modal-footer-content" style="display: none;">
-                <button class="calculate-btn" id="calculate-total-btn" onclick="calculateAndSaveTotalScore()">기록하기</button>
-            </div>
-        </div>
-    </div>
-
-    <template id="saved-card-template">
-        <div class="saved-card">
-            <button class="delete-btn"><i class="fa-solid fa-trash-can"></i></button>
-            <div class="card-main-content">
-                <div class="uni-name">대학명</div>
-                <div class="dept-name">학과명</div>
                 
-                <div class="saved-timestamp">--</div>
-                <div class="saved-score-details">
-                    </div>
-
-            </div>
-            <div class="card-actions">
-                <button class="view-history-btn"><i class="fa-solid fa-chart-line"></i> 기록 보기</button>
-            </div>
+                <table class="score-breakdown">
+                    <thead>
+                        <tr><th>수능 환산</th><th>내신 환산</th><th>실기 환산</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="suneung">0점</td>
+                            <td class="naeshin">0점</td>
+                            <td class="silgi">0점</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                </div>
         </div>
+    </template>
+    
+    <template id="silgi-table-template">
+         <table class="silgi-details-table">
+            <thead>
+                <tr><th>종목</th><th>기록</th><th>배점</th><th>감수</th></tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
     </template>
 
 
     <script>
-        // --- ⭐️ 2. DOM 요소 변수 (글로벌 헬퍼 함수 뒤에 선언) ---
-        const modalOverlay = document.getElementById('detail-modal');
-        const modalBody = document.getElementById('modal-body-content');
-        const modalFooter = document.getElementById('modal-footer-content');
-        const modalTitle = document.getElementById('modal-title');
+        // --- 2. DOM 요소 변수 ---
+        const universityTitle = document.getElementById('university-title');
+        const historyListContainer = document.getElementById('history-list');
+        const loadingMsg = document.getElementById('loading-msg');
 
-        // --- ⭐️ 3. 메인 함수 정의 (DOM 요소 변수 뒤, 실행부 앞) ---
+        // --- 3. 메인 함수 정의 ---
 
-        async function loadStudentProfile() {
-            try {
-                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/my-profile`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error(data.message || '프로필 로드 실패');
-                currentStudentProfile = data.profile;
-                console.log('Student Profile Loaded (for gender/scores):', currentStudentProfile);
-            } catch (err) {
-                console.error('학생 프로필 로드 실패:', err);
-                alert(`학생 정보를 불러오지 못했습니다: ${err.message}`);
-                currentStudentProfile = null; 
-            }
-        }
-
-        async function loadSavedList() {
-            const containers = {
-                '가': document.getElementById('gun-ga-cards'),
-                '나': document.getElementById('gun-na-cards'),
-                '다': document.getElementById('gun-da-cards')
-            };
-            const emptyMsgs = {
-                '가': document.getElementById('empty-ga'),
-                '나': document.getElementById('empty-na'),
-                '다': document.getElementById('empty-da')
-            };
-            
-            try {
-                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/saved-universities`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error('저장 목록 로드 실패');
-
-                data.list.forEach(item => {
-                    const gun = item.군 || '가'; 
-                    const container = containers[gun];
-                    if (container) {
-                        if (emptyMsgs[gun]) emptyMsgs[gun].style.display = 'none';
-                        
-                        const card = document.getElementById('saved-card-template').content.cloneNode(true).firstElementChild;
-                        card.querySelector('.uni-name').textContent = item.대학명;
-                        card.querySelector('.dept-name').textContent = item.학과명;
-                        
-                        
-if (item.logo_url) {
-                            const logoDiv = document.createElement('div');
-                            logoDiv.className = 'uni-logo-icon';
-                            logoDiv.style.backgroundImage = `url(${JUNGSI_SVR + item.logo_url})`;
-                            card.querySelector('.card-main-content').appendChild(logoDiv);
-                        }
-                        
-                        const branchCutoff = allCutoffsMap[item.U_ID];
-                        card.dataset.branchCutoff = (branchCutoff !== null && branchCutoff !== undefined) ? branchCutoff : '';
-                        
-                        card.dataset.savedSuneungScore = item.calculated_suneung_score || 0;
-
-                        card.dataset.uid = item.U_ID;
-                        card.dataset.year = item.학년도;
-                        card.dataset.gun = item.군;
-                        card.dataset.savedId = item.saved_id;
-
-                        card.querySelector('.card-main-content').addEventListener('click', (e) => {
-                            if (e.target.closest('.delete-btn')) return; 
-                            openDetailModal(card);
-                        });
-                        
-                        card.querySelector('.delete-btn').addEventListener('click', async (e) => {
-                            e.stopPropagation();
-                            await deleteSavedItem(card, item.saved_id, gun);
-                        });
-                        
-                        card.querySelector('.view-history-btn').addEventListener('click', (e) => {
-                             e.stopPropagation();
-                             const uid = item.U_ID;
-                             const year = item.학년도;
-                             const name = encodeURIComponent(`${item.대학명} - ${item.학과명}`);
-                             window.location.href = `history_view.html?uid=${uid}&year=${year}&name=${name}`;
-                        });
-                        
-                        container.appendChild(card);
-                        
-                        loadAndDisplayLatestHistory(card, item.U_ID, item.학년도);
-                    }
-                });
-            } catch (err) {
-                console.error('저장된 대학 목록 로드 실패:', err);
-                alert(`저장 목록을 불러오지 못했습니다: ${err.message}`);
-            }
-        }
-        
-        async function deleteSavedItem(cardElement, savedId, gun) {
-            if (!confirm('이 대학을 저장 목록에서 삭제하시겠습니까?')) return;
-            try {
-                const res = await fetch(`${JUNGSI_SVR}/jungsi/student/remove-university`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ savedId: savedId })
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error(data.message || '삭제 실패');
-                
-                showToast('삭제되었습니다.', false);
-                const container = cardElement.parentElement;
-                cardElement.remove();
-                
-                const emptyMsg = document.getElementById(`empty-${gun.toLowerCase()}`);
-                if (container && container.querySelectorAll('.saved-card').length === 0 && emptyMsg) {
-                    emptyMsg.style.display = 'block';
-                }
-            } catch (err) {
-                console.error('저장 항목 삭제 오류:', err);
-                showToast(`삭제 중 오류 발생: ${err.message}`, true);
-            }
-        }
-
-        async function openDetailModal(card) {
-            if (!currentStudentProfile) {
-                alert('학생 정보가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
-                return;
-            }
-
-            currentOpenCardElement = card;
-            currentModalBranchCutoff = card.dataset.branchCutoff ? parseFloat(card.dataset.branchCutoff) : null;
-
-            const uid = card.dataset.uid;
-            const year = card.dataset.year;
-            const savedScore = parseFloat(card.dataset.savedSuneungScore || 0);
-
-            modalTitle.textContent = '정보 로딩 중...';
-            modalBody.innerHTML = '<div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>';
-            modalFooter.style.display = 'none';
-            currentModal_F_data = null;
-            modalOverlay.classList.add('show');
-
-            let todayBestRecords = {};
-            try {
-                const bestRes = await fetch(`${JUNGSI_SVR}/jungsi/student/practical/today-best`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const bestData = await bestRes.json();
-                if (bestRes.ok && bestData.success) {
-                    todayBestRecords = bestData.bestRecords || {};
-                    console.log('Today\'s best records loaded:', todayBestRecords);
-                } else { console.warn('Failed to load today\'s best records:', bestData.message); }
-            } catch (err) { console.error('Error fetching today\'s best records:', err); }
-
-            try {
-                const res = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ U_ID: uid, year: year })
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error(data.message || '대학 상세 정보 로드 실패');
-
-                currentModal_F_data = data.data;
-                const F = currentModal_F_data;
-
-                modalTitle.textContent = `${F.대학명} - ${F.학과명}`;
-                modalBody.innerHTML = ''; 
-
-                let naeshinGridItemHtml = '';
-                if (F.내신 && Number(F.내신) > 0) {
-                    naeshinGridItemHtml = `
-                        <div class="score-item">
-                            <label>내신</label>
-                            <span class="value" id="modal-naeshin-score">0.00</span>
-                        </div>`;
-                }
-
-                modalBody.innerHTML += `
-                    <div class="score-summary-grid">
-                        <div class="score-item">
-                            <label>수능환산점수</label>
-                            <span class="value" id="modal-suneung-score">${savedScore.toFixed(2)}</span>
-                        </div>
-                        ${naeshinGridItemHtml}
-                        <div class="score-item">
-                            <label>실기</label>
-                            <span class="value" id="modal-silgi-score">0.00</span>
-                        </div>
-                        <div class="score-item">
-                            <label>지점 총점컷</label>
-                            <span class="value" id="modal-cutoff-score">${currentModalBranchCutoff !== null ? currentModalBranchCutoff.toFixed(2) : '-'}</span>
-                        </div>
-                        <div class="score-item total-row">
-                            <label>총점</label>
-                            <span class="value" id="modal-total-score">0.00</span>
-                        </div>
-                    </div>
-                `;
-                
-                if (F.내신 && Number(F.내신) > 0) {
-                    const savedNaeshinScore = card.dataset.latestNaeshinScore || '';
-                    modalBody.innerHTML += `
-                        <div class="modal-group">
-                            <label for="naeshin-score-input"><i class="fa-solid fa-book-open"></i> 해당학교의 진학사내신점수입력 (최종 ${F.내신}%)</label>
-                            <input type="number" id="naeshin-score-input" placeholder="진학사 내신 점수 입력 (예: 95.5)" value="${savedNaeshinScore}">
-                            <small style="color:var(--gray); font-size:11px;">* 이 대학의 내신 반영비율(${F.내신}%)이 적용된 최종 점수를 입력하세요.</small>
-                        </div>
-                    `;
-                    setTimeout(() => { 
-                         document.getElementById('naeshin-score-input')?.addEventListener('input', updateModalTotalScore);
-                    }, 0);
-                }
-
-                if (F.실기 && Number(F.실기) > 0) { 
-                    let silgiInputsHtml = '<div class="silgi-input-grid">';
-                    const gender = currentStudentProfile.gender;
-                    let events = []; 
-
-                    if (F.실기모드 === 'special' && F.U_ID === 13) {
-                        console.log('Special Case 13: 수동으로 실기 종목 리스트 생성');
-                        events = ['배근력', '좌전굴', '제자리멀리뛰기', '중량메고달리기'];
-                    } else if (F.실기배점 && F.실기배점.length > 0) {
-                        events = [...new Set(
-                            F.실기배점.filter(item => item.성별 === gender).map(item => item.종목명)
-                        )];
-                    }
-
-                    if (events.length > 0) {
-                        events.forEach(eventName => {
-                            const eventId = eventName.replace(/[\s\(\)]/g, '-');
-                            const bestRecordValue = todayBestRecords[eventName];
-                            const valueAttribute = (bestRecordValue !== undefined && bestRecordValue !== null) ? `value="${bestRecordValue}"` : '';
-
-                            silgiInputsHtml += `
-                                <div class="modal-group">
-                                    <label for="silgi-input-${eventId}">
-                                        <span>${eventName}</span>
-                                        <span class="deduction-display" id="silgi-gam-${eventId}">- (0감)</span>
-                                    </label>
-                                    <input type="text" class="silgi-record-input" id="silgi-input-${eventId}" data-event="${eventName}" placeholder="기록 입력 (예: 12.5)" ${valueAttribute}>
-                                </div>
-                            `;
-                        });
-                        silgiInputsHtml += '</div>';
-                        modalBody.innerHTML += `
-                            <div class="modal-group">
-                                <label><i class="fa-solid fa-person-running"></i> 실기 기록 입력 (${F.실기}%)</label>
-                                ${silgiInputsHtml}
-                            </div>
-                        `;
-                        addSilgiInputListeners(); 
-
-                        setTimeout(() => {
-                            events.forEach(eventName => {
-                                const bestRecordValue = todayBestRecords[eventName];
-                                if (bestRecordValue !== undefined && bestRecordValue !== null) {
-                                    const eventId = eventName.replace(/[\s\(\)]/g, '-');
-                                    const inputElement = document.getElementById(`silgi-input-${eventId}`);
-                                    if (inputElement) {
-                                        inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-                                        console.log(`Triggered input event for ${eventName} with value ${bestRecordValue}`);
-                                    }
-                                }
-                            });
-                        }, 100);
-
-                    } else {
-                         modalBody.innerHTML += `<p style="color:var(--danger); font-size:12px;">실기(${F.실기}%) 반영 대학이나, 학생 성별(${gender})에 맞는 실기 배점표 데이터가 없습니다.</p>`;
-                    }
-                }
-
-                modalFooter.style.display = 'block';
-                
-                setTimeout(updateModalTotalScore, 110); 
-
-            } catch (err) {
-                console.error('모달 데이터 로드 오류:', err);
-                modalBody.innerHTML = `<p style="color:var(--danger);">오류: ${err.message}</p>`;
-            }
-        }
-        
-        function closeDetailModal(event) {
-            if (event && event.target !== modalOverlay) {
-                return; 
-            }
-            
-            modalOverlay.classList.remove('show');
-            currentModal_F_data = null;
-            currentModalBranchCutoff = null;
-            
-            if (currentOpenCardElement) {
-                updateCardDisplayAfterClose(currentOpenCardElement);
-                currentOpenCardElement = null; 
-            }
-        }
-
-        async function calculateAndSaveTotalScore() {
-            if (!currentModal_F_data || !currentStudentProfile) return;
-            
-            const btn = document.getElementById('calculate-total-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 기록 중...';
-            
-            let suneungScore = parseFloat(document.getElementById('modal-suneung-score')?.textContent || 0);
-            let naeshinScoreEl = document.getElementById('modal-naeshin-score');
-            let naeshinScore = naeshinScoreEl ? parseFloat(naeshinScoreEl.textContent || 0) : 0;
-            let silgiScore = parseFloat(document.getElementById('modal-silgi-score')?.textContent || 0);
-            let totalScore = parseFloat(document.getElementById('modal-total-score')?.textContent || 0);
-            
-            let silgiRecordsPayload = []; 
-            
-            try {
-                const silgiInputs = document.querySelectorAll('.silgi-record-input');
-                if (silgiInputs.length > 0) {
-                    const practicals = Array.from(silgiInputs).map(input => ({
-                        event: input.dataset.event,
-                        value: input.value
-                    }));
-                    
-                    const sDataForSilgi = {
-                        gender: currentStudentProfile.gender,
-                        practicals: practicals
-                    };
-                    
-                    const silgiRes = await fetch(`${JUNGSI_SVR}/silgi/calculate`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ F_data: currentModal_F_data, S_data: sDataForSilgi })
-                    });
-                    
-                    const silgiData = await silgiRes.json();
-                    if (!silgiData.success) throw new Error(silgiData.message || '실기 점수 계산 실패');
-                    
-                    if (silgiData.result.breakdown && silgiData.result.breakdown.events) {
-                        silgiRecordsPayload = silgiData.result.breakdown.events.map(evt => ({
-                            event: evt.event,
-                            record: evt.record,
-                            score: evt.score,
-                            gam: evt.deduction_level 
-                        }));
-                    }
-                }
-                
-                const historyBody = {
-                    U_ID: currentModal_F_data.U_ID,
-                    year: currentModal_F_data.학년도,
-                    suneungScore: suneungScore,
-                    naeshinScore: naeshinScore,
-                    silgiRecordsJson: silgiRecordsPayload, 
-                    silgiScore: silgiScore,
-                    totalScore: totalScore
-                };
-
-                const historyRes = await fetch(`${JUNGSI_SVR}/jungsi/student/save-history`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(historyBody)
-                });
-
-                const historyData = await historyRes.json();
-                if (!historyData.success) {
-                    throw new Error(historyData.message || '계산 결과 기록에 실패했습니다.');
-                }
-                
-                if (historyData.updated) {
-                    showToast('✅ 오늘 점수로 업데이트 되었습니다!');
-                } else {
-                    showToast('✅ 성적 기록이 새로 저장되었습니다!');
-                }
-
-            } catch (err) {
-                console.error('기록 오류:', err);
-                showToast(`❌ 오류: ${err.message}`, true);
-            } finally {
-                 btn.disabled = false;
-                 btn.innerHTML = '기록하기';
-            }
-        }
-
-        async function loadAllCutoffs() {
-            if (currentStudentProfile && currentStudentProfile.학년도) {
-                try {
-                    const res = await fetch(`${JUNGSI_SVR}/jungsi/cutoffs/${currentStudentProfile.학년도}`, {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    const data = await res.json();
-                    if (data.success && data.cutoffs) {
-                        data.cutoffs.forEach(item => {
-                            allCutoffsMap[item.U_ID] = item.지점_총점컷; 
-                        });
-                        console.log('All cutoffs (total) loaded:', allCutoffsMap);
-                    }
-                } catch (err) {
-                    console.error('Failed to load all cutoffs:', err);
-                }
-            } else {
-                 console.warn('Cannot load cutoffs, student profile (year) not ready.');
-            }
-        }
-
-        // ▼▼▼▼▼ [⭐️⭐️⭐️ 수정된 함수] ▼▼▼▼▼
-        async function loadAndDisplayLatestHistory(cardElement, uid, year) {
-            const timestampEl = cardElement.querySelector('.saved-timestamp');
-            const detailsEl = cardElement.querySelector('.saved-score-details');
-            const cutoffRaw = allCutoffsMap[uid];
-            const cutoffNum = (cutoffRaw !== null && cutoffRaw !== undefined && cutoffRaw !== '') ? parseFloat(cutoffRaw) : null;
-            const cutoffDisplay = cutoffNum !== null ? cutoffNum.toFixed(2) : '-';
-            
-            const fData = await fetchFData(uid, year); 
-
+        /**
+         * API를 호출하여 성적 기록을 불러오는 함수
+         */
+        async function loadHistory(uid, year) {
             try {
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/get-history/${uid}/${year}`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
+
+                if (res.status === 401 || res.status === 403) {
+                    throw new Error('인증 오류. 다시 로그인해주세요.');
+                }
+                
                 const data = await res.json();
-                
-                if (!data.success || !data.history || data.history.length === 0) {
-                    timestampEl.textContent = '최근 기록 없음';
-                    detailsEl.innerHTML = `
-                        <div class="score-details-row">
-                            <span class="detail-item">수능: <strong class="score-value">-</strong></span>
-                        </div>
-                        <div class="score-details-row">
-                            <span class="detail-item">총점: <strong class="score-value">-</strong></span>
-                            <span class="detail-item">지점컷: <strong class="score-value">${cutoffDisplay}</strong></span>
-                        </div>
-                    `;
-                    cardElement.dataset.latestNaeshinScore = '';
-                    return; 
+                if (!data.success) {
+                    throw new Error(data.message || '기록 조회에 실패했습니다.');
                 }
                 
-                const latest = data.history[0]; 
-                const recordDate = new Date(latest.record_date);
-                const dateString = `${recordDate.getMonth() + 1}/${recordDate.getDate()} ${recordDate.getHours()}:${String(recordDate.getMinutes()).padStart(2, '0')}`;
-                
-                timestampEl.textContent = `최근 저장: ${dateString}`;
-                cardElement.dataset.latestNaeshinScore = latest.naeshin_score || '';
+                // 로딩 메시지 제거
+                loadingMsg.style.display = 'none';
 
-                const suneungVal = parseFloat(latest.suneung_score || 0).toFixed(2);
-                const naeshinVal = parseFloat(latest.naeshin_score || 0).toFixed(2);
-                const silgiVal = parseFloat(latest.silgi_score || 0).toFixed(2); 
-                const totalVal = parseFloat(latest.total_score || 0);
-                
-                // --- Row 1 (수능, 내신, 실기) ---
-                let row1Html = `<div class="score-details-row">`;
-                row1Html += `<span class="detail-item">수능: <strong class="score-value">${suneungVal}</strong></span>`;
-                if (fData && fData.내신 && Number(fData.내신) > 0) {
-                    row1Html += `<span class="detail-item">내신: <strong class="score-value">${naeshinVal}</strong></span>`;
+                if (data.history.length === 0) {
+                    historyListContainer.innerHTML = '<p class="empty-msg">아직 저장된 점수 기록이 없습니다.</p>';
+                    return;
                 }
                 
-                // ▼▼▼▼▼ [⭐️ 수정] 실기 JSON 파싱 및 표시 ▼▼▼▼▼
-                if (fData && fData.실기 && Number(fData.실기) > 0) {
-                    
-                    // ⭐️ 1) 'silgiRecordsJson' (camelCase) 키로 데이터를 찾음
-                    let silgiEventsJson = latest.silgiRecordsJson;
-
-                    // ⭐️ 2) 문자열이면 JSON 배열로 변환
-                    if (silgiEventsJson && typeof silgiEventsJson === 'string') {
-                        try {
-                            silgiEventsJson = JSON.parse(silgiEventsJson);
-                        } catch (e) {
-                            console.error('Failed to parse silgiRecordsJson string in card:', e);
-                            silgiEventsJson = null;
-                        }
-                    }
-                    
-                    // ⭐️ 3) 진짜 배열일 때만 표시
-                    if (silgiEventsJson && Array.isArray(silgiEventsJson) && silgiEventsJson.length > 0) {
-                        silgiEventsJson.forEach(ev => {
-                            if (ev.record === '') return; 
-                            const eventNameShort = ev.event.substring(0, 4); 
-                            const eventRecord = ev.record || '-'; 
-                            const eventScore = parseFloat(ev.score || 0).toFixed(1); 
-                            const eventGam = ev.gam ?? 0;
-                            
-                            row1Html += `<span class="detail-item">${eventNameShort}(${eventRecord}): <strong class="score-value">${eventScore}(${eventGam}감)</strong></span>`;
-                        });
-                    } else {
-                        // ⭐️ JSON이 없으면 (옛날 데이터), 그냥 총점이라도 표시
-                        row1Html += `<span class="detail-item">실기(총): <strong class="score-value">${silgiVal}</strong></span>`;
-                    }
-                }
-                // ▲▲▲▲▲ [⭐️ 수정] ▲▲▲▲▲
-                
-                row1Html += `</div>`;
-
-                // --- Row 2 (총점, 지점컷) ---
-                let totalScoreClass = '';
-                if (cutoffNum !== null) { 
-                    if (totalVal > cutoffNum) {
-                        totalScoreClass = 'total-score-high';
-                    } else if (totalVal < cutoffNum) {
-                        totalScoreClass = 'total-score-low';
-                    }
-                }
-                
-                let row2Html = `<div class="score-details-row">`;
-                row2Html += `<span class="detail-item ${totalScoreClass}">총점: <strong class="score-value">${totalVal.toFixed(2)}</strong></span>`;
-                row2Html += `<span class="detail-item">지점컷: <strong class="score-value">${cutoffDisplay}</strong></span>`;
-                row2Html += `</div>`;
-                
-                detailsEl.innerHTML = row1Html + row2Html;
+                // 기록이 있으면, 각 기록을 카드로 만들어 추가
+                data.history.forEach(record => {
+                    const card = createHistoryCard(record);
+                    historyListContainer.appendChild(card);
+                });
 
             } catch (err) {
-                console.error(`Failed to load history for card ${uid}:`, err);
-                timestampEl.textContent = '기록 로드 실패';
-                detailsEl.innerHTML = `
-                    <div class="score-details-row">
-                        <span class="detail-item">수능: <strong class="score-value">-</strong></span>
-                    </div>
-                    <div class="score-details-row">
-                        <span class="detail-item">총점: <strong class="score-value">-</strong></span>
-                        <span class="detail-item">지점컷: <strong class="score-value">${cutoffDisplay}</strong></span>
-                    </div>
-                `;
-                cardElement.dataset.latestNaeshinScore = '';
-            }
-        }
-        // ▲▲▲▲▲ [⭐️⭐️⭐️ 수정된 함수 끝] ▲▲▲▲▲
-        
-        async function fetchFData(uid, year) {
-             try {
-                const res = await fetch(`${JUNGSI_SVR}/jungsi/school-details`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ U_ID: uid, year: year })
-                });
-                const data = await res.json();
-                if (data.success) return data.data;
-                else return null;
-             } catch(e) { return null; }
-        }
-
-        function updateCardDisplayAfterClose(cardElement) {
-            if (!cardElement) return;
-            const uid = cardElement.dataset.uid;
-            const year = cardElement.dataset.year;
-            if (uid && year) {
-                console.log(`Updating card ${uid} after modal close...`);
-                loadAndDisplayLatestHistory(cardElement, uid, year);
+                console.error('성적 기록 로드 실패:', err);
+                loadingMsg.innerHTML = `<span style="color:var(--danger);">❌ ${err.message}</span>`;
             }
         }
 
-        async function updateModalTotalScore() {
-            if (!currentModal_F_data || !currentStudentProfile) return;
-
-            const suneungScore = parseFloat(document.getElementById('modal-suneung-score').textContent || 0);
+        /**
+         * 기록 데이터로 HTML 카드 요소를 생성하는 함수
+         */
+        function createHistoryCard(item) {
+            const card = document.getElementById('history-card-template').content.cloneNode(true).firstElementChild;
             
-            const naeshinInput = document.getElementById('naeshin-score-input');
-            const naeshinScore = naeshinInput ? parseFloat(naeshinInput.value || 0) : 0;
+            // 1. 날짜 및 총점
+            card.querySelector('.record-date').textContent = formatDateTime(item.record_date);
+            card.querySelector('.total-score-big strong').textContent = `${item.total_score || 0}점`;
             
-            const naeshinScoreEl = document.getElementById('modal-naeshin-score');
-            if (naeshinScoreEl) {
-                naeshinScoreEl.textContent = naeshinScore.toFixed(2);
-            }
+            // 2. 점수 요약 테이블
+            const breakdownTbody = card.querySelector('.score-breakdown tbody');
+            breakdownTbody.querySelector('.suneung').textContent = `${item.suneung_score || 0}점`;
+            breakdownTbody.querySelector('.naeshin').textContent = `${item.naeshin_score || 0}점`;
+            breakdownTbody.querySelector('.silgi').textContent = `${item.silgi_score || 0}점`;
             
-            let silgiScore = 0;
-            const silgiScoreEl = document.getElementById('modal-silgi-score');
-            silgiScoreEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
-            
-            document.querySelectorAll('.deduction-display').forEach(span => {
-                const inputId = span.id.replace('silgi-gam-', 'silgi-input-');
-                const input = document.getElementById(inputId);
-                if (input && input.value === '') {
-                     span.textContent = "- (0감)";
-                     span.className = 'deduction-display';
-                }
-            });
-
-            const silgiInputs = document.querySelectorAll('.silgi-record-input');
-            if (silgiInputs.length > 0) {
-                const practicals = Array.from(silgiInputs).map(input => ({
-                    event: input.dataset.event,
-                    value: input.value
-                }));
-                const sDataForSilgi = { gender: currentStudentProfile.gender, practicals: practicals };
+            // 3. 실기 세부 테이블 (데이터가 있을 경우에만)
+            if (item.silgi_records_json && Array.isArray(item.silgi_records_json) && item.silgi_records_json.length > 0) {
+                const silgiTable = document.getElementById('silgi-table-template').content.cloneNode(true).firstElementChild;
+                const silgiTbody = silgiTable.querySelector('tbody');
                 
-                try {
-                    const silgiRes = await fetch(`${JUNGSI_SVR}/silgi/calculate`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                        body: JSON.stringify({ F_data: currentModal_F_data, S_data: sDataForSilgi })
-                    });
-                    const silgiData = await silgiRes.json();
-                    
-                    if (silgiData.success) {
-                        silgiScore = parseFloat(silgiData.result.totalScore || 0);
-                        
-                        if (silgiData.result.breakdown && silgiData.result.breakdown.events) {
-                            silgiData.result.breakdown.events.forEach(ev => {
-                                const score = ev.score;
-                                const deduction = ev.deduction_level ?? 0; 
-                                
-                                const eventId = ev.event.replace(/[\s\(\)]/g, '-');
-                                const displaySpan = document.getElementById(`silgi-gam-${eventId}`);
-                                
-                                if (displaySpan) {
-                                    if (ev.record === '') {
-                                        displaySpan.textContent = "- (0감)";
-                                        displaySpan.className = 'deduction-display';
-                                    } else if (isNaN(Number(score))) {
-                                        displaySpan.textContent = `${score}`;
-                                        displaySpan.className = 'deduction-display';
-                                    } else {
-                                        displaySpan.textContent = `${Number(score).toFixed(2)}점 (${deduction}감)`;
-                                        displaySpan.className = `deduction-display ${deduction === 0 ? 'success' : ''}`;
-                                    }
-                                }
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error('Silgi calc error:', err);
-                    silgiScore = 0; 
-                }
+                item.silgi_records_json.forEach(silgi => {
+                    const tr = document.createElement('tr');
+                    const gam = silgi.gam || 0;
+                    tr.innerHTML = `
+                        <td>${silgi.event || '-'}</td>
+                        <td>${silgi.record || '-'}</td>
+                        <td>${silgi.score ?? 'N/A'}</td>
+                        <td class="${gam === 0 ? 'success' : ''}">${gam}감</td>
+                    `;
+                    silgiTbody.appendChild(tr);
+                });
+                
+                card.querySelector('.history-body').appendChild(silgiTable); // 카드 본문에 실기 테이블 추가
             }
-            silgiScoreEl.textContent = parseFloat(silgiScore || 0).toFixed(2);
-
-            const totalScore = suneungScore + naeshinScore + silgiScore;
-            const totalScoreEl = document.getElementById('modal-total-score');
-            totalScoreEl.textContent = totalScore.toFixed(2);
-
-            totalScoreEl.classList.remove('total-score-high', 'total-score-low');
-            if (currentModalBranchCutoff !== null) {
-                if (totalScore > currentModalBranchCutoff) {
-                    totalScoreEl.classList.add('total-score-high'); 
-                } else if (totalScore < currentModalBranchCutoff) {
-                    totalScoreEl.classList.add('total-score-low');
-                }
-            }
+            
+            return card;
         }
 
-        // --- ⭐️ 4. 페이지 로드 시 실행 (함수 정의가 끝난 후) ---
+        // --- 4. 페이지 로드 시 실행 ---
         document.addEventListener('DOMContentLoaded', async () => {
             if (!token) {
                 alert('로그인이 필요합니다.');
@@ -1073,16 +304,22 @@ if (item.logo_url) {
                 return;
             }
             
-            await loadStudentProfile(); 
+            // 1. URL에서 파라미터 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('uid');
+            const year = urlParams.get('year');
+            const name = urlParams.get('name') || '기록 보기';
             
-            if (currentStudentProfile) {
-                await loadAllCutoffs();   
-                await loadSavedList();  
-            } else {
-                 document.getElementById('empty-ga').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
-                 document.getElementById('empty-na').textContent = '학생 정보(성적)를 먼저 입력해주세요.';
-                 document.getElementById('empty-da').textContent = '학생 정보(DBC)를 먼저 입력해주세요.';
+            if (!uid || !year) {
+                historyListContainer.innerHTML = '<p class="empty-msg">잘못된 접근입니다. (대학 ID 또는 학년도 없음)</p>';
+                return;
             }
+            
+            // 2. 제목 설정
+            universityTitle.textContent = decodeURIComponent(name);
+            
+            // 3. 기록 불러오기 API 실행
+            await loadHistory(uid, year);
         });
 
     </script>
