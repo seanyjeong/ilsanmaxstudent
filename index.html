@@ -66,12 +66,13 @@
     <a href="#" id="nav-search" class="nav-button"        target="contentFrame" onclick="setActive(this)"><i class="fa-solid fa-magnifying-glass"></i><span>대학찾기</span></a>
     <a href="#" id="nav-saved"  class="nav-button"        target="contentFrame" onclick="setActive(this)"><i class="fa-solid fa-star"></i><span>저장대학</span></a>
     <a href="#" id="nav-prac"   class="nav-button"        target="contentFrame" onclick="setActive(this)"><i class="fa-solid fa-person-running"></i><span>실기관리</span></a>
+    <a href="#" id="nav-ranking" class="nav-button"       target="contentFrame" onclick="setActive(this)"><i class="fa-solid fa-trophy"></i><span>랭킹</span></a>
     <a href="#" id="nav-my"     class="nav-button"        target="contentFrame" onclick="setActive(this)"><i class="fa-solid fa-user"></i><span>마이페이지</span></a>
   </nav>
 
   <script>
     // ===== 0) 앱/배포 버전 (바꿀 때마다 문자열만 업데이트) =====
-    const APP_VERSION = '2025-11-18-02';
+    const APP_VERSION = '2025-11-12-04';
 
     // ===== 1) 토큰 체크 (비로그인 시 로그인 페이지로) =====
     (function () {
@@ -89,6 +90,7 @@
       search: vq('search.html'),
       saved:  vq('saved_list.html'),
       prac:   vq('practical.html'),
+      ranking: vq('ranking.html'),
       my:     vq('mypage.html')
     };
     // 초기 프레임 로드
@@ -98,6 +100,7 @@
       document.getElementById('nav-search').href = routes.search;
       document.getElementById('nav-saved').href  = routes.saved;
       document.getElementById('nav-prac').href   = routes.prac;
+      document.getElementById('nav-ranking').href = routes.ranking;
       document.getElementById('nav-my').href     = routes.my;
     })();
 
@@ -158,5 +161,3 @@
   </script>
 </body>
 </html>
-
-
