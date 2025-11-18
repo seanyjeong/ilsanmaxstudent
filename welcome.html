@@ -562,6 +562,12 @@
             </ul>
         </div>
 
+        <!-- 최초 레벨 달성자 공지 -->
+        <div class="card" id="firstAchieversCard" style="display: none; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border: 3px solid #ff6b6b;">
+            <h3 style="color: #ff6b6b;"><i class="fa-solid fa-trophy"></i> 🏆 최초 레벨 달성자 🏆</h3>
+            <div id="firstAchieversList" style="color: #333;"></div>
+        </div>
+
         <div class="card">
             <h3><i class="fa-solid fa-bullhorn" style="color:var(--info)"></i> IMAX 공지사항</h3>
             <div class="notice-list" id="noticeList">
@@ -900,7 +906,8 @@
                             data.levelInfo.oldLevel,
                             data.levelInfo.newLevel,
                             data.levelInfo.currentExp,
-                            data.levelInfo.expForNextLevel
+                            data.levelInfo.expForNextLevel,
+                            data.levelInfo.isFirstAchiever || false
                         );
                     }
                 }
@@ -981,58 +988,89 @@
         // --- ⭐️ 공지사항 모달 관련 함수 끝 ---
 
         // --- 레벨업 축하 모달 함수 ---
-        function showLevelupModal(oldLevel, newLevel, currentExp, nextLevelExp) {
+        function showLevelupModal(oldLevel, newLevel, currentExp, nextLevelExp, isFirstAchiever = false) {
             const overlay = document.getElementById('levelupOverlay');
+            const modal = overlay.querySelector('.levelup-modal');
+
             document.getElementById('levelupOldLevel').textContent = oldLevel;
             document.getElementById('levelupNewLevel').textContent = newLevel;
 
-            if (nextLevelExp) {
-                document.getElementById('levelupExpText').textContent = `⚡ ${currentExp} / ${nextLevelExp} EXP ⚡`;
+            // 최초 달성자 특별 스타일
+            if (isFirstAchiever) {
+                modal.style.background = 'linear-gradient(135deg, #ffd700 0%, #ff6b6b 50%, #ffd700 100%)';
+                modal.style.border = '5px solid #ff0000';
+                modal.style.boxShadow = '0 0 100px rgba(255, 215, 0, 0.9), 0 0 200px rgba(255, 0, 0, 0.6)';
+                document.getElementById('levelupExpText').textContent = `🏆🏆 최초 달성자! 🏆🏆`;
+                document.querySelector('.levelup-subtitle').textContent = '🔥🔥 역대 최초 레벨 달성! 🔥🔥';
             } else {
-                document.getElementById('levelupExpText').textContent = `🏆 만렙 달성! 총 ${currentExp} EXP 🏆`;
+                // 일반 레벨업 스타일 복구
+                modal.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ffd93d 50%, #ff6b6b 100%)';
+                modal.style.border = '3px solid #ffd700';
+                modal.style.boxShadow = '0 20px 60px rgba(255, 107, 107, 0.5), 0 0 100px rgba(255, 217, 61, 0.4)';
+                document.querySelector('.levelup-subtitle').textContent = '🔥 파워 업! 🔥';
+
+                if (nextLevelExp) {
+                    document.getElementById('levelupExpText').textContent = `⚡ ${currentExp} / ${nextLevelExp} EXP ⚡`;
+                } else {
+                    document.getElementById('levelupExpText').textContent = `🏆 만렙 달성! 총 ${currentExp} EXP 🏆`;
+                }
             }
 
             overlay.classList.add('show');
 
             // 🎆 초반 폭발 효과
-            confetti({
-                particleCount: 100,
-                spread: 160,
-                origin: { y: 0.5 },
-                colors: ['#ffd700', '#ff6b6b', '#ff9500', '#ff0000', '#ffed4e']
-            });
+            if (isFirstAchiever) {
+                // 최초 달성자 특별 폭발 (더 많이!)
+                confetti({
+                    particleCount: 200,
+                    spread: 180,
+                    origin: { y: 0.5 },
+                    colors: ['#ffd700', '#ff0000', '#ff9500', '#ffed4e'],
+                    startVelocity: 60
+                });
+            } else {
+                confetti({
+                    particleCount: 100,
+                    spread: 160,
+                    origin: { y: 0.5 },
+                    colors: ['#ffd700', '#ff6b6b', '#ff9500', '#ff0000', '#ffed4e']
+                });
+            }
 
             // 🎇 연속 confetti 효과
-            const duration = 4000;
+            const duration = isFirstAchiever ? 6000 : 4000; // 최초 달성자는 6초!
             const end = Date.now() + duration;
 
             (function frame() {
+                const particleMultiplier = isFirstAchiever ? 2 : 1; // 최초 달성자는 2배
+
                 // 왼쪽에서
                 confetti({
-                    particleCount: 10,
+                    particleCount: 10 * particleMultiplier,
                     angle: 60,
                     spread: 70,
                     origin: { x: 0, y: 0.8 },
-                    colors: ['#ffd700', '#ff6b6b', '#ff9500'],
-                    startVelocity: 45
+                    colors: isFirstAchiever ? ['#ffd700', '#ff0000', '#ffed4e'] : ['#ffd700', '#ff6b6b', '#ff9500'],
+                    startVelocity: isFirstAchiever ? 60 : 45
                 });
                 // 오른쪽에서
                 confetti({
-                    particleCount: 10,
+                    particleCount: 10 * particleMultiplier,
                     angle: 120,
                     spread: 70,
                     origin: { x: 1, y: 0.8 },
-                    colors: ['#ffd700', '#ff6b6b', '#ff9500'],
-                    startVelocity: 45
+                    colors: isFirstAchiever ? ['#ffd700', '#ff0000', '#ffed4e'] : ['#ffd700', '#ff6b6b', '#ff9500'],
+                    startVelocity: isFirstAchiever ? 60 : 45
                 });
                 // 중앙 폭발
-                if (Math.random() > 0.7) {
+                const explosionChance = isFirstAchiever ? 0.5 : 0.7; // 최초 달성자는 더 자주 폭발
+                if (Math.random() > explosionChance) {
                     confetti({
-                        particleCount: 30,
+                        particleCount: 30 * particleMultiplier,
                         spread: 360,
                         origin: { y: 0.3 },
-                        colors: ['#ffd700', '#ff0000', '#ff9500'],
-                        startVelocity: 30
+                        colors: isFirstAchiever ? ['#ffd700', '#ff0000', '#ffed4e'] : ['#ffd700', '#ff0000', '#ff9500'],
+                        startVelocity: isFirstAchiever ? 50 : 30
                     });
                 }
 
@@ -1040,6 +1078,13 @@
                     requestAnimationFrame(frame);
                 }
             }());
+
+            // 최초 달성자는 페이지 새로고침 (다른 학생들에게 공지 표시)
+            if (isFirstAchiever) {
+                setTimeout(() => {
+                    loadFirstAchievers(); // 최초 달성자 목록 새로고침
+                }, 1000);
+            }
         }
         window.showLevelupModal = showLevelupModal;
 
@@ -1047,6 +1092,61 @@
             document.getElementById('levelupOverlay').classList.remove('show');
         }
         window.closeLevelupModal = closeLevelupModal;
+
+        // --- 최초 달성자 로드 함수 ---
+        async function loadFirstAchievers() {
+            try {
+                const response = await fetch('https://supermax.kr/jungsi/level/first-achievers', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    console.warn('최초 달성자 정보를 불러올 수 없습니다.');
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success && data.achievers.length > 0) {
+                    const card = document.getElementById('firstAchieversCard');
+                    const list = document.getElementById('firstAchieversList');
+
+                    let html = '';
+                    data.achievers.forEach(achiever => {
+                        const date = new Date(achiever.achieved_at);
+                        const timeAgo = getTimeAgo(date);
+                        html += `
+                            <div style="padding: 12px; border-bottom: 1px dashed rgba(255,107,107,0.3); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 16px; color: #ff6b6b;">
+                                        🏆 ${achiever.student_name}님 - Lv.${achiever.level} 최초 달성!
+                                    </div>
+                                    <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                        ${achiever.branch || ''} | ${timeAgo}
+                                    </div>
+                                </div>
+                                <div style="font-size: 36px;">⚡</div>
+                            </div>
+                        `;
+                    });
+
+                    list.innerHTML = html;
+                    card.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('최초 달성자 로드 오류:', error);
+            }
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return '방금 전';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}분 전`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}시간 전`;
+            const days = Math.floor(hours / 24);
+            return `${days}일 전`;
+        }
 
         // --- 레벨 정보 로드 함수 ---
         async function loadStudentLevel() {
@@ -1147,6 +1247,7 @@
 
             // 데이터 로드 시작
             loadStudentLevel();
+            loadFirstAchievers();
             loadAssignments();
             loadNotices();
         });
