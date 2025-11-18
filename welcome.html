@@ -142,7 +142,13 @@
             margin-top: 2px;
         }
         .assignment-details { flex-grow: 1; font-size: 15px; }
-        .assignment-details .exercise-name { font-weight: 600; display: block; margin-bottom: 3px; }
+        .assignment-details .exercise-name { font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+        .assignment-details .exp-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            background: linear-gradient(135deg, #4361ee, #3f37c9);
+            color: white; padding: 2px 8px; border-radius: 12px;
+            font-size: 0.75em; font-weight: 700; white-space: nowrap;
+        }
         .assignment-details .target-info { font-size: 0.9em; color: var(--text-secondary); display: block; margin-bottom: 4px; }
         .assignment-details .teacher-name { font-size: 0.8em; color: var(--gray); font-style: italic; }
 
@@ -791,10 +797,14 @@
 
                     const teacherDisplay = item.teacher_name ? `${item.teacher_name} 선생님` : (item.teacher_userid || '담당자');
 
+                    const expValue = item.exp_value || 1;
                     li.innerHTML = `
                         <input type="checkbox" ${item.is_completed ? 'checked' : ''} onchange="updateAssignmentStatus(this, ${item.assignment_id})">
                         <div class="assignment-details">
-                            <span class="exercise-name">${item.exercise_name || '운동명 없음'}</span>
+                            <span class="exercise-name">
+                                <span>${item.exercise_name || '운동명 없음'}</span>
+                                <span class="exp-badge">⭐ +${expValue} EXP</span>
+                            </span>
                             <span class="target-info">${targetInfo || '세부 정보 없음'}</span>
                             <span class="teacher-name">할당: ${teacherDisplay}</span>
                         </div>
@@ -1110,24 +1120,24 @@
                     const card = document.getElementById('firstAchieversCard');
                     const list = document.getElementById('firstAchieversList');
 
-                    let html = '';
-                    data.achievers.forEach(achiever => {
-                        const date = new Date(achiever.achieved_at);
-                        const timeAgo = getTimeAgo(date);
-                        html += `
-                            <div style="padding: 12px; border-bottom: 1px dashed rgba(255,107,107,0.3); display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <div style="font-weight: 700; font-size: 16px; color: #ff6b6b;">
-                                        🏆 ${achiever.student_name}님 - Lv.${achiever.level} 최초 달성!
-                                    </div>
-                                    <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                                        ${achiever.branch || ''} | ${timeAgo}
-                                    </div>
+                    // 가장 최근 1명만 표시
+                    const achiever = data.achievers[0];
+                    const date = new Date(achiever.achieved_at);
+                    const timeAgo = getTimeAgo(date);
+
+                    const html = `
+                        <div style="padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 16px; color: #ff6b6b;">
+                                    🏆 ${achiever.student_name}님 - Lv.${achiever.level} 최초 달성!
                                 </div>
-                                <div style="font-size: 36px;">⚡</div>
+                                <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                    ${achiever.branch || ''} | ${timeAgo}
+                                </div>
                             </div>
-                        `;
-                    });
+                            <div style="font-size: 36px;">⚡</div>
+                        </div>
+                    `;
 
                     list.innerHTML = html;
                     card.style.display = 'block';
