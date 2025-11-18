@@ -347,6 +347,189 @@
             font-size: 30px;
             color: var(--warning);
         }
+
+        /* 레벨업 축하 모달 */
+        .levelup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .levelup-overlay.show {
+            display: flex;
+        }
+
+        .levelup-modal {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 50%, #ff6b6b 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            position: relative;
+            animation: bounceIn 0.6s ease, pulseGlow 1.5s ease-in-out infinite;
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.5), 0 0 100px rgba(255, 217, 61, 0.4);
+            border: 3px solid #ffd700;
+        }
+
+        .levelup-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: punchEffect 0.8s ease infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+
+        .levelup-title {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px #000,
+                         -1px -1px 0px #ffd700,
+                         1px -1px 0px #ffd700,
+                         -1px 1px 0px #ffd700,
+                         1px 1px 0px #ffd700;
+            letter-spacing: 3px;
+            animation: textShake 0.5s ease infinite;
+        }
+
+        .levelup-subtitle {
+            font-size: 18px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .levelup-levels {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 48px;
+            font-weight: 700;
+        }
+
+        .levelup-arrow {
+            font-size: 32px;
+            opacity: 0.7;
+        }
+
+        .levelup-exp {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 15px;
+        }
+
+        .levelup-close-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .levelup-close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 파티클 효과 */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes rotateScale {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            25% {
+                transform: rotate(-10deg) scale(1.1);
+            }
+            75% {
+                transform: rotate(10deg) scale(1.1);
+            }
+        }
+
+        @keyframes punchEffect {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.2) rotate(-5deg);
+            }
+            50% {
+                transform: scale(1.3) rotate(5deg);
+            }
+            75% {
+                transform: scale(1.2) rotate(-5deg);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 20px 60px rgba(255, 107, 107, 0.5), 0 0 100px rgba(255, 217, 61, 0.4);
+            }
+            50% {
+                box-shadow: 0 20px 60px rgba(255, 107, 107, 0.8), 0 0 150px rgba(255, 217, 61, 0.7);
+            }
+        }
+
+        @keyframes textShake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-2px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(2px);
+            }
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -356,6 +539,19 @@
             <div class="welcome-text">
                 <h2><span id="studentName">학생</span>님, 오늘도 반갑습니다.</h2>
                 <p>JUST ILSAN-MAX</p>
+
+                <!-- 레벨 표시 -->
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                    <div style="font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.95);">
+                        Lv. <span id="studentLevel">1</span>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <div style="width: 100%; height: 8px; background-color: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden;">
+                            <div id="studentExpBar" style="height: 100%; background: linear-gradient(90deg, #ffd700, #ffed4e); width: 0%; transition: width 0.5s ease;"></div>
+                        </div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px;" id="studentExpText">0 / 5 EXP</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -408,6 +604,22 @@
         <div class="quest-complete-message" onclick="event.stopPropagation()">
             <i class="fa-solid fa-trophy"></i> <h2>일일 퀘스트 완료!</h2>
             <p>오늘의 미션을 모두 달성했습니다!</p>
+        </div>
+    </div>
+
+    <!-- 레벨업 축하 모달 -->
+    <div class="levelup-overlay" id="levelupOverlay">
+        <div class="levelup-modal">
+            <div class="levelup-icon">💥👊⚡</div>
+            <div class="levelup-title">LEVEL UP!</div>
+            <div class="levelup-subtitle">🔥 파워 업! 🔥</div>
+            <div class="levelup-levels">
+                <span id="levelupOldLevel">1</span>
+                <span class="levelup-arrow">⚡→⚡</span>
+                <span id="levelupNewLevel">2</span>
+            </div>
+            <div class="levelup-exp" id="levelupExpText">경험치를 획득했습니다!</div>
+            <button class="levelup-close-btn" onclick="closeLevelupModal()">💪 확인 💪</button>
         </div>
     </div>
 
@@ -678,6 +890,21 @@
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '상태 업데이트 실패'}`);
                 if (!data.success) throw new Error(data.message || '상태 업데이트 실패 (Success: false)');
 
+                // ⭐️ 레벨 정보 업데이트
+                if (data.levelInfo) {
+                    loadStudentLevel(); // 레벨 정보 새로고침
+
+                    // 레벨업 했으면 축하 모달 표시
+                    if (data.levelInfo.leveledUp) {
+                        showLevelupModal(
+                            data.levelInfo.oldLevel,
+                            data.levelInfo.newLevel,
+                            data.levelInfo.currentExp,
+                            data.levelInfo.expForNextLevel
+                        );
+                    }
+                }
+
                 // ⭐️ [신규] API 호출 성공 후, 애니메이션 트리거 로직
                 
                 // 1. 현재 DOM 상태가 "모두 완료"인지 다시 확인
@@ -753,6 +980,109 @@
         });
         // --- ⭐️ 공지사항 모달 관련 함수 끝 ---
 
+        // --- 레벨업 축하 모달 함수 ---
+        function showLevelupModal(oldLevel, newLevel, currentExp, nextLevelExp) {
+            const overlay = document.getElementById('levelupOverlay');
+            document.getElementById('levelupOldLevel').textContent = oldLevel;
+            document.getElementById('levelupNewLevel').textContent = newLevel;
+
+            if (nextLevelExp) {
+                document.getElementById('levelupExpText').textContent = `⚡ ${currentExp} / ${nextLevelExp} EXP ⚡`;
+            } else {
+                document.getElementById('levelupExpText').textContent = `🏆 만렙 달성! 총 ${currentExp} EXP 🏆`;
+            }
+
+            overlay.classList.add('show');
+
+            // 🎆 초반 폭발 효과
+            confetti({
+                particleCount: 100,
+                spread: 160,
+                origin: { y: 0.5 },
+                colors: ['#ffd700', '#ff6b6b', '#ff9500', '#ff0000', '#ffed4e']
+            });
+
+            // 🎇 연속 confetti 효과
+            const duration = 4000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                // 왼쪽에서
+                confetti({
+                    particleCount: 10,
+                    angle: 60,
+                    spread: 70,
+                    origin: { x: 0, y: 0.8 },
+                    colors: ['#ffd700', '#ff6b6b', '#ff9500'],
+                    startVelocity: 45
+                });
+                // 오른쪽에서
+                confetti({
+                    particleCount: 10,
+                    angle: 120,
+                    spread: 70,
+                    origin: { x: 1, y: 0.8 },
+                    colors: ['#ffd700', '#ff6b6b', '#ff9500'],
+                    startVelocity: 45
+                });
+                // 중앙 폭발
+                if (Math.random() > 0.7) {
+                    confetti({
+                        particleCount: 30,
+                        spread: 360,
+                        origin: { y: 0.3 },
+                        colors: ['#ffd700', '#ff0000', '#ff9500'],
+                        startVelocity: 30
+                    });
+                }
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+        window.showLevelupModal = showLevelupModal;
+
+        function closeLevelupModal() {
+            document.getElementById('levelupOverlay').classList.remove('show');
+        }
+        window.closeLevelupModal = closeLevelupModal;
+
+        // --- 레벨 정보 로드 함수 ---
+        async function loadStudentLevel() {
+            try {
+                const response = await fetch('https://supermax.kr/jungsi/student/level', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    console.warn('레벨 정보를 불러올 수 없습니다.');
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    const level = data.level;
+
+                    // 레벨 표시
+                    document.getElementById('studentLevel').textContent = level.current_level;
+
+                    // 만렙 체크
+                    if (level.is_max_level) {
+                        document.getElementById('studentExpText').textContent = `${level.current_exp} EXP (만렙!)`;
+                        document.getElementById('studentExpBar').style.width = '100%';
+                    } else {
+                        // 경험치 바 업데이트
+                        const progress = level.progress_percentage || 0;
+                        document.getElementById('studentExpText').textContent = `${level.current_exp} / ${level.exp_for_next_level} EXP`;
+                        document.getElementById('studentExpBar').style.width = `${progress}%`;
+                    }
+                }
+            } catch (error) {
+                console.error('레벨 정보 로드 오류:', error);
+            }
+        }
+
         // --- 4. 페이지 로드 시 실행 ---
         document.addEventListener('DOMContentLoaded', () => {
             if (token) {
@@ -816,6 +1146,7 @@
             }
 
             // 데이터 로드 시작
+            loadStudentLevel();
             loadAssignments();
             loadNotices();
         });
