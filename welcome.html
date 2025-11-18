@@ -643,6 +643,17 @@
         const JUNGSI_SVR = 'https://supermax.kr';
         const token = localStorage.getItem('jwt_token');
 
+        // ⭐️ 토큰 만료 체크 함수
+        function handleAuthError(res) {
+            if (res.status === 401 || res.status === 403) {
+                alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+                localStorage.removeItem('jwt_token');
+                window.location.href = 'student_login.html';
+                return true;
+            }
+            return false;
+        }
+
         // --- 1. DOM 요소 ---
         const studentNameEl = document.getElementById('studentName');
         const branchLogoEl = document.getElementById('branchLogo');
@@ -769,6 +780,7 @@
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/today-assignment`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
+                if (handleAuthError(res)) return; // 🔐 토큰 만료시 로그인 페이지로
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '운동 목록 로드 실패'}`);
                 if (!data.success) throw new Error(data.message || '운동 목록 로드 실패 (Success: false)');
@@ -837,6 +849,7 @@
                 const res = await fetch(`${JUNGSI_SVR}/jungsi/student/announcements`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
+                if (handleAuthError(res)) return; // 🔐 토큰 만료시 로그인 페이지로
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '공지 로드 실패'}`);
                 if (!data.success) throw new Error(data.message || '공지 로드 실패 (Success: false)');
@@ -902,6 +915,7 @@
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                     body: JSON.stringify({ assignment_id: assignmentId, is_completed: isCompleted })
                 });
+                if (handleAuthError(res)) return; // 🔐 토큰 만료시 로그인 페이지로
                 const data = await res.json();
                 if (!res.ok) throw new Error(`[${res.status}] ${data.message || '상태 업데이트 실패'}`);
                 if (!data.success) throw new Error(data.message || '상태 업데이트 실패 (Success: false)');
@@ -1110,6 +1124,7 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
+                if (handleAuthError(response)) return; // 🔐 토큰 만료시 로그인 페이지로
                 if (!response.ok) {
                     console.warn('최초 달성자 정보를 불러올 수 없습니다.');
                     return;
@@ -1165,6 +1180,7 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
+                if (handleAuthError(response)) return; // 🔐 토큰 만료시 로그인 페이지로
                 if (!response.ok) {
                     console.warn('레벨 정보를 불러올 수 없습니다.');
                     return;
