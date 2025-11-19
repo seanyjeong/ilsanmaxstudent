@@ -926,10 +926,24 @@
                     if (item.is_completed) { li.classList.add('completed'); }
                     li.dataset.assignmentId = item.assignment_id;
 
-                    let targetInfo = '';
-                    if (item.category === 'Weight') { targetInfo = `${item.target_weight || '-'}kg ${item.target_sets || '-'}x${item.target_reps || '-'}`; }
-                    else if (item.target_notes) { targetInfo = item.target_notes; }
-                    else if (item.target_sets || item.target_reps) { targetInfo = `${item.target_sets || ''}세트 ${item.target_reps || ''}회`; }
+                    // 세트와 횟수 정보 생성
+                    let setsRepsInfo = '';
+                    if (item.target_sets || item.target_reps) {
+                        setsRepsInfo = `${item.target_sets || '-'}세트 ${item.target_reps || '-'}회`;
+                    }
+
+                    // Weight 카테고리일 경우 무게 정보 추가
+                    let weightInfo = '';
+                    if (item.category === 'Weight' && item.target_weight) {
+                        weightInfo = `${item.target_weight}kg`;
+                    }
+
+                    // 노트 정보
+                    const notesInfo = item.target_notes ? item.target_notes : '';
+
+                    // 모든 정보를 결합 (빈 값은 제외)
+                    const targetInfoParts = [weightInfo, setsRepsInfo, notesInfo].filter(part => part);
+                    const targetInfo = targetInfoParts.length > 0 ? targetInfoParts.join(' | ') : '세부 정보 없음';
 
                     const teacherDisplay = item.teacher_name ? `${item.teacher_name} 선생님` : (item.teacher_userid || '담당자');
 
