@@ -106,15 +106,12 @@
             padding: 0;
         }
 
-        /* 퀵 액션 */
+        /* 퀵 액션 - 입력창 위 */
         .quick-actions {
             display: flex;
             gap: 8px;
-            padding: 16px 16px 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
+            padding: 0 0 10px 0;
         }
-        .quick-actions::-webkit-scrollbar { display: none; }
 
         .quick-btn {
             background: rgba(99, 102, 241, 0.15);
@@ -540,21 +537,6 @@
     </div>
 
     <div class="chat-container">
-        <div class="quick-actions">
-            <button class="quick-btn" onclick="sendQuick('한국체대 실기배점표')">
-                <i class="fa-solid fa-graduation-cap"></i> 체대 배점표
-            </button>
-            <button class="quick-btn" onclick="sendQuick('성신여대 스레 정보')">
-                <i class="fa-solid fa-school"></i> 성신여대
-            </button>
-            <button class="quick-btn" onclick="sendQuick('용인대 실기 종목')">
-                <i class="fa-solid fa-person-running"></i> 용인대 실기
-            </button>
-            <button class="quick-btn" onclick="openDiceModal()">
-                <i class="fa-solid fa-dice"></i> 랜덤 뽑기
-            </button>
-        </div>
-
         <div class="messages" id="messages">
             <div class="message ai">
                 <div class="msg-wrapper">
@@ -574,6 +556,11 @@
         </div>
 
         <div class="input-container">
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="openDiceModal()">
+                    <i class="fa-solid fa-dice"></i> 랜덤 뽑기
+                </button>
+            </div>
             <div class="input-area">
                 <input type="text" id="userInput" placeholder="질문을 입력하세요..."
                        onkeypress="if(event.key==='Enter') sendMessage()">
