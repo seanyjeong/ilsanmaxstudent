@@ -552,8 +552,8 @@
     </div>
 
     <script>
-        // n8n 웹훅 URL (여기에 본인 n8n Chat URL 입력)
-        const N8N_CHAT_URL = 'https://n8n.sean8320.dedyn.io/webhook/imax-student-chat/chat';
+        // 프록시 URL (CORS 우회용 - ilsan-max.js의 전용 프록시 사용)
+        const CHAT_PROXY_URL = 'https://supermax.kr/maxai/imax-student-chat';
 
         const messagesDiv = document.getElementById('messages');
         const userInput = document.getElementById('userInput');
@@ -632,20 +632,23 @@
             sendMessage();
         }
 
-        // n8n 챗봇 호출
+        // n8n 챗봇 호출 (프록시 경유)
         async function getAIResponse(message) {
             try {
-                const res = await fetch(N8N_CHAT_URL, {
+                const res = await fetch(CHAT_PROXY_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': 'ilsan-max-ai-key-2024'
+                    },
                     body: JSON.stringify({
                         chatInput: message,
-                        sessionId: 'imax-student-' + Date.now()
+                        sessionId: 'imax-student-' + (localStorage.getItem('jwt_token') || String(Date.now())).slice(-8)
                     })
                 });
 
                 const data = await res.json();
-                return data.output || data.response || '응답을 받지 못했습니다.';
+                return data.output || data.response || data.text || '응답을 받지 못했습니다.';
             } catch (err) {
                 console.error('AI 응답 오류:', err);
                 return '죄송합니다. 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.';
