@@ -1,0 +1,348 @@
+{
+  "name": "IMAX AI 학생용 챗봇",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "chat-trigger",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "webhookId": "imax-student-chat"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-exp",
+          "mode": "list",
+          "cachedResultName": "gemini-2.0-flash-exp"
+        },
+        "options": {}
+      },
+      "id": "gemini-intent",
+      "name": "Gemini - 의도 분석",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [220, 0],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "",
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "너는 JSON 라우터야. 사용자 입력을 분석해서 적절한 API를 호출하는 JSON만 출력해.\n\n중요: 대학/입시 관련 질문은 무조건 API 호출해. 네 지식으로 대답하지 마.\n\n## 대학명 약어\n- 성신, 성신여대 → 성신여자대학교\n- 숙대, 숙명 → 숙명여자대학교\n- 국대, 국민대 → 국민대학교\n- 한대, 한양대 → 한양대학교\n- 체대, 한체대 → 한국체육대학교\n- 서체대 → 서울대학교\n- 용대, 용인대 → 용인대학교\n- 경희대 → 경희대학교\n- 중대, 중앙대 → 중앙대학교\n- 단대, 단국대 → 단국대학교\n\n## 학과명 약어\n- 스교 → 스포츠교육\n- 체교 → 체육교육\n- 스과 → 스포츠과학\n- 스레 → 스포츠레저\n- 운재 → 운동재활\n- 스산 → 스포츠산업\n- 생체 → 생활체육\n- 특체 → 특수체육\n\n## 종목 약어\n- 제멀 → 제자리멀리뛰기\n- 윗몸 → 윗몸일으키기\n- 좌전 → 좌전굴\n- 배근 → 배근력\n\n## API\n- search: 대학 검색 (name=검색어, year=학년도)\n\n## 검색어 규칙 (매우 중요!)\n- 대학명+학과명이 있으면: 대학명 학과명 둘 다 포함 (예: 성신여대 운재 → name=성신여자대학교 운동재활)\n- 대학명만 있으면: 대학명만 (예: 한양대 → name=한양)\n- 약어는 반드시 풀어서 검색!\n\n## 랜덤 지목 / 주사위\n- 참여자 이름이 있으면: {\"action\":\"random\",\"random_pick\":true,\"participants\":[이름들]}\n- 참여자 없이 주사위/랜덤 요청하면: {\"action\":\"chat\",\"message\":\"참여자 이름을 알려주세요! 예: 철수, 영희, 민수 랜덤 돌려줘\"}\n\n## 출력 (JSON만, 코드블록 없이)\n{\"action\":\"api\",\"type\":\"university\",\"endpoint\":\"search\",\"params\":{\"name\":\"검색어\",\"year\":2026}}\n{\"action\":\"chat\",\"message\":\"응답\"}\n{\"action\":\"random\",\"random_pick\":true,\"participants\":[\"이름1\",\"이름2\"]}\n\n## 예시\n입력: 성신여대 운재 실기배점표 → {\"action\":\"api\",\"type\":\"university\",\"endpoint\":\"search\",\"params\":{\"name\":\"성신여자대학교 운동재활\",\"year\":2026}}\n입력: 성신여대 스레 → {\"action\":\"api\",\"type\":\"university\",\"endpoint\":\"search\",\"params\":{\"name\":\"성신여자대학교 스포츠레저\",\"year\":2026}}\n입력: 국민대 스교 → {\"action\":\"api\",\"type\":\"university\",\"endpoint\":\"search\",\"params\":{\"name\":\"국민대학교 스포츠교육\",\"year\":2026}}\n입력: 체대 → {\"action\":\"api\",\"type\":\"university\",\"endpoint\":\"search\",\"params\":{\"name\":\"한국체육대학교\",\"year\":2026}}\n입력: 철수 영희 민수 뽑아 → {\"action\":\"random\",\"random_pick\":true,\"participants\":[\"철수\",\"영희\",\"민수\"]}\n입력: 주사위 돌리고 싶어 → {\"action\":\"chat\",\"message\":\"참여자 이름을 알려주세요! 예: 철수, 영희, 민수 랜덤 돌려줘\"}\n입력: 랜덤 뽑기 → {\"action\":\"chat\",\"message\":\"참여자 이름을 알려주세요! 예: 철수, 영희, 민수 랜덤 돌려줘\"}\n입력: 안녕 → {\"action\":\"chat\",\"message\":\"안녕하세요! IMAX AI 입시 어시스턴트입니다. 대학 정보나 실기 배점표가 궁금하시면 물어봐주세요!\"}"
+        }
+      },
+      "id": "agent-intent",
+      "name": "AI Agent - 의도분석",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "let output = $input.first().json.output;\n// Remove markdown code blocks if present\noutput = output.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\ntry {\n  const parsed = JSON.parse(output);\n  return [{ json: parsed }];\n} catch(e) {\n  // JSON 파싱 실패시 일반 대화로 처리\n  return [{ json: { action: 'chat', message: output } }];\n}"
+      },
+      "id": "parse-intent",
+      "name": "JSON 파싱",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "api-check",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "api",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-api",
+      "name": "API 호출 필요?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst endpoint = data.endpoint;\nconst params = data.params || {};\n\nlet url = `http://211.37.174.218:8321/maxai/api/universities/${endpoint}`;\n\n// Build query string\nconst queryParams = Object.entries(params)\n  .filter(([k, v]) => v !== undefined && v !== null && v !== '')\n  .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)\n  .join('&');\n\nif (queryParams) {\n  url += '?' + queryParams;\n}\n\nreturn [{ json: { url, params } }];"
+      },
+      "id": "build-url",
+      "name": "URL 생성",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, -100]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "ilsan-max-ai-key-2024"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-api",
+      "name": "API 호출",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, -100]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-exp",
+          "mode": "list",
+          "cachedResultName": "gemini-2.0-flash-exp"
+        },
+        "options": {}
+      },
+      "id": "gemini-response",
+      "name": "Gemini - 응답 생성",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [1540, -100],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "",
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=사용자 질문: {{ $('Chat Trigger').item.json.chatInput }}\n\nAPI 응답 데이터:\n{{ JSON.stringify($json, null, 2) }}",
+        "options": {
+          "systemMessage": "너는 IMAX 입시 AI 어시스턴트야. API에서 받은 데이터를 자연스러운 한국어로 설명해줘.\n\n## 가장 중요한 규칙\n- API에서 받은 데이터만 말해! 날짜, 금액, 이름 등을 절대 추측하거나 지어내지 마!\n- 데이터에 없는 정보는 \"확인되지 않음\"이라고 해\n\n## 응답 규칙\n- 대학 정보: 수능/실기 비율, 실기종목 명확히\n- 모집정원, 반영비율 등 기본 정보도 알려줘\n- 친절하고 간결하게\n- 반드시 텍스트만 출력 (JSON 금지)\n- 이모지 적절히 사용\n\n## 실기배점표 표시 (중요!)\n종목별로 정렬해서 보여줘. 형식:\n\n📊 [종목명]\n100점: 남 OO / 여 OO\n90점: 남 OO / 여 OO\n...\n\n모든 종목, 주요 배점 구간 보여주기!\n\n## 검색 결과가 여러 개일 때\n목록으로 보여주고 \"더 구체적으로 검색해주세요\" 안내"
+        }
+      },
+      "id": "agent-response",
+      "name": "AI Agent - 응답생성",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [1760, -100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output;\nreturn [{ json: { output: output } }];"
+      },
+      "id": "format-api-response",
+      "name": "API 응답 포맷",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, -100]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "random-check",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "random",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-random",
+      "name": "랜덤 뽑기?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1100, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst participants = data.participants || [];\n\nif (participants.length < 2) {\n  return [{ json: { output: '⚠️ 2명 이상 입력해주세요!' } }];\n}\n\n// 각 참가자에게 1-99 점수 부여\nconst results = participants.map(name => ({\n  name,\n  score: Math.floor(Math.random() * 99) + 1\n}));\n\n// 점수 높은 순 정렬\nresults.sort((a, b) => b.score - a.score);\nconst winner = results[0];\n\n// 결과 메시지\nlet msg = '🎲 주사위 결과!\\n\\n';\nresults.forEach((r, i) => {\n  const medal = i === 0 ? '🏆' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : ''));\n  msg += `${medal} ${r.name}: ${r.score}점\\n`;\n});\nmsg += `\\n🎉 당첨: ${winner.name}님!`;\n\nreturn [{ json: { output: msg } }];"
+      },
+      "id": "random-pick",
+      "name": "랜덤 뽑기 실행",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.first().json.message || '무엇을 도와드릴까요?';\nreturn [{ json: { output: message } }];"
+      },
+      "id": "format-chat-response",
+      "name": "일반대화 응답 포맷",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 200]
+    }
+  ],
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - 의도분석",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - 의도 분석": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - 의도분석",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - 의도분석": {
+      "main": [
+        [
+          {
+            "node": "JSON 파싱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON 파싱": {
+      "main": [
+        [
+          {
+            "node": "API 호출 필요?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API 호출 필요?": {
+      "main": [
+        [
+          {
+            "node": "URL 생성",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "랜덤 뽑기?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL 생성": {
+      "main": [
+        [
+          {
+            "node": "API 호출",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API 호출": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - 응답생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - 응답 생성": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - 응답생성",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - 응답생성": {
+      "main": [
+        [
+          {
+            "node": "API 응답 포맷",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "랜덤 뽑기?": {
+      "main": [
+        [
+          {
+            "node": "랜덤 뽑기 실행",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "일반대화 응답 포맷",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
