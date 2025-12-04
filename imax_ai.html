@@ -628,22 +628,37 @@
 
         // 응답 포맷팅
         function formatResponse(text) {
-            // 실기배점표 패턴 감지 및 테이블 변환
-            const tablePattern = /📊\s*([^\n]+)\n((?:\*\s*\d+점:.*\n?)+)/g;
+            // 실기배점표 패턴 감지 및 테이블 변환 (배점/남/여 3열 형식)
+            const tablePattern = /📊\s*([^\n]+)\n((?:\*\s*\d+점.*\n?)+)/g;
             let formatted = text;
 
             // 실기배점표를 테이블로 변환
             formatted = formatted.replace(tablePattern, (match, title, rows) => {
                 const rowLines = rows.trim().split('\n').filter(r => r.trim());
                 let tableHtml = `<div class="score-table-title">📊 ${title.trim()}</div>`;
-                tableHtml += '<table class="score-table"><thead><tr><th>점수</th><th>기록</th></tr></thead><tbody>';
 
-                rowLines.forEach(row => {
-                    const scoreMatch = row.match(/\*\s*(\d+점):\s*여?\s*(.+)/);
-                    if (scoreMatch) {
-                        tableHtml += `<tr><td>${scoreMatch[1]}</td><td>${scoreMatch[2].trim()}</td></tr>`;
-                    }
-                });
+                // 남/여 둘 다 있는지 체크
+                const hasGender = rowLines.some(r => r.includes('남') && r.includes('여'));
+
+                if (hasGender) {
+                    tableHtml += '<table class="score-table"><thead><tr><th>배점</th><th>남</th><th>여</th></tr></thead><tbody>';
+                    rowLines.forEach(row => {
+                        // * 100점: 남 OO / 여 OO 형식
+                        const match3 = row.match(/\*\s*(\d+점)[:\s]+남\s*([^\s/]+)\s*[/\s]+여\s*(.+)/);
+                        if (match3) {
+                            tableHtml += `<tr><td>${match3[1]}</td><td>${match3[2].trim()}</td><td>${match3[3].trim()}</td></tr>`;
+                        }
+                    });
+                } else {
+                    // 여자대학 등 성별 하나만 있는 경우
+                    tableHtml += '<table class="score-table"><thead><tr><th>배점</th><th>기록</th></tr></thead><tbody>';
+                    rowLines.forEach(row => {
+                        const match2 = row.match(/\*\s*(\d+점)[:\s]+(?:여\s*)?(.+)/);
+                        if (match2) {
+                            tableHtml += `<tr><td>${match2[1]}</td><td>${match2[2].trim()}</td></tr>`;
+                        }
+                    });
+                }
 
                 tableHtml += '</tbody></table>';
                 return tableHtml;
