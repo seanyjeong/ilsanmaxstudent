@@ -214,6 +214,56 @@
             font-weight: 600;
         }
 
+        /* 실기배점표 테이블 */
+        .score-table-title {
+            font-weight: 700;
+            color: var(--accent);
+            margin: 12px 0 8px 0;
+            font-size: 14px;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0 16px 0;
+            font-size: 13px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .score-table thead {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .score-table th {
+            padding: 10px 12px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .score-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .score-table tr:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .score-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            margin: 12px 0;
+        }
+
         /* 타이핑 인디케이터 */
         .typing-indicator {
             display: flex;
@@ -591,12 +641,37 @@
 
         // 응답 포맷팅
         function formatResponse(text) {
-            // 줄바꿈 처리
-            let formatted = text.replace(/\n/g, '<br>');
+            // 실기배점표 패턴 감지 및 테이블 변환
+            const tablePattern = /📊\s*([^\n]+)\n((?:\*\s*\d+점:.*\n?)+)/g;
+            let formatted = text;
+
+            // 실기배점표를 테이블로 변환
+            formatted = formatted.replace(tablePattern, (match, title, rows) => {
+                const rowLines = rows.trim().split('\n').filter(r => r.trim());
+                let tableHtml = `<div class="score-table-title">📊 ${title.trim()}</div>`;
+                tableHtml += '<table class="score-table"><thead><tr><th>점수</th><th>기록</th></tr></thead><tbody>';
+
+                rowLines.forEach(row => {
+                    const scoreMatch = row.match(/\*\s*(\d+점):\s*여?\s*(.+)/);
+                    if (scoreMatch) {
+                        tableHtml += `<tr><td>${scoreMatch[1]}</td><td>${scoreMatch[2].trim()}</td></tr>`;
+                    }
+                });
+
+                tableHtml += '</tbody></table>';
+                return tableHtml;
+            });
+
+            // 줄바꿈 처리 (테이블 외부만)
+            formatted = formatted.replace(/\n/g, '<br>');
             // 볼드 처리
             formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            // 리스트 처리
+            formatted = formatted.replace(/\*\s+([^*<][^\n<]*)/g, '• $1');
             // 이모지 강조
-            formatted = formatted.replace(/(📊|🎯|🏆|🥈|🥉|🎉|⚠️)/g, '<span class="highlight">$1</span>');
+            formatted = formatted.replace(/(📊|🎯|🏆|🥈|🥉|🎉|⚠️|✨|😊)/g, '<span class="highlight">$1</span>');
+            // 구분선
+            formatted = formatted.replace(/---/g, '<hr class="divider">');
             return formatted;
         }
 
