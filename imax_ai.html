@@ -637,14 +637,14 @@
                 const rowLines = rows.trim().split('\n').filter(r => r.trim());
                 let tableHtml = `<div class="score-table-title">📊 ${title.trim()}</div>`;
 
-                // 남/여 둘 다 있는지 체크
-                const hasGender = rowLines.some(r => r.includes('남') && r.includes('여'));
+                // 남/여 둘 다 있는지 체크 (슬래시로 구분된 남/여 패턴)
+                const hasGender = rowLines.some(r => /남.*\/.*여/.test(r) || /여.*\/.*남/.test(r));
 
                 if (hasGender) {
                     tableHtml += '<table class="score-table"><thead><tr><th>배점</th><th>남</th><th>여</th></tr></thead><tbody>';
                     rowLines.forEach(row => {
-                        // 다양한 형식 지원: 남12.5/여14.0, 남 12.5 / 여 14.0, 남12.5초/여14.0초 등
-                        const match3 = row.match(/\*\s*(\d+점)[:\s]*남\s*([0-9.]+[^\s\/]*)\s*\/\s*여\s*([0-9.]+.*)/);
+                        // 다양한 형식: * 100점: 남 12.5 / 여 14.0 또는 * 100점 남12.5초 / 여14.0초
+                        const match3 = row.match(/\*\s*(\d+점)[:\s]*남\s*([^\/]+)\/\s*여\s*(.+)/);
                         if (match3) {
                             tableHtml += `<tr><td>${match3[1]}</td><td>${match3[2].trim()}</td><td>${match3[3].trim()}</td></tr>`;
                         }
